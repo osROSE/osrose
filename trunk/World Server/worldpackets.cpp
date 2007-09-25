@@ -2217,8 +2217,9 @@ bool CWorldServer::pakEquipABC ( CPlayer* thisclient, CPacket* P )
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-// Craft item  (From RageZone)  (Crafting modifications by: Killerfly)		//                        
+// Craft item  (From RageZone)  (Crafting modifications by: Killerfly)  	//                        
 /////////////////////////////////////////////////////////////////////////////////
+
 bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
 {    
 	if(thisclient->Shop->open==true)
@@ -2334,6 +2335,7 @@ bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
      }
      return true;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 // After Craft  (From RageZone)  (if you coded this tell me to add your name)    //                        
@@ -3092,8 +3094,8 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             ADDBYTE (pak, tempslot);
             ADDDWORD(pak, BuildItemHead(thisclient->items[tempslot]));
             ADDDWORD(pak, BuildItemData(thisclient->items[tempslot]));
-            //ADDDWORD( pak, 0x00000000 );
-            //ADDWORD ( pak, 0x0000 );
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );
             if (rewardCount > 1)
             {
                 tempslot = thisclient->AddItem(itemextra);
@@ -3102,8 +3104,8 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
                     ADDBYTE(pak, tempslot);
                     ADDDWORD(pak, BuildItemHead(thisclient->items[tempslot]));
                     ADDDWORD(pak, BuildItemData(thisclient->items[tempslot]));
-                    //ADDDWORD(pak, 0x00000000);
-                    //ADDWORD(pak, 0x0000);
+                    ADDDWORD(pak, 0x00000000);
+                    ADDWORD(pak, 0x0000);
                 } else {
                     Log(MSG_WARNING, "Error adding second item");
                     return true;
@@ -3113,8 +3115,8 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             ADDBYTE (pak, chestSlot);
             ADDDWORD(pak, BuildItemHead(thisclient->items[chestSlot]));
             ADDDWORD(pak, BuildItemData(thisclient->items[chestSlot]));
-            //ADDDWORD( pak, 0x00000000 );
-            //ADDWORD ( pak, 0x0000 );
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );
  
             thisclient->client->SendPacket( &pak );
             }
