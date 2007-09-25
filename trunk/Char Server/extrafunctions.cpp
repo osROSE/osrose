@@ -26,7 +26,7 @@ CCharClient* CCharServer::GetClientByUserID( UINT userid )
     for(UINT i=0;i<ClientList.size( );i++)
 	{		
         CCharClient* client = (CCharClient*) ClientList.at( i );
-        if(client->userid==userid)
+        if(client->userid==userid && client->accesslevel != 0xffff)
         {
             return client;
         }

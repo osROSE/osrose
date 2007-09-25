@@ -1127,6 +1127,8 @@ bool CPlayer::GiveQuestReward( CQuest* thisquest )
         ADDBYTE    ( pak, newslot );
         ADDDWORD   ( pak, GServer->BuildItemHead( items[newslot] ) );
         ADDDWORD   ( pak, GServer->BuildItemData( items[newslot] ) );
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );
         ADDBYTE    ( pak, 0x00 );
         client->SendPacket( &pak );
     }      

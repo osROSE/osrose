@@ -644,12 +644,16 @@ void CPlayer::UpdateInventory( unsigned int slot1, unsigned int slot2 )
         ADDBYTE    ( pak, slot1);
         ADDDWORD   ( pak, GServer->BuildItemHead( items[slot1] ) );
         ADDDWORD   ( pak, GServer->BuildItemData( items[slot1] ) );
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );
     }    
     if(slot2!=0xffff)
     {
         ADDBYTE    ( pak, slot2 );
         ADDDWORD   ( pak, GServer->BuildItemHead( items[slot2] ) );
         ADDDWORD   ( pak, GServer->BuildItemData( items[slot2] ) );
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );
     }
     client->SendPacket( &pak );    
 }

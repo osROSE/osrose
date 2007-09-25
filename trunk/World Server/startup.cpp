@@ -381,6 +381,77 @@ bool CWorldServer::LoadRespawnData( )
 	return true;       
 }
 
+bool CWorldServer::LoadChestData( )
+{
+    Log(MSG_LOAD, "Chest Data       ");
+    MYSQL_ROW row;
+    MYSQL_RES *result = DB->QStore("SELECT chestid,reward,rewardtype,prob FROM chest_data order by id");
+    if(result==NULL) return false;
+    while( row = mysql_fetch_row(result) )
+    {
+        CChest* newchest = new (nothrow) CChest;
+        if(newchest==NULL)
+        {
+            Log( MSG_ERROR, "Error allocing memory" );
+            continue;
+        }
+        newchest->chestid = atoi(row[0]);
+ 
+        UINT value = 0;
+        bool First = true;
+        // items
+        while((value=atoi(strtok(First?row[1]:NULL, "|")))!=0)
+        {
+            First = false;
+            CReward* Reward = new (nothrow) CReward;
+            if(Reward==NULL)
+            {
+                Log(MSG_WARNING, "\nError allocing memory [chestdata]" );
+                continue;
+            }
+            Reward->id = value;
+            newchest->Rewards.push_back( Reward );
+        }
+ 
+        value = 0;
+        // Reward Type
+        for(UINT j=0;j<newchest->Rewards.size();j++)
+        {
+            value = atoi(strtok((j==0?row[2]:NULL), "|"));
+            if(value==0)
+            {
+                newchest->Rewards.erase(newchest->Rewards.begin() + j);
+                Log(MSG_WARNING, "reward type not set! chestid: %i - reward id: %i - reward deleted", newchest->chestid, newchest->Rewards.at(j)->id );
+            }
+            else
+            {
+                newchest->Rewards.at(j)->type = value;
+            }
+        }
+ 
+        newchest->probmax = 0;
+        value = 0;
+        // probability
+        for(UINT j=0;j<newchest->Rewards.size();j++)
+        {
+            value = atoi(strtok((j==0?row[3]:NULL), "|"));
+            if(value==0)
+            {
+                newchest->Rewards.at(j)->prob = 1;
+                Log(MSG_WARNING, "Probability is not complete, chestid: %i - probability set to 1", newchest->chestid );
+            }
+            else
+            {
+                newchest->Rewards.at(j)->prob = value;
+            }
+            newchest->probmax += newchest->Rewards.at(j)->prob;
+        }
+ 
+        ChestList.push_back( newchest );
+    }
+    DB->QFree( );
+}
+
 bool CWorldServer::LoadMonsterSpawn( )
 {
 	Log( MSG_LOAD, "SpawnZones data      " );    
