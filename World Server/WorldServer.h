@@ -128,7 +128,8 @@ class CWorldServer : public CServerSocket
     	CRespawnPoint* GetRespawnByMap( int id );   
         CSkills* GetSkillByID( UINT id );          		      
     	void ClearClientID( UINT id );
-    	CDrop* GetDropByID( UINT id, UINT map=0 );	
+    	CDrop* GetDropByID( UINT id, UINT map=0 );
+        CChest* GetChestByID( UINT id );	
     	CNPC* GetNPCByID( UINT id, UINT map=0 );
         CNPC* GetNPCByType( UINT npctype );
         CDrop* GetDrop( CMonster* thismon );	
@@ -265,6 +266,10 @@ class CWorldServer : public CServerSocket
       	bool pakGMChangeAtkSpeedModif(CPlayer* thisclient, int modif);
       	bool pakGMChangeHitDelayModif(CPlayer* thisclient, int modif);
       	bool pakGMChangeMSpeedModif(CPlayer* thisclient, int modif);
+        bool pakGMBuff(CPlayer* thisClient, int strength); // by Drakia
+        bool pakGMDebuff(CPlayer* thisClient); // by Drakia
+        bool pakGMGiveBuff(CPlayer* thisClient, CPlayer* targetClient, int skillID, int strength); // by Drakia
+
     
     	//------------------ CHAR SERVER COMMANDS (worldpackets.cpp)
     	bool TeleportTo ( CPlayer* thisclient, int map, fPoint position );	
@@ -286,6 +291,7 @@ class CWorldServer : public CServerSocket
         bool LoadRespawnData( );
         bool LoadQuestData( );
         bool LoadDropsData( );
+        bool LoadChestData( );
         bool LoadSkillData( );
         bool LoadMonsters( );
         bool LoadNPCData( );
@@ -320,6 +326,7 @@ class CWorldServer : public CServerSocket
         vector<CNPCData*>       NPCData;                // NPC/Mobs List
         vector<CParty*>         PartyList;              // Party List
         vector<CFairy*>         FairyList;              // Fairy List
+        vector<CChest*>         ChestList;              // Chest List
         
         CItemStas               StatsList[500];
         UINT                    upgrade[10];

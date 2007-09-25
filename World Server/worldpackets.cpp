@@ -109,10 +109,8 @@ void CWorldServer::pakInventory( CPlayer *thisclient )
     {        
        	ADDDWORD( pak, BuildItemHead( thisclient->items[j] ) );
        	ADDDWORD( pak, BuildItemData( thisclient->items[j] ) ); 
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );  
 
 	}
     thisclient->client->SendPacket( &pak );
@@ -217,10 +215,14 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
                     item.count = 1;
                     ADDDWORD( pak, BuildItemHead( item ) );
                     ADDDWORD( pak, myquest->items[j] );
+                    ADDDWORD( pak, 0x00000000 );
+                    ADDWORD ( pak, 0x0000 );
                 }
                 else
                 {
                     ADDQWORD( pak, 0x00000000 );
+                    ADDDWORD( pak, 0x00000000 );
+                    ADDWORD ( pak, 0x0000 );
                 }
             }
             ADDQWORD( pak, 0x00000000 ); 
@@ -588,6 +590,8 @@ bool CWorldServer::pakSpawnDrop( CPlayer* thisclient, CDrop* thisdrop )
 		// -- ZULY --
 		ADDDWORD( pak, 0xccccccdf );
 		ADDDWORD( pak, thisdrop->amount );
+        ADDDWORD( pak, 0xcccccccc );
+            ADDWORD ( pak, 0xcccc );
 		ADDWORD( pak, thisdrop->clientid );
 		ADDWORD( pak, 0x0000 );
 		ADDWORD( pak, 0x5f90 );
@@ -597,12 +601,11 @@ bool CWorldServer::pakSpawnDrop( CPlayer* thisclient, CDrop* thisdrop )
 		// -- ITEM --
 		ADDDWORD( pak, BuildItemHead( thisdrop->item ) );
 		ADDDWORD( pak, thisdrop->amount );
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );
 		ADDWORD( pak, thisdrop->clientid );
 		ADDDWORD( pak, BuildItemData( thisdrop->item ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+ 
 		
 	}
 	thisclient->client->SendPacket( &pak );
@@ -752,12 +755,23 @@ bool CWorldServer::pakPickDrop( CPlayer* thisclient, CPacket* P )
 		    ADDBYTE( pak, 0 );
 		    ADDDWORD( pak, 0xccccccdf );
 		    ADDDWORD( pak, thisdrop->amount );
+                ADDDWORD( pak, 0xcccccccc );
+                ADDWORD ( pak, 0xcccc );
 		    dropowner->client->SendPacket( &pak );
 		    flag = true;            
         }
         else
         if( thisdrop->type == 2 ) // Item
         {
+            unsigned int type = UseList.Index[thisdrop->item.itemnum]->type;
+            if (type == 320) {
+                RESETPACKET( pak,0x7a3 );
+                ADDWORD    ( pak, dropowner->clientid );
+                ADDWORD    ( pak, thisdrop->item.itemnum );
+                SendToVisible( &pak, dropowner );
+                flag = true;
+            } else {
+
             unsigned int tempslot = dropowner->AddItem( thisdrop->item );
             if(tempslot!=0xffff)// we have slot
             {
@@ -773,10 +787,8 @@ bool CWorldServer::pakPickDrop( CPlayer* thisclient, CPacket* P )
                 ADDBYTE    ( pak, 0x00 );
                 ADDDWORD   ( pak, BuildItemHead( dropowner->items[slot1] ) );
                 ADDDWORD   ( pak, BuildItemData( dropowner->items[slot1] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+                ADDDWORD( pak, 0x00000000 );
+                ADDWORD ( pak, 0x0000 );   
               
                 dropowner->client->SendPacket( &pak );  
                 dropowner->UpdateInventory( slot1, slot2 ); 
@@ -787,7 +799,8 @@ bool CWorldServer::pakPickDrop( CPlayer* thisclient, CPacket* P )
                 ADDBYTE    (pak, 0x03);
                 dropowner->client->SendPacket(&pak);                     
             }
-        }         
+        }       
+        }          
     }
 	else
 	{
@@ -806,17 +819,17 @@ bool CWorldServer::pakPickDrop( CPlayer* thisclient, CPacket* P )
                 if( thisdrop->type == 1 )
                 {
                     ADDDWORD( pak, 0xccccccdf );
-        		    ADDDWORD( pak, thisdrop->amount );                    
+        		    ADDDWORD( pak, thisdrop->amount );
+                    ADDDWORD( pak, 0xcccccccc );
+                    ADDWORD ( pak, 0xcccc );                    
                 }                
                 else             
                 if( thisdrop->type == 2 )
                 {
                     ADDDWORD   ( pak, BuildItemHead( thisdrop->item ) );
                     ADDDWORD   ( pak, BuildItemData( thisdrop->item ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
                     
                 }
                 thisclient->Party->party->SendToMembers( &pak, dropowner );                
@@ -1289,10 +1302,8 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 			ADDBYTE  ( pak, newslot );
 			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
 			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+                ADDDWORD( pak, 0x00000000 );
+                ADDWORD ( pak, 0x0000 );   
     		switch(thisitem.itemtype)
     		{			
                 case 1:
@@ -1600,10 +1611,8 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 		ADDBYTE( pak, slotid );
 		ADDDWORD( pak, BuildItemHead( thisclient->items[slotid] ) );
 		ADDDWORD( pak, BuildItemData( thisclient->items[slotid] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
 
 		ncount++;
 	}
@@ -1773,13 +1782,13 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						ADDBYTE( pakt, (unsigned char)thisclient->Trade->trade_itemid[i] );
 						ADDDWORD( pakt, BuildItemHead( thisclient->items[thisclient->Trade->trade_itemid[i]] ) );
 						ADDDWORD( pakt, BuildItemData( thisclient->items[thisclient->Trade->trade_itemid[i]] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+                        ADDDWORD( pak, 0x00000000 );
+                        ADDWORD ( pak, 0x0000 );  
 						ADDBYTE( pako, newslot );
 						ADDDWORD( pako, BuildItemHead( otherclient->items[newslot] ) );
 						ADDDWORD( pako, BuildItemData( otherclient->items[newslot] ) );
+                        ADDDWORD( pak, 0x00000000 );
+                        ADDWORD ( pak, 0x0000 );
 						tucount++;
 						oucount++;
 					}
@@ -1796,9 +1805,13 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						ADDBYTE( pako, (unsigned char)otherclient->Trade->trade_itemid[i] );
 						ADDDWORD( pako, BuildItemHead( otherclient->items[otherclient->Trade->trade_itemid[i]] ) );
 						ADDDWORD( pako, BuildItemData( otherclient->items[otherclient->Trade->trade_itemid[i]] ) );
+                        ADDDWORD( pak, 0x00000000 );
+                        ADDWORD ( pak, 0x0000 );
 						ADDBYTE( pakt, newslot );
 						ADDDWORD( pakt, BuildItemHead( thisclient->items[newslot] ) );
 						ADDDWORD( pakt, BuildItemData( thisclient->items[newslot] ) );
+                        ADDDWORD( pak, 0x00000000 );
+                        ADDWORD ( pak, 0x0000 );
 						tucount++;
 						oucount++;
 					}
@@ -1836,6 +1849,8 @@ bool CWorldServer::pakTradeAdd ( CPlayer* thisclient, CPacket* P )
            return true;
 		ADDDWORD( pak, 0xccccccdf );
 		ADDDWORD( pak, count );
+        ADDDWORD( pak, 0xcccccccc );
+        ADDWORD ( pak, 0xcccc );
 		thisclient->Trade->trade_count[islot] = count;
 	}
     else
@@ -1851,10 +1866,8 @@ bool CWorldServer::pakTradeAdd ( CPlayer* thisclient, CPacket* P )
 			CItem tmpitem = thisclient->items[slotid]; tmpitem.count = count;
 			ADDDWORD( pak, BuildItemHead( tmpitem ) );
 			ADDDWORD( pak, BuildItemData( tmpitem ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );  
 		}
         else
         {
@@ -1862,6 +1875,8 @@ bool CWorldServer::pakTradeAdd ( CPlayer* thisclient, CPacket* P )
 			thisclient->Trade->trade_itemid[islot] = 0;
 			ADDDWORD( pak, 0 );
 			ADDDWORD( pak, 0 );
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );
 		}
 	}
 	otherclient->client->SendPacket( &pak );
@@ -2299,6 +2314,8 @@ bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
      else{
 	     ADDDWORD(pak, BuildItemData(item));  
      }
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );
         int crafting_exp = item.durability + changeofstatsrange * (thisclient->Stats->Level/ 15);
 		thisclient->CharInfo->Exp += crafting_exp;//  add exp		
 		thisclient->client->SendPacket(&pak);
@@ -2399,10 +2416,8 @@ bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
                     ADDBYTE    ( pak, i );
                   	ADDDWORD   ( pak, BuildItemHead( thisclient->storageitems[i] ) );
                		ADDDWORD   ( pak, BuildItemData( thisclient->storageitems[i] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
                 }            
             }
             ADDQWORD( pak, thisclient->CharInfo->Storage_Zulies );
@@ -2449,16 +2464,12 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             ADDWORD    ( pak, newslot ); 
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[itemslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[itemslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDDWORD   ( pak, BuildItemHead( newitem ) ); 
             ADDDWORD   ( pak, BuildItemData( newitem ) ); 
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
     		ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
             thisclient->client->SendPacket( &pak ); 
             thisclient->storageitems[newslot] = newitem;    
@@ -2525,17 +2536,13 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             ADDWORD    ( pak, storageslot );
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
                   
             ADDDWORD   ( pak, BuildItemHead( thisclient->storageitems[storageslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->storageitems[storageslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
     		ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
             ADDBYTE    ( pak, 0x00 );    		
             thisclient->client->SendPacket( &pak );            
@@ -2667,10 +2674,8 @@ bool CWorldServer::pakShowShop( CPlayer* thisclient, CPacket* P )
         ADDBYTE     ( pak, i );
         ADDDWORD    ( pak, BuildItemHead( thisitem ) );
         ADDDWORD    ( pak, BuildItemData( thisitem ) );
-         //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
        ADDDWORD    ( pak, otherclient->Shop->SellingList[i].price );
     }
     for(unsigned int i = 0; i<30;i++)
@@ -2681,10 +2686,8 @@ bool CWorldServer::pakShowShop( CPlayer* thisclient, CPacket* P )
             ADDBYTE     ( pak, i );
             ADDDWORD    ( pak, BuildItemHead( thisitem ) );
             ADDDWORD    ( pak, BuildItemData( thisitem ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDDWORD    ( pak, otherclient->Shop->BuyingList[i].price );
         }
     }
@@ -2767,6 +2770,8 @@ bool CWorldServer::pakBuyShop( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, newslot );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );
             thisclient->client->SendPacket( &pak );    
             
             //update inventory (seller)        
@@ -2776,10 +2781,8 @@ bool CWorldServer::pakBuyShop( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, invslot );
             ADDDWORD   ( pak, BuildItemHead( otherclient->items[invslot] ) );
             ADDDWORD   ( pak, BuildItemData( otherclient->items[invslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
             otherclient->client->SendPacket( &pak );             
             
             //update shop
@@ -2791,16 +2794,16 @@ bool CWorldServer::pakBuyShop( CPlayer* thisclient, CPacket* P )
             if(otherclient->Shop->SellingList[slot].count<=0)
             {
                ADDDWORD ( pak, 0x00000000 );
-               ADDDWORD ( pak, 0x00000000 );                
+               ADDDWORD ( pak, 0x00000000 );
+               ADDDWORD( pak, 0x00000000 );
+               ADDWORD ( pak, 0x0000 );                
             }
             else
             {
                ADDDWORD ( pak, BuildItemHead( otherclient->items[invslot] ));
                ADDDWORD ( pak, BuildItemData( otherclient->items[invslot] ));                               
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+               ADDDWORD( pak, 0x00000000 );
+               ADDWORD ( pak, 0x0000 );   
             }
             SendToVisible( &pak, otherclient );                        
         }
@@ -2897,10 +2900,8 @@ bool CWorldServer::pakSellShop( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, invslot );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[invslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[invslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             thisclient->client->SendPacket( &pak );    
             
             //update inventory (buyer)        
@@ -2910,10 +2911,8 @@ bool CWorldServer::pakSellShop( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, newslot );
             ADDDWORD   ( pak, BuildItemHead( otherclient->items[newslot] ) );
             ADDDWORD   ( pak, BuildItemData( otherclient->items[newslot] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             otherclient->client->SendPacket( &pak );     
             
             //update shop
@@ -2925,10 +2924,8 @@ bool CWorldServer::pakSellShop( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, slot );
             ADDDWORD   ( pak, BuildItemHead( thisitem ) );
             ADDDWORD   ( pak, BuildItemData( thisitem ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             SendToVisible( &pak, otherclient );                                                  
         }
         break;
@@ -3002,21 +2999,129 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, destslot );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[destslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[destslot] ) );      
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDBYTE    ( pak, srcslot );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[srcslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[srcslot] ) );               
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             thisclient->client->SendPacket( &pak );        
             thisclient->SetStats( );
         }   
         break; //case 0x02 ( Surprise gift box )       
+
+        case 0x02: // Treasure Chests
+        {
+            CItem item;
+            CItem itemextra;
+            unsigned int chestSlot = GETBYTE((*P), 3);
+            unsigned int rewardCount = (RandNumber(0, 100) < 20)?2:1;
+            CChest* thischest = GetChestByID(thisclient->items[chestSlot].itemnum);
+            if (thischest == NULL)
+            {
+                Log(MSG_WARNING, "No reward found for chest %i", thisclient->items[chestSlot].itemnum);
+                return true;
+            }
+            unsigned int randv = RandNumber( 1, thischest->probmax );
+            //int Unk1 = GETBYTE((*P), 1);  // I don't know what these 2 values are for...
+            //int Unk2 = GETBYTE((*P), 2);
+            //Log(MSG_INFO, "Slot: %u  Unk1: %u  Unk2: %u", Slot, Unk1, Unk2);  // Just a debug message
+ 
+            DWORD prob = 1;
+            for(UINT i=0;i<thischest->Rewards.size();i++)
+            {
+                CReward* reward = thischest->Rewards.at( i );
+                prob += reward->prob;
+                if(randv<=prob)
+                {
+                    item.itemtype = reward->type;
+                    item.itemnum = reward->id;
+                    item.count = 1;
+                    item.socketed = false;
+                    item.appraised = true;
+                    item.lifespan = 100;
+                    item.durability = 100;
+                    item.refine = 0;
+                    prob = reward->prob;
+                    break;
+                }
+            }
+            if (rewardCount > 1)
+            {
+                DWORD probextra = 1;
+                randv = RandNumber( 1, thischest->probmax - prob );
+                itemextra.itemnum = 0;
+                for(UINT i=0;i<thischest->Rewards.size();i++)
+                {
+                    CReward* reward = thischest->Rewards.at( i );
+                    if (reward->id != item.itemnum) {
+                        prob += reward->prob;
+                        if(randv<=prob)
+                        {
+                            itemextra.itemtype = reward->type;
+                            itemextra.itemnum = reward->id;
+                            itemextra.count = 1;
+                            itemextra.socketed = false;
+                            itemextra.appraised = true;
+                            itemextra.lifespan = 100;
+                            itemextra.durability = 100;
+                            itemextra.refine = 0;
+                            break;
+                        }
+                    }
+                }
+                if (itemextra.itemnum == 0)
+                {
+                    Log(MSG_INFO, "Could not obtain secondary reward. Make sure all chests have atleast 2 rewards.");
+                    rewardCount = 1;
+                }
+            }
+ 
+            thisclient->items[chestSlot].count--;
+            if (thisclient->items[chestSlot].count < 1)
+                ClearItem(thisclient->items[chestSlot]);
+ 
+            unsigned int tempslot = thisclient->AddItem(item);
+            if (tempslot != 0xffff)
+            {
+            BEGINPACKET( pak, 0x7bc );
+            ADDBYTE (pak, 0x13);  // Status code. Congrats?
+            ADDBYTE (pak, (rewardCount + 1));  // Number of items
+ 
+            ADDBYTE (pak, tempslot);
+            ADDDWORD(pak, BuildItemHead(thisclient->items[tempslot]));
+            ADDDWORD(pak, BuildItemData(thisclient->items[tempslot]));
+            //ADDDWORD( pak, 0x00000000 );
+            //ADDWORD ( pak, 0x0000 );
+            if (rewardCount > 1)
+            {
+                tempslot = thisclient->AddItem(itemextra);
+                if (tempslot != 0xffff)
+                {
+                    ADDBYTE(pak, tempslot);
+                    ADDDWORD(pak, BuildItemHead(thisclient->items[tempslot]));
+                    ADDDWORD(pak, BuildItemData(thisclient->items[tempslot]));
+                    //ADDDWORD(pak, 0x00000000);
+                    //ADDWORD(pak, 0x0000);
+                } else {
+                    Log(MSG_WARNING, "Error adding second item");
+                    return true;
+                }
+            }
+ 
+            ADDBYTE (pak, chestSlot);
+            ADDDWORD(pak, BuildItemHead(thisclient->items[chestSlot]));
+            ADDDWORD(pak, BuildItemData(thisclient->items[chestSlot]));
+            //ADDDWORD( pak, 0x00000000 );
+            //ADDWORD ( pak, 0x0000 );
+ 
+            thisclient->client->SendPacket( &pak );
+            }
+            return true;
+        }
+        break;
+        
         case 0x05://Refine
         {
             BYTE item = GETBYTE((*P),3);
@@ -3058,17 +3163,13 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, material );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[material] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[material] ) );            
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDBYTE    ( pak, item );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[item] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[item] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDBYTE    ( pak, 0x00 );
             ADDDWORD   ( pak, 0x002f0000 );
             ADDDWORD   ( pak, 0x00000017 );
@@ -3101,17 +3202,13 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, material);
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[material] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[material] ) );            
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDBYTE    ( pak, item );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[item] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->items[item] ) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             thisclient->client->SendPacket(&pak);                           
         }
         break;        
@@ -3135,10 +3232,8 @@ bool CWorldServer::pakRepairItem( CPlayer* thisclient, CPacket* P )
             ADDBYTE    ( pak, slot );
             ADDDWORD   ( pak, BuildItemHead( thisclient->items[slot] ));
             ADDDWORD   ( pak, BuildItemData( thisclient->items[slot] ));
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
             ADDBYTE    ( pak, 0x00 );
             thisclient->client->SendPacket( &pak );
             thisclient->SetStats( );
@@ -3274,10 +3369,8 @@ bool CWorldServer::pakRepairTool( CPlayer* thisclient, CPacket* P )
         ADDBYTE(pak,GETBYTE((*P), 0x2));
         ADDDWORD( pak, BuildItemHead( thisclient->items[GETBYTE((*P), 0x2)]) );
         ADDDWORD( pak, BuildItemData( thisclient->items[GETBYTE((*P), 0x2)]) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
 
         thisclient->client->SendPacket(&pak);
     }
@@ -3291,10 +3384,8 @@ bool CWorldServer::pakRepairTool( CPlayer* thisclient, CPacket* P )
          ADDBYTE(pak,GETBYTE((*P), 0x2));
          ADDDWORD( pak, BuildItemHead( thisclient->items[GETBYTE((*P), 0x2)]) );
          ADDDWORD( pak, BuildItemData( thisclient->items[GETBYTE((*P), 0x2)]) );
-        //Added 2 lines below for 139+ Clients - code on osRose Forum - Purple / Drakia
-        // Disabled for now, problems in drops
-//        ADDDWORD( pak, 0x00000000 );
-//        ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
 
     thisclient->client->SendPacket(&pak);
     }

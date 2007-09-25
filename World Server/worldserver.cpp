@@ -472,6 +472,7 @@ bool CWorldServer::OnServerReady( )
     LoadItemStats( );
     LoadSkillData( );
     LoadDropsData( );
+    LoadChestData( );
     LoadQuestData( );
     LoadNPCData( );
     LoadTeleGateData( );

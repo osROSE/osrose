@@ -697,6 +697,20 @@ struct MDrop    // monster drops
 	CMDrops* mapdrop;        
 };
 
+struct CReward
+{
+    unsigned int id;
+    unsigned int type;
+    unsigned int prob;
+};
+ 
+struct CChest
+{
+    unsigned int chestid;
+    vector<CReward*> Rewards;
+    unsigned int probmax;
+};
+
 struct CBValue
 {
     UINT NewValue;

@@ -270,6 +270,18 @@ CDrop* CWorldServer::GetDropByID( UINT id, UINT map )
 	return NULL;	
 }
 
+// Search a Chest by ChestID
+CChest* CWorldServer::GetChestByID( UINT id )
+{
+    for(UINT i=0;i<ChestList.size();i++)
+    {
+        CChest* chest = (CChest*) ChestList.at(i);
+    if (chest->chestid == id)
+            return chest;
+    }
+    return NULL;
+}
+
 // Search a Monster by ID
 CMonster* CWorldServer::GetMonsterByID( UINT id, UINT map )
 {
@@ -754,9 +766,9 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];                     
             }
             else // Firecrackers
-            if( useitem->itemnum==913 || useitem->itemnum==918 || useitem->itemnum==921 ||
-                (useitem->itemnum>929 && useitem->itemnum<935) || 
-                (useitem->itemnum>989 && useitem->itemnum<995) )                
+            if( useitem->itemnum==913 ||
+                (useitem->itemnum>920 && useitem->itemnum<935) ||
+                (useitem->itemnum>989 && useitem->itemnum<996) )               
             {
                 useitem->usescript = 4;
                 useitem->usetype = UseList.Index[useitem->itemnum]->useeffect[0];
@@ -770,15 +782,21 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];                                  
             }
             else // Summons
-            if( (useitem->itemnum>400 && useitem->itemnum<440) || useitem->itemnum==942)
+            if( (useitem->itemnum>400 && useitem->itemnum<440) || (useitem->itemnum>915 && useitem->itemnum<918) || (useitem->itemnum>939 && useitem->itemnum<943) )
             {
                 if( thisclient->CharInfo->stamina<101 )
                     return NULL;
                 thisclient->CharInfo->stamina -= 100;
                 useitem->usescript = 5;
                 useitem->usetype = UseList.Index[useitem->itemnum]->useeffect[1];
-                if(useitem->itemnum==439){useitem->usevalue = 965;}
-                else if(useitem->itemnum==942){useitem->usevalue = 1472;}
+                if(useitem->itemnum==439){useitem->usevalue = 965;} // Metal Moldie
+                else if(useitem->itemnum==916){useitem->usevalue = 294;} //Firecracker Penguin
+                else if(useitem->itemnum==917){useitem->usevalue = 297;} // Ice Spirit
+                else if(useitem->itemnum==940){useitem->usevalue = 994;} // Easter Bunny
+                else if(useitem->itemnum==941){useitem->usevalue = 995;} // Easter Egg
+                else if(useitem->itemnum==942){useitem->usevalue = 1472;} // Soccer Ball Pet
+//                else if(useitem->itemnum==943) {useitem->usevalue;} // Event Scroll
+//                else if(useitem->itemnum==944){useitem->usevalue = 172;} // Arua's Blessing
                 else{ useitem->usevalue = useitem->itemnum + 500; }                
             }
             else // Snowball
@@ -910,7 +928,7 @@ CPlayer* CWorldServer::GetClientByUserID( UINT userid )
     for(UINT i=0;i<ClientList.size();i++)
 	{		
         CPlayer* thisclient = (CPlayer*)ClientList.at(i)->player;
-        if(thisclient->Session->userid==userid)
+        if(thisclient->Session->userid==userid && thisclient->Session->accesslevel != 0xffff)
             return thisclient;
 	};         
     return NULL;

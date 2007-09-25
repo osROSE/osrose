@@ -1549,9 +1549,29 @@ else if (strcmp(command, "give2")==0)
 	    Log( MSG_GMACTION, " mSpeedModif changed to %i by %s" , mSpeedModif, thisclient->CharInfo->charname);
 	    return pakGMChangeMSpeedModif(thisclient, mSpeedModif);
 	}
+	// buff - debuff by Drakia
+    else if (strcmp(command, "buff")==0) {
+        if (thisclient->Session->accesslevel < 300)
+            return true;
+        UINT strength;
+        if ((tmp = strtok(NULL, " ")) == NULL) strength = 0; else strength = atoi(tmp);
+        if (strength < 15) strength = 15;
+        Log( MSG_GMACTION, "buff : character [ %s ] Strength [ %d ]", thisclient->CharInfo->charname, strength);
+        pakGMBuff(thisclient, strength);
+        return true;
+     }
+     else if ( strcmp(command, "debuff")==0) {
+        if (thisclient->Session->accesslevel < 300)
+            return true;
+        Log(MSG_GMACTION, "debuff : character [ %s ]", thisclient->CharInfo->charname);
+        pakGMDebuff(thisclient);
+        return true;
+     }
     else
     {
 		Log( MSG_WARNING, "Invalid GM Command '%s' by '%s'", command, thisclient->CharInfo->charname);
+		//Wrong Command Alert {By CrAshInSiDe}
+        SendPM(thisclient, "Invalid Command");
 	}    
 	return true;	
 }
@@ -2227,6 +2247,8 @@ bool CWorldServer::pakGMZulygive(CPlayer* thisclient, char* name, int zuly)
 	ADDBYTE(pak, 0);
 	ADDDWORD(pak, 0xccccccdf);
 	ADDDWORD(pak, zuly);
+    ADDDWORD( pak, 0xcccccccc );
+    ADDWORD ( pak, 0xcccc );
 	otherclient->client->SendPacket(&pak);
 
 	return true;
@@ -2791,4 +2813,82 @@ bool CWorldServer::pakGMChangeMSpeedModif(CPlayer* thisclient, int modif)
     ADDBYTE(pak, 0);
     thisclient->client->SendPacket(&pak);
 	return true;
+}
+
+// GM Debuff players in sight. by Drakia
+bool CWorldServer::pakGMDebuff(CPlayer* thisClient)
+{
+    for(int i = 0; i < 30; i++)
+    {
+        thisClient->MagicStatus[i].Duration = 0;
+        thisClient->MagicStatus[i].BuffTime = 0;
+    }
+    thisClient->RefreshBuff();
+    for (int i = 0; i < thisClient->VisiblePlayers.size(); i++)
+    {
+        CPlayer* targetClient = thisClient->VisiblePlayers[i];
+        if (targetClient->Session->isLoggedIn == false) continue;
+        if (targetClient->Stats->HP <= 0) continue;
+        for(int j = 0; j < 30; j++)
+        {
+            targetClient->MagicStatus[j].Duration = 0;
+            targetClient->MagicStatus[j].BuffTime = 0;
+        }
+        targetClient->RefreshBuff();
+    }
+    return true;
+}
+ 
+// GM Buff players in sight. by Drakia
+bool CWorldServer::pakGMBuff( CPlayer* thisClient, int strength )
+{
+    // Buff the GM
+    pakGMDebuff(thisClient);
+ 
+    pakGMGiveBuff( thisClient, thisClient, 3906, strength); // Attack   (300s) (18)
+    pakGMGiveBuff( thisClient, thisClient, 3905, strength); // Defense  (300s) (19)
+    pakGMGiveBuff( thisClient, thisClient, 3908, strength); // Accuracy (420s) (20)
+    pakGMGiveBuff( thisClient, thisClient, 3907, strength); // MResist  (420s) (21)
+    pakGMGiveBuff( thisClient, thisClient, 3909, strength); // Dodge    (420s) (22)
+    pakGMGiveBuff( thisClient, thisClient, 3904, strength); // Dash     (300s) (23)
+    pakGMGiveBuff( thisClient, thisClient, 3910, strength); // Haste    (420s) (24)
+    pakGMGiveBuff( thisClient, thisClient, 3911, strength); // Critical (420s) (26)
+    pakGMGiveBuff( thisClient, thisClient, 3900, strength); // Max HP   (420s) (38)
+    pakGMGiveBuff( thisClient, thisClient, 3901, strength); // Max MP   (420s) (39)
+    // Buff all players visible
+    for (int i = 0; i < thisClient->VisiblePlayers.size(); i++)
+    {
+        CPlayer* target = thisClient->VisiblePlayers[i];
+        if ( target->Session->isLoggedIn == false ) continue;
+        if ( target->Stats->HP <= 0 ) continue;
+        pakGMGiveBuff( thisClient, target, 3906, strength); // Attack   (300s) (18)
+        pakGMGiveBuff( thisClient, target, 3905, strength); // Defense  (300s) (19)
+        pakGMGiveBuff( thisClient, target, 3908, strength); // Accuracy (420s) (20)
+        pakGMGiveBuff( thisClient, target, 3907, strength); // MResist  (420s) (21)
+        pakGMGiveBuff( thisClient, target, 3909, strength); // Dodge    (420s) (22)
+        pakGMGiveBuff( thisClient, target, 3904, strength); // Dash     (300s) (23)
+        pakGMGiveBuff( thisClient, target, 3910, strength); // Haste    (420s) (24)
+        pakGMGiveBuff( thisClient, target, 3911, strength); // Critical (420s) (26)
+        pakGMGiveBuff( thisClient, target, 3900, strength); // Max HP   (420s) (38)
+        pakGMGiveBuff( thisClient, target, 3901, strength); // Max MP   (420s) (39)
+ 
+    }
+    return true;
+}
+ 
+// Find the skill, add the buff, and send the packet. This is where the magic happens
+// And what took me so freakin long to figure out x.x
+bool CWorldServer::pakGMGiveBuff(CPlayer* thisClient, CPlayer* targetClient, int skillID, int strength)
+{
+    CSkills* skill = GServer->GetSkillByID(skillID);
+ 
+    GServer->AddBuffs( skill, targetClient, strength );
+    BEGINPACKET( pak, 0x7b5 );
+    ADDWORD    ( pak, targetClient->clientid );
+    ADDWORD    ( pak, thisClient->clientid );
+    ADDWORD    ( pak, skillID );
+    ADDWORD    ( pak, strength );
+    ADDBYTE    ( pak, skill->nbuffs );
+    GServer->SendToVisible( &pak, targetClient );
+    return true;
 }
