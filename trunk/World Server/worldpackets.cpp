@@ -3055,6 +3055,8 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
                     item.lifespan = 100;
                     item.durability = 100;
                     item.refine = 0;
+                    item.stats = 0;
+                    item.gem = 0;
                     prob = reward->prob;
                     break;
                 }
@@ -3064,7 +3066,7 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
                 DWORD probextra = 1;
                 randv = RandNumber( 1, thischest->probmax - prob );
                 itemextra.itemnum = 0;
-                for(UINT i=0;i<thischest->Rewards.size();i++)
+                for(UINT i=0;i<thischest->Rewards.size() - 1;i++)
                 {
                     CReward* reward = thischest->Rewards.at( i );
                     if (reward->id != item.itemnum) {
@@ -3079,6 +3081,8 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
                             itemextra.lifespan = 100;
                             itemextra.durability = 100;
                             itemextra.refine = 0;
+                            itemextra.stats = 0;
+                            itemextra.gem = 0;
                             break;
                         }
                     }
