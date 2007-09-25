@@ -2278,13 +2278,23 @@ bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
 		for(char used=5; used != 11; used +=2)
         {
             WORD material= GETWORD((*P), used);//gets inventory location
-            if(!CheckInventorySlot( thisclient, material))
-            return false;                      
-           if (material != 0){
-		      thisclient->items[material].count -= ProductList.Index[materialnumber]->amount[m];
-    	   m += 2;
-		   if (thisclient->items[material].count <=0){
-			  ClearItem(thisclient->items[material]);}}}
+            if (material != 0) {
+                if(!CheckInventorySlot( thisclient, material))
+                    return false;
+                if (thisclient->items[material].count < ProductList.Index[materialnumber]->amount[m])
+                    return false;
+                UINT clientMat = (thisclient->items[material].itemtype * 1000) + thisclient->items[material].itemnum;
+                if (clientMat != ProductList.Index[materialnumber]->item[m]) {
+                    Log(MSG_HACK, "Client craft mats don't equal server. Player: %s", thisclient->CharInfo->charname);
+                    return false;
+                }
+                thisclient->items[material].count -= ProductList.Index[materialnumber]->amount[m];
+                m += 2;
+                if (thisclient->items[material].count <=0) {
+                    ClearItem(thisclient->items[material]);
+                }
+            }
+        }
 		       
         BEGINPACKET( pak, 0x07d8);
         ADDWORD( pak, thisclient->clientid );
