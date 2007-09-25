@@ -193,7 +193,7 @@ bool CLoginServer::pakGetIP( CLoginClient* thisclient, CPacket* P )
 
 	BEGINPACKET( pak, 0x70a );
 
-	if(!DB->QExecute( "UPDATE accounts SET lastsvr=%i,lastip='%s' WHERE id=%i", channelnum, inet_ntoa( thisclient->clientinfo.sin_addr ), thisclient->userid))
+	if(!DB->QExecute( "UPDATE accounts SET lastsvr=%i,lastip='%s',lasttime=UNIX_TIMESTAMP( NOW() ) WHERE id=%i", channelnum, inet_ntoa( thisclient->clientinfo.sin_addr ), thisclient->userid))
 	   return false;
 	MYSQL_RES *result = DB->QStore( "SELECT host,port,lanip,lansubmask,connected,maxconnections FROM channels WHERE id=%i and type=1", servernum );
     if(result==NULL) return false;	
