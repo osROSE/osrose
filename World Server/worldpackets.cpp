@@ -1745,9 +1745,6 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
                 if ( thisclient->CharInfo->Zulies < thisclient->Trade->trade_count[0x0a]) return true;
                 if ( thisclient->CharInfo->Zulies < otherclient->Trade->trade_count[0x0a]) return true;
 
-				// Check if user has enough zuly by Wouter
-				if ( thisclient->CharInfo->Zulies < thisclient->Trade->trade_count[0x0a]) return true;
-				if ( thisclient->CharInfo->Zulies < otherclient->Trade->trade_count[0x0a]) return true;
 				// Update the zuly
 				thisclient->CharInfo->Zulies -= thisclient->Trade->trade_count[0x0a];
 				otherclient->CharInfo->Zulies -= otherclient->Trade->trade_count[0x0a];
@@ -1778,17 +1775,17 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						if( thisclient->items[thisclient->Trade->trade_itemid[i]].count<=0)
       						ClearItem(thisclient->items[thisclient->Trade->trade_itemid[i]]);
 						otherclient->items[newslot]=thisitem;
-						otherclient->items[newslot].count = thisclient->Trade->trade_count[i];
+						otherclient->items[newslot].count += thisclient->Trade->trade_count[i];
 						ADDBYTE( pakt, (unsigned char)thisclient->Trade->trade_itemid[i] );
 						ADDDWORD( pakt, BuildItemHead( thisclient->items[thisclient->Trade->trade_itemid[i]] ) );
 						ADDDWORD( pakt, BuildItemData( thisclient->items[thisclient->Trade->trade_itemid[i]] ) );
-                        ADDDWORD( pak, 0x00000000 );
-                        ADDWORD ( pak, 0x0000 );  
+                        ADDDWORD( pakt, 0x00000000 );
+                        ADDWORD ( pakt, 0x0000 );  
 						ADDBYTE( pako, newslot );
 						ADDDWORD( pako, BuildItemHead( otherclient->items[newslot] ) );
 						ADDDWORD( pako, BuildItemData( otherclient->items[newslot] ) );
-                        ADDDWORD( pak, 0x00000000 );
-                        ADDWORD ( pak, 0x0000 );
+                        ADDDWORD( pako, 0x00000000 );
+                        ADDWORD ( pako, 0x0000 );
 						tucount++;
 						oucount++;
 					}
@@ -1801,17 +1798,17 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						if( otherclient->items[otherclient->Trade->trade_itemid[i]].count<=0 )
       						ClearItem( otherclient->items[otherclient->Trade->trade_itemid[i]] );
 						thisclient->items[newslot]=thisitem;
-						thisclient->items[newslot].count = otherclient->Trade->trade_count[i];						
+						thisclient->items[newslot].count += otherclient->Trade->trade_count[i];						
 						ADDBYTE( pako, (unsigned char)otherclient->Trade->trade_itemid[i] );
 						ADDDWORD( pako, BuildItemHead( otherclient->items[otherclient->Trade->trade_itemid[i]] ) );
 						ADDDWORD( pako, BuildItemData( otherclient->items[otherclient->Trade->trade_itemid[i]] ) );
-                        ADDDWORD( pak, 0x00000000 );
-                        ADDWORD ( pak, 0x0000 );
+                        ADDDWORD( pako, 0x00000000 );
+                        ADDWORD ( pako, 0x0000 );
 						ADDBYTE( pakt, newslot );
 						ADDDWORD( pakt, BuildItemHead( thisclient->items[newslot] ) );
 						ADDDWORD( pakt, BuildItemData( thisclient->items[newslot] ) );
-                        ADDDWORD( pak, 0x00000000 );
-                        ADDWORD ( pak, 0x0000 );
+                        ADDDWORD( pakt, 0x00000000 );
+                        ADDWORD ( pakt, 0x0000 );
 						tucount++;
 						oucount++;
 					}
