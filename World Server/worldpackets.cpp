@@ -2292,7 +2292,7 @@ bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
                     return false;
                 }
                 thisclient->items[material].count -= ProductList.Index[materialnumber]->amount[m];
-                m += 2;
+                m++;
                 if (thisclient->items[material].count <=0) {
                     ClearItem(thisclient->items[material]);
                 }
