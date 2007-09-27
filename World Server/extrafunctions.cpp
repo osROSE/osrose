@@ -687,7 +687,8 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
 
             else //Return Scrolls
             if( (useitem->itemnum>349 && useitem->itemnum<355) || 
-                (useitem->itemnum>359 && useitem->itemnum<365) )
+                (useitem->itemnum>359 && useitem->itemnum<365) ||
+                (useitem->itemnum=945 ) )
             {
                 if( thisclient->Stats->MP < 33 ){delete useitem;}
                 thisclient->Stats->MP -= 32;
@@ -749,6 +750,12 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                         useitem->usetype = 63;
                         useitem->usevalue = 54004440;                        
                     break;                    
+                    //Junon's Order Return Scroll - added by rl2171
+                    case 945:
+                        useitem->usetype = 2;
+                        useitem->usevalue = 53225100;                        
+                    break;                    
+
                 }
             }
             else //Charm Scrolls
