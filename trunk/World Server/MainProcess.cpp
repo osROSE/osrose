@@ -144,6 +144,17 @@ PVOID MapProcess( PVOID TS )
                 }
                 //LMA END
                 
+               //Let's kill the bonfires after 2 minutes.. by Terr0risT
+                if (monster->IsBonfire( ))
+                    {
+                        UINT etime = (UINT)round((clock( ) - monster->SpawnTime));
+                        if (etime>120000) // delete our bonfire...
+                        {
+                        map->DeleteMonster( monster, true, j ); continue;
+                        }   
+                    }
+                
+                
 //A lot of code only for ghosts ====================================================================== 
                 if((map->IsNight( ) || map->ghost==2))
                 {
