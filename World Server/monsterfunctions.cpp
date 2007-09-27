@@ -69,6 +69,14 @@ bool CMonster::IsGhostSeed( )
     return false;
 }
 
+// Return True if bonfire/salamander flame/mana flame.. by Terr0risT
+bool CMonster::IsBonfire( )
+{
+    if(montype>770 && montype<811)
+        return true;
+    return false;
+}
+
 // return true if current monster can move
 bool CMonster::CanMove( )
 {

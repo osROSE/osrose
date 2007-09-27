@@ -49,6 +49,7 @@ class CMonster : public CCharacter
         bool UnspawnMonster( );          		
       	bool IsGhost( );
       	bool IsGhostSeed( );
+      	bool IsBonfire( );
       	bool CanMove( );
       	void OnEnemyDie( void* enemy );
       	bool ReadyToMove( );
