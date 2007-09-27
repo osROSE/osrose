@@ -2262,7 +2262,6 @@ bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
 	unsigned newslot= thisclient->GetNewItemSlot( item );
 	if (newslot !=0xffff)
     {
-		thisclient->items[newslot] = item;
 		//get material used lookup number
 		int	materialnumber = 0;
 		if(item.itemtype<10)
@@ -2298,7 +2297,7 @@ bool CWorldServer::pakCraft( CPlayer* thisclient, CPacket* P )
                 }
             }
         }
-		       
+		thisclient->items[newslot] = item;
         BEGINPACKET( pak, 0x07d8);
         ADDWORD( pak, thisclient->clientid );
         ADDWORD( pak, 0x0100);
