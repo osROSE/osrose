@@ -1774,8 +1774,11 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						thisclient->items[thisclient->Trade->trade_itemid[i]].count -= thisclient->Trade->trade_count[i];
 						if( thisclient->items[thisclient->Trade->trade_itemid[i]].count<=0)
       						ClearItem(thisclient->items[thisclient->Trade->trade_itemid[i]]);
-						otherclient->items[newslot]=thisitem;
-						otherclient->items[newslot].count += thisclient->Trade->trade_count[i];
+                        if (otherclient->items[newslot].count > 0)
+                            thisitem.count = otherclient->items[newslot].count + thisclient->Trade->trade_count[i];
+                        else
+                            thisitem.count = thisclient->Trade->trade_count[i];
+                        otherclient->items[newslot]=thisitem;
 						ADDBYTE( pakt, (unsigned char)thisclient->Trade->trade_itemid[i] );
 						ADDDWORD( pakt, BuildItemHead( thisclient->items[thisclient->Trade->trade_itemid[i]] ) );
 						ADDDWORD( pakt, BuildItemData( thisclient->items[thisclient->Trade->trade_itemid[i]] ) );
@@ -1797,8 +1800,11 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						otherclient->items[otherclient->Trade->trade_itemid[i]].count -= otherclient->Trade->trade_count[i];
 						if( otherclient->items[otherclient->Trade->trade_itemid[i]].count<=0 )
       						ClearItem( otherclient->items[otherclient->Trade->trade_itemid[i]] );
-						thisclient->items[newslot]=thisitem;
-						thisclient->items[newslot].count += otherclient->Trade->trade_count[i];						
+                        if (thisclient->items[newslot].count > 0)
+                            thisitem.count = thisclient->items[newslot].count + otherclient->Trade->trade_count[i];
+                        else
+                            thisitem.count = otherclient->Trade->trade_count[i];
+                        thisclient->items[newslot]=thisitem;					
 						ADDBYTE( pako, (unsigned char)otherclient->Trade->trade_itemid[i] );
 						ADDDWORD( pako, BuildItemHead( otherclient->items[otherclient->Trade->trade_itemid[i]] ) );
 						ADDDWORD( pako, BuildItemData( otherclient->items[otherclient->Trade->trade_itemid[i]] ) );
