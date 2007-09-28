@@ -46,6 +46,15 @@ bool CLoginServer::pakUserLogin( CLoginClient* thisclient, CPacket* P )
     MYSQL_ROW row;
     thisclient->username.assign( (const char*)&P->Buffer, 32, (P->Size-6-32)>16?16:P->Size-6-32 );
     thisclient->password.assign( (const char*)&P->Buffer, 0, 32 );
+    if ( !thisclient->hasGameGuard && Config.checkGameGuard )
+    {
+        Log(MSG_HACK, "Warning, user [ %s ] tried logging in without gameguard", thisclient->username.c_str());
+        BEGINPACKET( pak, 0x708 );
+        ADDBYTE( pak, 10 );
+        ADDDWORD( pak, 0);
+        thisclient->SendPacket( &pak );
+        return false;
+    }
     BEGINPACKET( pak, 0x708 );
     MYSQL_RES *result = DB->QStore( "SELECT id,password,accesslevel,online,active FROM accounts WHERE username='%s'", thisclient->username.c_str() );
     if(result==NULL) return false;
@@ -277,5 +286,11 @@ bool CLoginServer::pakConnectToChar( CLoginClient* thisclient, CPacket *P )
     ADDDWORD   ( pak, Config.CharPass );
     cryptPacket( (char*)&pak, NULL );
     send( newserver->sock, (char*)&pak, pak.Size, 0 );   
+    return true;
+}
+
+bool CLoginServer::pakGameGuard( CLoginClient* thisclient, CPacket *P )
+{
+    thisclient->hasGameGuard = true;
     return true;
 }

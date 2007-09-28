@@ -36,6 +36,7 @@ class CLoginClient : public CClientSocket
     	string username;
     	string password;
     	WORD accesslevel;	
+    	bool hasGameGuard;
 };
 
 // Server class
@@ -63,6 +64,7 @@ class CLoginServer : public CServerSocket
     	bool pakUserLogin( CLoginClient* thisclient, CPacket* P );
     	bool pakGetServers( CLoginClient* thisclient, CPacket* P );
     	bool pakGetIP( CLoginClient* thisclient, CPacket* P );	    	
+    	bool pakGameGuard( CLoginClient* thisclient, CPacket* P );
     	    
         // Variables	
         string   filename;

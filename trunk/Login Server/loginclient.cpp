@@ -25,6 +25,7 @@ CLoginClient::CLoginClient( )
 {
 	userid = 0;
 	isLoggedIn = false;
+	hasGameGuard = false;
 	accesslevel = 0;
 	username.reserve(17);
 	password.reserve(33);		
