@@ -339,7 +339,7 @@ UINT CPlayer::GetNewItemSlot( CItem thisitem )
         case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:case 9://equip
             itemtab=0;
         break;
-        case 10://consumibles
+        case 10://consumables
             itemtab=1;
         break;
         case 11:case 12://etc
@@ -365,12 +365,11 @@ UINT CPlayer::GetNewItemSlot( CItem thisitem )
                     return slot;
             }
             break;
-            case 1:case 2://consumible and etc
+            case 1:case 2://consumable and etc - updated by Core
             {
-                if((items[slot].itemnum == thisitem.itemnum && items[slot].count<999)
+               if((items[slot].itemnum == thisitem.itemnum && items[slot].itemtype == thisitem.itemtype && items[slot].count<999)
                     ||(items[slot].itemnum==0 && items[slot].count<1))
-                    return slot;
-            }
+                    return slot;            }
             break;                                 
         }
     }	
