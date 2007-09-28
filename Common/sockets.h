@@ -144,6 +144,7 @@ struct CROSEServerConfig
     unsigned int LoginPort;          // Login port      
     unsigned int LoginPass;    
     bool CreateLoginAccount;         // Create account in login if not exist?             
+    bool checkGameGuard;             // Should we check if the user has gameguard?
 	
 	// CHARSEVER
 	unsigned long int DeleteTime;    // Delete time

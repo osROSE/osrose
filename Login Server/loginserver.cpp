@@ -125,6 +125,7 @@ void CLoginServer::LoadConfigurations( char* file )
     Config.MinimumAccessLevel   = ConfigGetInt    ( file, "accesslevel", 100 );    	
 	Config.usethreads           = ConfigGetInt    ( file, "usethreads", 0 )==0?false:true;
     Config.CreateLoginAccount   = ConfigGetInt    ( file, "CreateLoginAccount", 0 )==0?false:true;
+    Config.checkGameGuard       = ConfigGetInt    ( file, "checkGameGuard", 1)==0?false:true;
 }
 
 // Handle packets
@@ -137,7 +138,7 @@ bool CLoginServer::OnReceivePacket( CClientSocket* thisclient, CPacket *P )
 	   case 0x708: return pakUserLogin        ( (CLoginClient*)thisclient, P );
 	   case 0x704: return pakGetServers       ( (CLoginClient*)thisclient, P ); 
 	   case 0x70a: return pakGetIP            ( (CLoginClient*)thisclient, P );
-	   case 0x808: return true;
+	   case 0x808: return pakGameGuard        ( (CLoginClient*)thisclient, P );
     	default:
     		Log( MSG_WARNING, "[%i]Login Server Received unknown packet. Command:%04x Size:%04x", thisclient->sock, P->Command, P->Size );
 		break;
