@@ -300,7 +300,7 @@ struct CCSellData
 
 struct CUseData
 {
-    UINT id;;
+    UINT id;
     UINT restriction;
     UINT type;
     UINT price;
