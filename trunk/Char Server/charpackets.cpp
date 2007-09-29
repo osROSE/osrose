@@ -425,6 +425,19 @@ bool CCharServer::pakChatrooms ( CCharClient* thisclient, CPacket* P )
 bool CCharServer::pakDeleteChar( CCharClient* thisclient, CPacket* P )
 {
 	if(!thisclient->isLoggedIn) return false;    
+	char* name = (char*)&P->Buffer[2];
+    MYSQL_RES *result;
+	MYSQL_ROW row;
+	result = DB->QStore("SELECT account_name FROM characters WHERE char_name='%s' LIMIT 1", name);
+	if(result==NULL) return false;
+	row = mysql_fetch_row(result);
+	if (strcmp(row[0], thisclient->username)!=0)
+	{
+	    Log(MSG_HACK, "User %s tried deleting another users (%s) character.", thisclient->username, name);
+	    DB->QFree( );
+	    return false;
+	}
+	DB->QFree( );
     short int action = GETBYTE((*P), 1 );
     unsigned long int DeleteTime = 0;
     switch(action)
