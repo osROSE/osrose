@@ -764,7 +764,7 @@ bool CWorldServer::pakPickDrop( CPlayer* thisclient, CPacket* P )
         if( thisdrop->type == 2 ) // Item
         {
             unsigned int type = UseList.Index[thisdrop->item.itemnum]->type;
-            if (type == 320) {
+            if (type == 320 && thisdrop->item.itemtype == 10) {
                 RESETPACKET( pak,0x7a3 );
                 ADDWORD    ( pak, dropowner->clientid );
                 ADDWORD    ( pak, thisdrop->item.itemnum );
