@@ -287,12 +287,22 @@ bool CWorldServer::pakDoIdentify( CPlayer *thisclient, CPacket *P )
     pakInventory(thisclient);
     pakQuestData(thisclient);
 	RESETPACKET( pak, 0x7de );
-	ADDDWORD   ( pak, 0x000c1003 );
+	/*ADDDWORD   ( pak, 0x000c1003 );
 	ADDDWORD   ( pak, 0xffff0000 );
 	ADDDWORD   ( pak, 0x00000000 );
 	ADDDWORD   ( pak, 0x9b000038 );
 	ADDDWORD   ( pak, 0x7272656a );
 	ADDDWORD   ( pak, 0x3c3c3479 );
+	ADDDWORD   ( pak, 0x534d5547 );
+	ADDWORD    ( pak, 0x3e3e );
+	ADDBYTE    ( pak, 0x00 );*/
+	// This packet didn't match what I was getting on official. Changing it allowed jRose connections. This is a "Platinum" packet.
+	ADDDWORD   ( pak, 0x00011002 );
+	ADDDWORD   ( pak, 0x006f0000 );
+	ADDDWORD   ( pak, 0x32350000 );
+	ADDDWORD   ( pak, 0x1d383239 );
+	ADDDWORD   ( pak, 0x31093033 );
+	ADDDWORD   ( pak, 0x3c3c6c09 );
 	ADDDWORD   ( pak, 0x534d5547 );
 	ADDWORD    ( pak, 0x3e3e );
 	ADDBYTE    ( pak, 0x00 );
