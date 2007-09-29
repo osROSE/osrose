@@ -409,20 +409,30 @@ void CPlayer::RestartPlayerVal( )
 //Force refresh of actual HP / MP Hp/Mp jumping bug.
 bool CPlayer::RefreshHPMP()
 {
-     	clock_t etime = clock() - lastShowTime;
-     	if ( etime < 3 * CLOCKS_PER_SEC )
-     	{
-             return true;
-         }
+    clock_t etime = clock() - lastShowTime;
+    if ( etime < CLOCKS_PER_SEC )
+        return true;
 
-        BEGINPACKET( pak, 0x7ec );
+    BEGINPACKET( pak, 0x7ec );
+    ADDWORD    ( pak, Stats->HP );
+    ADDWORD    ( pak, Stats->MP );
+    client->SendPacket ( &pak );
+
+    if (Party->party != NULL)
+    {
+        BEGINPACKET( pak, 0x7d5 );
+        ADDDWORD   ( pak, CharInfo->charid );
+        ADDWORD    ( pak, clientid );
+        ADDWORD    ( pak, GetMaxHP( ) );
         ADDWORD    ( pak, Stats->HP );
-        ADDWORD    ( pak, Stats->MP );
-        client->SendPacket ( &pak );            
-        lastShowTime = clock();
-                 
-         
-         return true;
+        ADDDWORD   ( pak, 0x01000000 );
+        ADDDWORD   ( pak, 0x0000000f );
+        ADDWORD    ( pak, 0x1388 );
+        Party->party->SendToMembers( &pak);
+    }
+
+    lastShowTime = clock();
+    return true;
 }
 
 
@@ -434,58 +444,31 @@ bool CPlayer::Regeneration()
        lastRegenTime=0;
        return true;
     }
-    
+
     //LMA REGEN
     bool is_first_regen=false;
     if (lastRegenTime==0)
     {
        is_first_regen=true;
     }
-    
-	clock_t etime = clock() - lastRegenTime;		
-    if ( etime >= 3 * CLOCKS_PER_SEC )
-    {
-        //LMA, it seems it's faster than 10 seconds...
-        //if( etime >= 10 * CLOCKS_PER_SEC && Stats->HP > 0 )
-        if( etime >= 5 * CLOCKS_PER_SEC && Stats->HP > 0 )
-        {
-            unsigned int hpamount = GetHPRegenAmount( );
-            unsigned int mpamount = GetMPRegenAmount( );                         
-            Stats->HP += hpamount;
-            Stats->MP += mpamount;
-            if( Stats->HP > Stats->MaxHP)        
-                Stats->HP = Stats->MaxHP;
-            if( Stats->MP > Stats->MaxMP )        
-                Stats->MP = Stats->MaxMP;
-                
-            if (Stats->MaxHP==Stats->HP && Stats->MaxMP== Stats->MP)
-            {
-               lastRegenTime=0;
-            }
-            else
-            {
-                lastRegenTime = clock();
-            }                    
-        }        
 
-        BEGINPACKET( pak, 0x7ec );
-        ADDWORD    ( pak, Stats->HP );
-        ADDWORD    ( pak, Stats->MP );
-        client->SendPacket ( &pak );         
-        
-        if (Party->party != NULL)
-        {
-           BEGINPACKET( pak, 0x7d5 );
-           ADDDWORD   ( pak, CharInfo->charid );
-           ADDWORD    ( pak, clientid );
-           ADDWORD    ( pak, GetMaxHP( ) );
-           ADDWORD    ( pak, Stats->HP );
-           ADDDWORD   ( pak, 0x01000000 );
-           ADDDWORD   ( pak, 0x0000000f );
-           ADDWORD    ( pak, 0x1388 );
-           Party->party->SendToMembers( &pak);
-        }
-    }   
+	clock_t etime = clock() - lastRegenTime;
+    if( etime >= 8 * CLOCKS_PER_SEC && Stats->HP > 0 )
+    {
+        unsigned int hpamount = GetHPRegenAmount( );
+        unsigned int mpamount = GetMPRegenAmount( );
+        Stats->HP += hpamount;
+        Stats->MP += mpamount;
+        if( Stats->HP > Stats->MaxHP)
+            Stats->HP = Stats->MaxHP;
+        if( Stats->MP > Stats->MaxMP )
+            Stats->MP = Stats->MaxMP;
+
+        if (Stats->MaxHP==Stats->HP && Stats->MaxMP== Stats->MP)
+           lastRegenTime=0;
+        else
+            lastRegenTime = clock();
+    }
     return true;
 }
 
