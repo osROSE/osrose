@@ -2913,17 +2913,6 @@ bool CWorldServer::pakGMMaxStats( CPlayer* thisclient )
         pakGMStat(thisclient, "cha", 300);
         pakGMStat(thisclient, "sen", 300);
  
- 
-    BEGINPACKET( pak, 0x79e );
-    ADDWORD( pak, thisclient->clientid );
-    ADDWORD( pak, thisclient->CharInfo->StatPoints );
-    thisclient->client->SendPacket( &pak );
- 
-    RESETPACKET( pak, 0x79e );
-    ADDWORD( pak, thisclient->clientid );
-    SendToVisible( &pak, thisclient, false );
- 
     return true;
 } 
- 
 
