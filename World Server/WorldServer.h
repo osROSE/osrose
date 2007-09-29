@@ -269,7 +269,7 @@ class CWorldServer : public CServerSocket
         bool pakGMBuff(CPlayer* thisClient, int strength); // by Drakia
         bool pakGMDebuff(CPlayer* thisClient); // by Drakia
         bool pakGMGiveBuff(CPlayer* thisClient, CPlayer* targetClient, int skillID, int strength); // by Drakia
-
+        bool pakGMMaxStats(CPlayer* thisClient);
     
     	//------------------ CHAR SERVER COMMANDS (worldpackets.cpp)
     	bool TeleportTo ( CPlayer* thisclient, int map, fPoint position );	

@@ -258,6 +258,7 @@ struct CROSEServerConfig
     int Command_Mdmg;
     int Command_Rules;
     int Command_Cfmode;
+    int Command_MaxStats;
     
     char* Command_GlobalPrefix;        
     
