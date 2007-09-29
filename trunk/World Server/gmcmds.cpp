@@ -1567,6 +1567,15 @@ else if (strcmp(command, "give2")==0)
         pakGMDebuff(thisclient);
         return true;
      }
+    // MaxStats - by rl2171
+    else if(strcmp(command, "maxstats")==0) 
+    {
+        if(Config.Command_MaxStats > thisclient->Session->accesslevel)
+            return true;
+        Log( MSG_GMACTION, " %s : /MaxStats", thisclient->CharInfo->charname );
+        return pakGMMaxStats( thisclient );
+    }     
+   
     else
     {
 		Log( MSG_WARNING, "Invalid GM Command '%s' by '%s'", command, thisclient->CharInfo->charname);
@@ -2892,3 +2901,29 @@ bool CWorldServer::pakGMGiveBuff(CPlayer* thisClient, CPlayer* targetClient, int
     GServer->SendToVisible( &pak, targetClient );
     return true;
 }
+ 
+// GM Give yourself all stats maxed 
+bool CWorldServer::pakGMMaxStats( CPlayer* thisclient )
+{ 
+ 
+        pakGMStat(thisclient, "str", 300);
+        pakGMStat(thisclient, "dex", 300);
+        pakGMStat(thisclient, "con", 300);
+        pakGMStat(thisclient, "int", 300);
+        pakGMStat(thisclient, "cha", 300);
+        pakGMStat(thisclient, "sen", 300);
+ 
+ 
+    BEGINPACKET( pak, 0x79e );
+    ADDWORD( pak, thisclient->clientid );
+    ADDWORD( pak, thisclient->CharInfo->StatPoints );
+    thisclient->client->SendPacket( &pak );
+ 
+    RESETPACKET( pak, 0x79e );
+    ADDWORD( pak, thisclient->clientid );
+    SendToVisible( &pak, thisclient, false );
+ 
+    return true;
+} 
+ 
+

@@ -709,6 +709,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Broadcast = ConfigGetInt    ( "commands.ini", "broadcast", 299 );
     Config.Command_GlobalTime  = ConfigGetInt    ( "commands.ini", "globaldelay", 30 );
     Config.Command_GlobalPrefix = ConfigGetString    ( "commands.ini", "globalprefix", "[Broadcast]" );
+    Config.Command_MaxStats     = ConfigGetInt    ( "commands.ini", "maxstats", 299 );     //MaxStats
 
 }
 // Incoming packet
