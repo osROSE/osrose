@@ -654,6 +654,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Give2 = ConfigGetInt    ( "commands.ini", "give2", 299 );
     Config.Command_GiveFairy = ConfigGetInt    ( "commands.ini", "givefairy", 299 );
     Config.Command_GiveZuly = ConfigGetInt    ( "commands.ini", "givezuly", 299 );
+    Config.Command_GmList = ConfigGetInt ( "commands.ini", "gmlist", 299 );
     Config.Command_Go = ConfigGetInt    ( "commands.ini", "go", 299 );
     Config.Command_Goto = ConfigGetInt    ( "commands.ini", "goto", 299 );
     Config.Command_GoToMap = ConfigGetInt    ( "commands.ini", "gotomap", 299 );

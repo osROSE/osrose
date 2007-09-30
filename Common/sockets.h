@@ -185,7 +185,8 @@ struct CROSEServerConfig
     // COMMAND LEVELS
     int Command_Go;
     int Command_Who;
-    int Command_Who2;    
+    int Command_Who2;
+    int Command_GmList;    
     int Command_Broadcast;
     int Command_Mute;
     int Command_Event;    //event
