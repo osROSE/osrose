@@ -47,6 +47,38 @@ bool CWorldServer::pakGMCommand( CPlayer* thisclient, CPacket* P )
         Log( MSG_GMACTION, " %s : /tele %i,%u,%u" , thisclient->CharInfo->charname, map, round(x), round(y));
         return pakGMTele(thisclient, map, x, y);
     }
+/* GM List {By CrAshInSiDe} */
+    else if(strcmp(command, "gmlist")==0) 
+    {
+        if(Config.Command_GmList > thisclient->Session->accesslevel)
+            return true;       
+        SendPM(thisclient, "The currently GM connected is:");
+        int count=1;
+        int hiddenam=0;
+        char line0[200];
+        while(count <= (ClientList.size()-1)) 
+        {
+            CPlayer* whoclient = (CPlayer*)ClientList.at(count)->player;
+            if(whoclient->Session->accesslevel > 100) 
+            {
+                sprintf(line0, "%s - GM[%i]", whoclient->CharInfo->charname, whoclient->Session->accesslevel);                                      
+            } 
+ 
+            if(whoclient->isInvisibleMode != true) 
+            {
+                SendPM(thisclient, line0 );
+            } 
+            else 
+            {
+                hiddenam++;
+            }
+            count++;
+        }
+        sprintf(line0, "There are currently %i GM connected!", ((ClientList.size()-1)-hiddenam));
+        Log( MSG_GMACTION, " %s : /gmlist" , thisclient->CharInfo->charname);
+        SendPM(thisclient, line0 );
+        return true;
+    }
    else if (strcmp(command, "mute")==0) //==== Mute a player ==== [by Paul_T]
    {
         if(Config.Command_Mute > thisclient->Session->accesslevel)
@@ -1784,6 +1816,19 @@ bool CWorldServer::pakGMReborn(CPlayer* thisclient)
      
          thisclient->ActiveQuest = 0;
          thisclient->MyQuest.clear();
+         
+/*Update Reborn Command {By CrAshInSiDe*/
+        int x = 5098;
+        int y = 5322;
+        int map = 22;
+      if( (x != 0) && (y != 0) && (map != 0) )
+        {
+            fPoint coord;
+            coord.x = x;
+            coord.y = y;
+            MapList.Index[map]->TeleportPlayer( thisclient, coord, false );
+            }
+         
 
  // Uncomment below if you want to use the Nobles part
  /*        
