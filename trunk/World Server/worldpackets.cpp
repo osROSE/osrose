@@ -3423,20 +3423,26 @@ bool CWorldServer::pakRepairTool( CPlayer* thisclient, CPacket* P )
 // Disconnect char
 bool CWorldServer::pakCharDSClient( CPlayer* thisclient, CPacket* P )
 {
-    if(!thisclient->Session->isLoggedIn) return true;
+    unsigned int userid = GETDWORD((*P), 1 );               
+    CPlayer* otherclient = GetClientByUserID( userid );
+    if(otherclient==NULL) return true;
+    
     BYTE action = GETBYTE((*P),0);
     switch(action)
     {
         case 1:
         {
-            unsigned int userid = GETDWORD((*P), 1 );         
-            CPlayer* otherclient = GetClientByUserID( userid );
             if(otherclient==NULL)
             {
                 Log(MSG_WARNING, "userid '%s' not found online", userid );
                 return true;
             }
-            otherclient->client->isActive = false;                                     
+ 
+            BEGINPACKET( pak, 0x707 );
+            ADDWORD( pak, 0 );
+            otherclient->client->SendPacket( &pak );
+ 
+            otherclient->client->isActive = false;                              
         }
         break;
     }     

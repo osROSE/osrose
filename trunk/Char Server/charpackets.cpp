@@ -496,13 +496,14 @@ bool CCharServer::pakUpdateLevel( CCharClient* thisclient, CPacket* P )
 bool CCharServer::pakLoginDSClient( CCharClient* thisclient, CPacket* P )
 {
     if(!thisclient->isLoggedIn) return false;
+    unsigned int userid = GETDWORD((*P), 1 );
+    CCharClient* otherclient = GetClientByUserID( userid );
+    if(otherclient==NULL) return false;
     BYTE action = GETBYTE((*P),0);
     switch(action)
     {
         case 1:
         {            
-            unsigned int userid = GETDWORD ((*P), 1);
-            CCharClient* otherclient = GetClientByUserID( userid );
             if(otherclient==NULL)
             {
                 Log( MSG_WARNING, "Userid '%u' is not online", userid );
@@ -510,14 +511,14 @@ bool CCharServer::pakLoginDSClient( CCharClient* thisclient, CPacket* P )
             }
             otherclient->isLoggedIn = false;
             otherclient->isActive = false;
-        	BEGINPACKET( pak, 0x502 );
-        	ADDBYTE    ( pak, 1 );
-        	ADDDWORD   ( pak, userid );
-        	ADDBYTE    ( pak, 0x00 );
-    	    cryptPacket( (char*)&pak, NULL );
- 	        CChanels* thischannel = GetChannelByID( otherclient->channel );
- 	        if(thischannel!=NULL)
-        	    send( thischannel->sock, (char*)&pak, pak.Size, 0 );  
+            BEGINPACKET( pak, 0x502 );
+            ADDBYTE    ( pak, 1 );
+            ADDDWORD   ( pak, userid );
+            //ADDBYTE    ( pak, 0x00 );
+            cryptPacket( (char*)&pak, NULL );
+            CChanels* thischannel = GetChannelByID( otherclient->channel );
+            if(thischannel!=NULL)
+                send( thischannel->sock, (char*)&pak, pak.Size, 0 ); 
         }
         break;
     } 
