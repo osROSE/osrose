@@ -79,6 +79,59 @@ bool CWorldServer::pakGMCommand( CPlayer* thisclient, CPacket* P )
         SendPM(thisclient, line0 );
         return true;
     }
+ 
+    /// geo edit for /savetown // 30 sep 07
+    else if (strcmp(command, "savetown")==0)
+    {
+        if ((tmp = strtok(NULL, " ")) == NULL) tmp = 0; int loc=atoi(tmp);
+        unsigned int spot = 0;
+        switch(loc)
+        {
+            case 1:  //AP
+            {
+                spot = 1;
+                break;
+            }           
+            case 2:  //Zant
+            {
+                spot = 2;
+                break;
+            }           
+            case 3:  //Junon
+            {
+                spot = 4;
+                break;
+            }           
+            case 4:  //Eucar
+            {
+                spot = 5;
+                break;
+            }           
+            case 5:  //Xita
+            {
+                spot = 68;
+                break;
+            }           
+        }   
+        if(spot>0)
+        {
+            thisclient->Position->saved = spot;
+            SendPM(thisclient, "Saved in Town");
+        }
+        else
+        {      
+            SendPM(thisclient, "Please input a number after the savetown command, below is a list of places and their appropriate number");
+            SendPM(thisclient, "1 = Adventurers plains");
+            SendPM(thisclient, "2 = The city of Zant");
+            SendPM(thisclient, "3 = Junon Polis");
+            SendPM(thisclient, "4 = The city of Eucar");
+            SendPM(thisclient, "5 = Xita Refuge");
+            SendPM(thisclient, "Example; /savetown 3");
+        }
+           
+        return true;
+    }
+    /// end geo edit
    else if (strcmp(command, "mute")==0) //==== Mute a player ==== [by Paul_T]
    {
         if(Config.Command_Mute > thisclient->Session->accesslevel)
