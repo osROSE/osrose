@@ -1171,9 +1171,10 @@ bool CWorldServer::pakUserDied ( CPlayer* thisclient, CPacket* P )
     thisclient->Stats->HP = thisclient->Stats->MaxHP * 10 / 100;
     if(thisrespawn!=NULL)
     {        
+             /// geo edit for saved town warp // 29 sep 07
+        map = MapList.Index[thisrespawn->destMap];
         map->TeleportPlayer( thisclient, thisrespawn->dest, false );
-    }
-    else
+    }    else
     {
         fPoint coord;
         coord.x = 5200;
