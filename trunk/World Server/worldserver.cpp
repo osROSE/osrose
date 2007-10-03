@@ -665,6 +665,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Info = ConfigGetInt    ( "commands.ini", "info", 299 );
     Config.Command_IQuest = ConfigGetInt    ( "commands.ini", "iquest", 299 );
     Config.Command_Item = ConfigGetInt    ( "commands.ini", "item", 299 );
+    Config.Command_AllSkill = ConfigGetInt ( "commands.ini", "allskill", 299 );
     Config.Command_Job = ConfigGetInt    ( "commands.ini", "job", 299 );
     Config.Command_Kick = ConfigGetInt    ( "commands.ini", "kick", 299 );
     Config.Command_KillInRange = ConfigGetInt    ( "commands.ini", "killinrange", 299 );
@@ -721,8 +722,9 @@ bool CWorldServer::OnReceivePacket( CClientSocket* thisclient, CPacket *P )
         case 0x0500: return pakCSReady          ( (CPlayer*)thisclient->player, P );
         case 0x0502: return pakCharDSClient     ( (CPlayer*)thisclient->player, P );        
     	case 0x0505: return pakCSCharSelect     ( (CPlayer*)thisclient->player, P );
-    	case 0x0756: return true;//unknown
-    	case 0x0700: return pakPing             ( (CPlayer*)thisclient->player, P );
+    	//case 0x0756: return true;//unknown
+    	case 0x0756: return pakChangeRespawn ( (CPlayer*)thisclient->player, P );
+        case 0x0700: return pakPing             ( (CPlayer*)thisclient->player, P );
     	case 0x0707: return pakExit             ( (CPlayer*)thisclient->player, P );
     	case 0x070b: return pakDoIdentify       ( (CPlayer*)thisclient->player, P );
     	case 0x071c: return pakCharSelect       ( (CPlayer*)thisclient->player, P );

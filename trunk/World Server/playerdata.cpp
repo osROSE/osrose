@@ -855,11 +855,11 @@ void CPlayer::savedata( )
     	   hp=Stats->MaxHP * 10 / 100;
 	   if(Stats->MP<0)
 	       Stats->MP=0;	   
-        GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i WHERE id=%i", 
+        GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i, townid=%i WHERE id=%i", 
                     CharInfo->Job,Stats->Level, CharInfo->Zulies, hp, Stats->MP, 
                     Attr->Str,Attr->Con,Attr->Dex,Attr->Int,Attr->Cha,Attr->Sen,
                     CharInfo->Exp,CharInfo->SkillPoints,CharInfo->StatPoints,CharInfo->stamina, 
-                    quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,CharInfo->charid );
+                    quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,Position->saved,CharInfo->charid );
     	if(!GServer->DB->QExecute("DELETE FROM items WHERE owner=%i", CharInfo->charid)) return;
     	for(UINT i=0;i<MAX_INVENTORY;i++) 
         {

@@ -192,6 +192,7 @@ struct CROSEServerConfig
     int Command_Event;    //event
     int Command_Tele;
     int Command_Level;
+    int Command_AllSkill; // by crashinside
     int Command_Reborn;  //reborn by Core
     int Command_LevelUp;
     int Command_TeleToMe;

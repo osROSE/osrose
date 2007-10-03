@@ -1152,6 +1152,45 @@ bool CWorldServer::pakGameGuard ( CPlayer* thisclient, CPacket* P )
 	return true;
 }
 
+ 
+// Changing Respawn for a client
+bool CWorldServer::pakChangeRespawn( CPlayer* thisclient, CPacket* P )
+{
+        //player position (map)
+       unsigned int spot = 0;
+        switch(thisclient->Position->Map)
+        {
+            case 22:  //AP
+            {
+                spot = 1;
+                break;
+            }           
+            case 1:  //Zant
+            {
+                spot = 2;
+                break;
+            }           
+            case 2:  //Junon
+            {
+                spot = 4;
+                break;
+            }           
+            case 51:  //Eucar
+            {
+                spot = 5;
+                break;
+            }           
+            case 61:  //Xita
+            {
+                spot = 68;
+                break;
+            }           
+        }   
+ 
+                thisclient->Position->saved = spot;
+    return true;
+}
+ 
 // User Died
 bool CWorldServer::pakUserDied ( CPlayer* thisclient, CPacket* P )
 {               
@@ -2644,7 +2683,7 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
             int itemCount = GETWORD((*P),n+5);
             if (thisclient->items[slot].count < itemCount)
                return true;
-            thisclient->Shop->SellingList[i].count;
+            thisclient->Shop->SellingList[i].count = itemCount; // geo edit for invisible stackables // 30 sep 07
         }
         else
             thisclient->Shop->SellingList[i].count = 1;
