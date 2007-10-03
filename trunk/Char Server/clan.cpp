@@ -52,6 +52,7 @@ bool CCharServer::SendClanInfo (CCharClient* thisclient)
 //            ADDDWORD   ( pak, 0x00000000 );
 //            ADDBYTE    ( pak, 0x00 );
 //            ADDBYTE    ( pak, 0x00);
+            ADDDWORD   ( pak, 0x00000000 );
             ADDSTRING  ( pak, thisclan->name);//Clan Name            
             ADDBYTE    ( pak, 0x00);            
             ADDSTRING  ( pak, thisclan->slogan);//Clan slogan
