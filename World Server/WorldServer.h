@@ -208,7 +208,8 @@ class CWorldServer : public CServerSocket
     	bool pakCraft( CPlayer* thisclient, CPacket* P );   	
     	bool pakDoID( CPlayer* thisclient, CPacket* P );	
     	bool pakGate( CPlayer* thisclient, CPacket* P );	
-    	bool pakExit( CPlayer* thisclient, CPacket* P );
+    	bool pakChangeRespawn( CPlayer* thisclient, CPacket* P );
+        bool pakExit( CPlayer* thisclient, CPacket* P );
     	bool pakPing( CPlayer* thisclient, CPacket* P );	          	
       	bool SendLevelUPtoChar(CPlayer* thisclient ); 
        bool pakRepairTool( CPlayer* thisclient, CPacket* P );       
@@ -245,6 +246,7 @@ class CWorldServer : public CServerSocket
         bool pakGMChangeFairyStay(CPlayer* thisclient, int newvalue); 
         bool pakGMChangeFairyTestMode(CPlayer* thisclient, int mode); 
         bool pakGMTelePlayerHere( CPlayer* thisclient, char* name );
+        bool pakGMAllSkill ( CPlayer* thisclient, char* name); // by crashinside
         bool pakGMReborn( CPlayer* thisclient); //Reborn by Core
         bool pakGMLevel( CPlayer* thisclient, int level , char* name);    
         bool pakGMTeleToPlayer( CPlayer* thisclient, char* name );    
