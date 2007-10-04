@@ -226,6 +226,9 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
                 }
             }
             ADDQWORD( pak, 0x00000000 ); 
+            ADDDWORD( pak, 0x00000000 ); //LMA 139+
+            ADDWORD ( pak, 0x0000 );     //LMA 139+
+
                             
             b++;
             continue;
@@ -235,8 +238,14 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
     }
     for(int i=b;i<10;i++)
     {
+       /*
         for(int j=0;j<0x4e;j++)
-            ADDBYTE( pak, 0x00 );        
+            ADDBYTE( pak, 0x00 );
+        */
+ 
+        //LMA 139+        
+        for(int j=0;j<0x72;j++)
+            ADDBYTE( pak, 0x00 ); 
     } 
     //ADDBYTE( pak, 0x00 );
     
@@ -2658,22 +2667,30 @@ bool CWorldServer::pakStoreZuly( CPlayer* thisclient, CPacket* P)
     return true;
 }
 
+ 
 // Open Shop
 bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
 {
+     //LMA 139+:
+     //They added six extra 0x00 between items and prices + shop name...
+     UINT lma_offset=6;
+     
+     
     if( thisclient->Shop->open ) 
         return true;    
     BYTE nselling = GETBYTE((*P),0);
     BYTE nbuying = GETBYTE((*P),1);
     if(nselling>30 || nbuying>30) 
         return true;
-    int nchar = ((nselling + nbuying) * 12 ) + nselling + nbuying + 2;
+    int nchar = ((nselling + nbuying) * (12+lma_offset) ) + nselling + nbuying + 2;
     strncpy(thisclient->Shop->name ,(char*)&(*P).Buffer[nchar] , P->Size-nchar );  
+    
+    Log(MSG_INFO,"[Create] Shop Name %s",thisclient->Shop->name);
     thisclient->Shop->Selling = nselling;
     thisclient->Shop->Buying = nbuying;
     for(int i=0;i<nselling;i++)
     {
-        int n=(i*13)+2;
+        int n=(i*(13+lma_offset))+2;
         BYTE slot =  GETBYTE((*P),n);
         if(!CheckInventorySlot( thisclient, slot))
             return false; 
@@ -2687,11 +2704,14 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
         }
         else
             thisclient->Shop->SellingList[i].count = 1;
-        thisclient->Shop->SellingList[i].price = GETDWORD((*P),n+9);           
+        thisclient->Shop->SellingList[i].price = GETDWORD((*P),n+9+lma_offset);
+        
+        //LMA Log:
+        Log(MSG_INFO,"[S-%i/%i], Item %i, slot %i, Nb %i, Price %i",i,nselling,thisclient->items[slot].itemnum,slot,thisclient->Shop->SellingList[i].count,thisclient->Shop->SellingList[i].price);        
     }         
     for(int i=0;i<nbuying;i++)
     {
-        unsigned int n=(nselling*13)+2+(i*12)+i;
+        unsigned int n=(nselling*(13+lma_offset))+2+(i*(12+lma_offset))+i;
         BYTE slot = GETBYTE((*P),n);
         thisclient->Shop->BuyingList[slot].slot = slot;     
         DWORD head = GETDWORD((*P),n+1);
@@ -2702,7 +2722,10 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
             thisclient->Shop->BuyingList[slot].count = GETWORD((*P),n+5); 
         else
             thisclient->Shop->BuyingList[slot].count = 1;         
-        thisclient->Shop->BuyingList[slot].price = GETDWORD((*P),n+9);                   
+        thisclient->Shop->BuyingList[slot].price = GETDWORD((*P),n+9+lma_offset);
+        
+        //LMA Log:
+        Log(MSG_INFO,"[B-%i/%i], Item %i, slot %i, Nb %i, Price %i",i,nbuying,thisitem.itemnum,slot,thisclient->Shop->BuyingList[slot].count,thisclient->Shop->BuyingList[slot].price);                
     }
     BEGINPACKET( pak, 0x796 );
     ADDWORD    ( pak, thisclient->clientid );
@@ -2720,6 +2743,7 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
     thisclient->Shop->open = true;
     return true;
 }
+ 
 
 // Show Shop to other players
 bool CWorldServer::pakShowShop( CPlayer* thisclient, CPacket* P )

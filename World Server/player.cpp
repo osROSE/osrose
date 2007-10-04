@@ -353,6 +353,7 @@ bool CPlayer::SpawnToPlayer( CPlayer* player, CPlayer* otherclient )
 	   ADDBYTE( pak, Shop->ShopType);
 	   ADDBYTE( pak, 0x00);
 	   ADDSTRING(pak, Shop->name);
+	   ADDBYTE( pak, 0x00);       //LMA 139+
     }
     if(Clan->clanid!=0)
     {
