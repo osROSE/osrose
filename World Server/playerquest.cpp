@@ -1051,17 +1051,48 @@ bool CPlayer::AddQuest( unsigned long int questid )
             
         }
         
+       //LMA: We have to delete the reward quest on some cases...
+       //[8000,8003] = Santa Rewards.
+       if (finalquest->id>=8000&&finalquest->id<=8003)
+       {
+          LogQuest("Reward Santa, deleting Quest %i",finalquest->id);
+          DelInactiveQuest(questid);
+       }    
+        
     }
     
     
     return true;    
 }
 
+//LMA: delete inactive quest
+bool CPlayer::DelInactiveQuest( unsigned long int questid )
+{
+     LogQuest("searching %lu",questid);
+    QUESTS* myquest = GetQuestByQuestID( questid );
+    if( myquest == 0 )
+        return false;
+        LogQuest("ok2");
+    for(UINT i=0;i<MyQuest.size( );i++)
+    {
+        if(MyQuest.at(i)==myquest)
+        {
+            LogQuest("deleting Quest %i",myquest->thisquest->id);
+            MyQuest.erase( MyQuest.begin()+i );
+            delete myquest;
+            break;
+        }
+    }
+        LogQuest("ok3");	
+    return true;
+}
+
+
 bool CPlayer::DelQuest( unsigned long int questid )
 {
     CQuest* thisquest = GServer->GetQuestByID( questid );
     if(thisquest==0)
-        return true;
+        return true;       
     QUESTS* myquest = GetQuestByQuestID( thisquest->questid );
     if( myquest == 0 )
         return false;
@@ -1074,13 +1105,59 @@ bool CPlayer::DelQuest( unsigned long int questid )
             break;
         }
     }
-	ActiveQuest--;
+	ActiveQuest--;	
     return true;
 }
 
 
 bool CPlayer::GiveQuestReward( CQuest* thisquest )
 {
+     
+     //LMA: Check for direct quests rewards.
+     if (thisquest->script==666&&thisquest->value1!=0)
+     {
+        //check if the parent quest exists.
+        CQuest* thisquesttemp = GServer->GetQuestByID(thisquest->value1); 
+        if(thisquesttemp==0)
+        {
+           Log(MSG_HACK, "[REWARD] player %s, Quest %i, Bogus Parent Quest %i", CharInfo->charname,thisquest->id, thisquest->value1 );
+           return false;
+        }
+        
+        //have we got this quest in list?
+        QUESTS* myquest = GetQuestByQuestID( thisquesttemp->questid );
+        if (myquest==0)
+        {
+           Log(MSG_HACK, "[REWARD] player %s, Quest %i, Parent Quest %i not in player list", CharInfo->charname, thisquest->id, thisquest->value1 );
+           return false;
+        }
+        
+        if (!myquest->active)
+        {
+           Log(MSG_HACK, "[REWARD] player %s, Quest %i, Parent Quest %i not active", CharInfo->charname, thisquest->id, thisquest->value1 );
+           return false;
+        }
+                
+        if (thisquest->value3!=0&&thisquest->value2<5)
+        {
+           //check if enough of an item quest to give the reward
+           UINT lma_previous=0;
+           lma_previous=myquest->items[thisquest->value2];
+           if(myquest->items[thisquest->value2]<thisquest->value3)
+           {
+             Log(MSG_HACK, "[REWARD] player %s, Quest %i, Parent Quest %i hasn't enough items (%i<%i)", CharInfo->charname, thisquest->id, thisquest->value1, myquest->items[thisquest->value2], thisquest->value3 );
+             return false;                                                                
+           }
+           
+           //Taking items.
+           myquest->items[thisquest->value2]-=thisquest->value3;
+           LogQuest("[REWARD] player %s, Quest %i, Parent Quest %i we took %i, remains %i (was %i)", CharInfo->charname, thisquest->id, thisquest->value1, thisquest->value3,myquest->items[thisquest->value2],lma_previous);           
+        }
+        
+     }
+     //End of Checks.
+     
+     //Go on :)
     if( thisquest==0 )
         return false;
     if( thisquest->ExpReward>0 )//Give Exp
@@ -1132,6 +1209,7 @@ bool CPlayer::GiveQuestReward( CQuest* thisquest )
         ADDBYTE    ( pak, 0x00 );
         client->SendPacket( &pak );
     }      
+       
     return true;
 }
 

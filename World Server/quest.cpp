@@ -225,6 +225,11 @@ bool CWorldServer::DoQuestScript( CPlayer* thisclient, CQuest* thisquest )
              }   
         break;
         //LMA end
+        case 666:
+             {
+              //Don't ever touch this one.
+             }
+             break;
     }    
     return true;
 }
