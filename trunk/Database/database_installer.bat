@@ -62,6 +62,7 @@ echo creating list_friend table
 echo creating list_quest table
 %mysqlPath% -h %host% -u %user% --password=%pass% -D %db% < list_quest.sql
 
+
 :upgrade
 echo Installing new database content.
 echo updating list_npcs
@@ -80,6 +81,8 @@ echo updating skills_data
 %mysqlPath% -h %host% -u %user% --password=%pass% -D %db% < skills_data.sql
 echo updating storage
 %mysqlPath% -h %host% -u %user% --password=%pass% -D %db% < storage.sql
+echo updating chest_data
+%mysqlPath% -h %host% -u %user% --password=%pass% -D %db% < chest_data.sql
 
 :end
 echo.

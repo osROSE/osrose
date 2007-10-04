@@ -139,7 +139,11 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
     //LMA: Quest Variables (50 bytes)
     for(int i=0;i<25;i++)
     {
-         Log(MSG_INFO,"quest variable %i=%i",i,thisclient->QuestVariables[i]); 
+         if (thisclient->QuestVariables[i]!=0)
+         {
+            Log(MSG_INFO,"quest variable %i=%i",i,thisclient->QuestVariables[i]); 
+         }
+         
         ADDBYTE( pak, thisclient->QuestVariables[i] );          
         ADDBYTE( pak, 0x00 );         
     }
@@ -2685,7 +2689,7 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
     int nchar = ((nselling + nbuying) * (12+lma_offset) ) + nselling + nbuying + 2;
     strncpy(thisclient->Shop->name ,(char*)&(*P).Buffer[nchar] , P->Size-nchar );  
     
-    Log(MSG_INFO,"[Create] Shop Name %s",thisclient->Shop->name);
+    Log(MSG_INFO,"[Create] Begin Shop %s:",thisclient->Shop->name);
     thisclient->Shop->Selling = nselling;
     thisclient->Shop->Buying = nbuying;
     for(int i=0;i<nselling;i++)
@@ -2707,7 +2711,7 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
         thisclient->Shop->SellingList[i].price = GETDWORD((*P),n+9+lma_offset);
         
         //LMA Log:
-        Log(MSG_INFO,"[S-%i/%i], Item %i, slot %i, Nb %i, Price %i",i,nselling,thisclient->items[slot].itemnum,slot,thisclient->Shop->SellingList[i].count,thisclient->Shop->SellingList[i].price);        
+        Log(MSG_INFO,"[S-%i/%i], Item (%i:%i), slot %i, Nb %i, Price %i",i+1,nselling,thisclient->items[slot].itemtype,thisclient->items[slot].itemnum,slot,thisclient->Shop->SellingList[i].count,thisclient->Shop->SellingList[i].price);        
     }         
     for(int i=0;i<nbuying;i++)
     {
@@ -2725,8 +2729,11 @@ bool CWorldServer::pakOpenShop( CPlayer* thisclient, CPacket* P )
         thisclient->Shop->BuyingList[slot].price = GETDWORD((*P),n+9+lma_offset);
         
         //LMA Log:
-        Log(MSG_INFO,"[B-%i/%i], Item %i, slot %i, Nb %i, Price %i",i,nbuying,thisitem.itemnum,slot,thisclient->Shop->BuyingList[slot].count,thisclient->Shop->BuyingList[slot].price);                
+        Log(MSG_INFO,"[B-%i/%i], Item (%i:%i), slot %i, Nb %i, Price %i",i+1,nbuying,thisitem.itemtype,thisitem.itemnum,slot,thisclient->Shop->BuyingList[slot].count,thisclient->Shop->BuyingList[slot].price);                
     }
+    
+    Log(MSG_INFO,"[Create] End Shop %s.",thisclient->Shop->name);
+    
     BEGINPACKET( pak, 0x796 );
     ADDWORD    ( pak, thisclient->clientid );
     ADDFLOAT   ( pak, thisclient->Position->current.x );

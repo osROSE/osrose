@@ -121,6 +121,7 @@ class CPlayer: public CCharacter
         
         // quest
         bool AddQuest( unsigned long int questid );
+        bool DelInactiveQuest( unsigned long int questid );    //LMA
         bool DelQuest( unsigned long int questid );
         bool GiveQuestReward( CQuest* thisquest );        
         QUESTS* GetQuestByQuestID( unsigned long int questid );

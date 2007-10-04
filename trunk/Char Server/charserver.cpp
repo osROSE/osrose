@@ -267,6 +267,7 @@ bool CCharServer::OnReceivePacket( CClientSocket* thisclient, CPacket *P )
         case 0x07e7: return pakDownloadCM       ( (CCharClient*)thisclient, P );  
         case 0x07e8: return pakClanIconTime     ( (CCharClient*)thisclient, P );          
         case 0x079e: return pakUpdateLevel      ( (CCharClient*)thisclient, P ); 
+        case 0x0808: return true; //LMA: GG Packet here too.
      	default:
 		Log( MSG_WARNING, "(SID:%i) Received unknown packet. Command:%04x Size:%04x", thisclient->sock, P->Command, P->Size );
         break;
