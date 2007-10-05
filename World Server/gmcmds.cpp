@@ -3023,7 +3023,7 @@ bool CWorldServer::pakGMMaxStats( CPlayer* thisclient )
 } 
 
  
-//GM: All Skills {By CrAshInSiDe}
+//GM: All Skills {By CrAshInSiDe} - Skills and levels updated by rl2171
     bool CWorldServer::pakGMAllSkill(CPlayer* thisclient, char* name)
 {
     int classid = thisclient->CharInfo->Job;
