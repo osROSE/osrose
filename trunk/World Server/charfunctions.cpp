@@ -173,11 +173,15 @@ bool CCharacter::IsOnBattle( )
     }
 }
 
-bool CCharacter::CanAttack( )
+bool CCharacter::CanAttack( ) // updated by Core
 {
     clock_t etime = clock() - Battle->lastAtkTime;
     //if( etime < CLOCKS_PER_SEC * 100 / Stats->Attack_Speed ) return false;   for the time being let's just let it be unsynced to avoid disbalanced
     int weapontype = IsPlayer()?getWeaponType():0;
+    //the fix: not much but it works ;)
+    if (weapontype == 212) 
+        return true;
+        
     if ( weapontype == 231 || weapontype == 232 || weapontype == 233 )
     {
        if( (etime < CLOCKS_PER_SEC * (GServer->ATTK_SPEED_MODIF*4/3) / Stats->Attack_Speed) || Status->Stun != 0xff ) return false;
