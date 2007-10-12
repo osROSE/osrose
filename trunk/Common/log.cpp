@@ -155,4 +155,5 @@ if ( fh != NULL )
     }
 
 	va_end  ( ap );
+        fflush( stdout );
 }
