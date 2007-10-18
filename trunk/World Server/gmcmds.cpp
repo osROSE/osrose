@@ -1668,6 +1668,55 @@ else if (strcmp(command, "give2")==0)
         Log( MSG_GMACTION, " %s : /MaxStats", thisclient->CharInfo->charname );
         return pakGMMaxStats( thisclient );
     }     
+
+    // mystat - by PurpleYouko
+    else if(strcmp(command, "mystat")==0)
+    {
+         if ((tmp = strtok(NULL, " "))==NULL)
+        {
+            SendPM(thisclient, "Please input after the mystat command, below is a list of commands");
+            SendPM(thisclient, "ap = Attack Power");
+            SendPM(thisclient, "acc = Accuracy");
+            SendPM(thisclient, "dodge = Dodge");
+            SendPM(thisclient, "def = Defense");
+            SendPM(thisclient, "crit = Critical");
+            SendPM(thisclient, "mspd = Movement Speed");
+            SendPM(thisclient, "Example; /mystat ap");
+         return true;
+        }
+         
+         char buffer[200];
+         if(strcmp(tmp, "ap")==0)
+         {
+             sprintf ( buffer, "My Attack Power is %i", thisclient->Stats->Attack_Power );
+             SendPM(thisclient, buffer);
+         }
+         else if(strcmp(tmp, "acc")==0)
+         {
+             sprintf ( buffer, "My Accuracy is %i", thisclient->Stats->Accury );
+             SendPM(thisclient, buffer); 
+         }
+         else if(strcmp(tmp, "dodge")==0) 
+         {
+             sprintf ( buffer, "My dodge is %i", thisclient->Stats->Dodge);
+             SendPM(thisclient, buffer);  
+         }
+         else if(strcmp(tmp, "def")==0) 
+         {
+             sprintf ( buffer, "My defense is %i", thisclient->Stats->Defense);
+             SendPM(thisclient, buffer);  
+         }
+         else if(strcmp(tmp, "crit")==0) 
+         {
+             sprintf ( buffer, "My critical is %i", thisclient->Stats->Critical);
+             SendPM(thisclient, buffer);  
+         }
+         else if(strcmp(tmp, "mspd")==0) 
+         {
+             sprintf ( buffer, "My move speed is %i", thisclient->Stats->Move_Speed);
+             SendPM(thisclient, buffer);  
+         }
+    }
    
     else
     {
