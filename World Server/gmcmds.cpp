@@ -3175,7 +3175,16 @@ otherclient->cskills[45].id = 1516;
 otherclient->cskills[45].level = 1;
 otherclient->cskills[46].id = 1771;
 otherclient->cskills[46].level = 3;
-
+// Mileage Items - raider - katar
+otherclient->cskills[47].id = 5803; // 861
+otherclient->cskills[47].level = 1;
+otherclient->cskills[48].id = 5804; // 862
+otherclient->cskills[48].level = 1;
+// Mileage Items - raider - dual
+otherclient->cskills[49].id = 5805; // 863
+otherclient->cskills[49].level = 1;
+otherclient->cskills[50].id = 5806; // 864
+otherclient->cskills[50].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3251,6 +3260,11 @@ otherclient->cskills[33].id = 496;
 otherclient->cskills[33].level = 3;
 otherclient->cskills[34].id = 491;
 otherclient->cskills[34].level = 3;
+// Mileage Items - knight - 1 handed
+otherclient->cskills[35].id = 5601; // 847
+otherclient->cskills[35].level = 1;
+otherclient->cskills[36].id = 5602; // 848
+otherclient->cskills[36].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3350,6 +3364,21 @@ otherclient->cskills[45].id = 701;
 otherclient->cskills[45].level = 9;
 otherclient->cskills[46].id = 601;
 otherclient->cskills[46].level = 9;
+// Mileage Items - 2 hand sword
+otherclient->cskills[47].id = 5603; // 849
+otherclient->cskills[47].level = 1;
+otherclient->cskills[48].id = 5604; // 850
+otherclient->cskills[48].level = 1;
+// Mileage Items - spear
+otherclient->cskills[49].id = 5605; // 851
+otherclient->cskills[49].level = 1;
+otherclient->cskills[50].id = 5606; // 852
+otherclient->cskills[50].level = 1;
+// Mileage Items - axe
+otherclient->cskills[51].id = 5607; // 853
+otherclient->cskills[51].level = 1;
+otherclient->cskills[52].id = 5608; // 854
+otherclient->cskills[52].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3425,6 +3454,18 @@ otherclient->cskills[34].id = 1286;
 otherclient->cskills[34].level = 6;
 otherclient->cskills[35].id = 1221;
 otherclient->cskills[35].level = 3;
+// Mileage Items - cleric
+otherclient->cskills[36].id = 5704; // 857
+otherclient->cskills[36].level = 1;
+otherclient->cskills[37].id = 5705; // 858
+otherclient->cskills[37].level = 1;
+// Mileage Item - Soul Recall
+otherclient->cskills[38].id = 5701; // 592
+otherclient->cskills[38].level = 1;
+// Unique Item - Soul Recall
+otherclient->cskills[39].id = 4401; // 560
+otherclient->cskills[39].level = 3;
+
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3504,6 +3545,18 @@ otherclient->cskills[35].id = 921;
 otherclient->cskills[35].level = 3;
 otherclient->cskills[36].id = 926;
 otherclient->cskills[36].level = 3;
+// Mileage Items - mage
+otherclient->cskills[37].id = 5702; // 855
+otherclient->cskills[37].level = 1;
+otherclient->cskills[38].id = 5703; // 856
+otherclient->cskills[38].level = 1;
+// Mileage Item - Soul Recall
+otherclient->cskills[39].id = 5701; // 592
+otherclient->cskills[39].level = 1;
+// Unique Item - Soul Recall
+otherclient->cskills[40].id = 4401; // 560
+otherclient->cskills[40].level = 3;
+
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3575,6 +3628,11 @@ otherclient->cskills[31].id = 5570;
 otherclient->cskills[31].level = 1;
 otherclient->cskills[32].id = 5574;
 otherclient->cskills[32].level = 1;
+// Mileage Items - scout
+otherclient->cskills[33].id = 5801; // 859
+otherclient->cskills[33].level = 1;
+otherclient->cskills[34].id = 5802; // 860
+otherclient->cskills[34].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3684,6 +3742,11 @@ otherclient->cskills[50].id = 2646;
 otherclient->cskills[50].level = 2;
 otherclient->cskills[51].id = 2656;
 otherclient->cskills[51].level = 7;
+// Mileage Items - artisan
+otherclient->cskills[52].id = 5902; // 865
+otherclient->cskills[52].level = 1;
+otherclient->cskills[53].id = 5903; // 866
+otherclient->cskills[53].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 
 }
@@ -3765,6 +3828,11 @@ otherclient->cskills[36].id = 2426;
 otherclient->cskills[36].level = 3;
 otherclient->cskills[37].id = 2431;
 otherclient->cskills[37].level = 3;
+// Mileage Items - Borg - Launcher
+otherclient->cskills[38].id = 5904; // 867
+otherclient->cskills[38].level = 1;
+otherclient->cskills[39].id = 5905; // 868
+otherclient->cskills[39].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 }
 
