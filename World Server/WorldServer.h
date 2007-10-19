@@ -247,6 +247,7 @@ class CWorldServer : public CServerSocket
         bool pakGMChangeFairyTestMode(CPlayer* thisclient, int mode); 
         bool pakGMTelePlayerHere( CPlayer* thisclient, char* name );
         bool pakGMAllSkill ( CPlayer* thisclient, char* name); // by crashinside
+        bool pakGMDelSkills ( CPlayer* thisclient, char* name); // by rl2171
         bool pakGMReborn( CPlayer* thisclient); //Reborn by Core
         bool pakGMLevel( CPlayer* thisclient, int level , char* name);    
         bool pakGMTeleToPlayer( CPlayer* thisclient, char* name );    

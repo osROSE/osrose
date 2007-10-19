@@ -55,6 +55,14 @@ bool CWorldServer::pakGMCommand( CPlayer* thisclient, CPacket* P )
         Log( MSG_GMACTION, " %s : /allskill %s", thisclient->CharInfo->charname, name);
         return pakGMAllSkill(thisclient, name);
         }
+   else if (strcmp(command, "delskills")==0) /* Remove all Skill from a Player - modified by rl2171 */
+   {
+        if(Config.Command_DelSkills > thisclient->Session->accesslevel)
+        return true;
+        if ((tmp = strtok(NULL, " "))==NULL) return true; char* name=tmp;
+        Log( MSG_GMACTION, " %s : /delskills %s", thisclient->CharInfo->charname, name);
+        return pakGMDelSkills(thisclient, name);
+        }
 /* GM List {By CrAshInSiDe} */
     else if(strcmp(command, "gmlist")==0) 
     {
@@ -3880,3 +3888,129 @@ else
     return true;
 }
  
+//GM: DeleteSkills {modified from allskill command - rl2171}
+    bool CWorldServer::pakGMDelSkills(CPlayer* thisclient, char* name)
+{
+
+    CPlayer* otherclient = GetClientByCharName( name );
+    if(otherclient==NULL)
+    return true;
+    
+{
+otherclient->cskills[0].id = 0;
+otherclient->cskills[0].level = 1;
+otherclient->cskills[1].id = 0;
+otherclient->cskills[1].level = 1;
+otherclient->cskills[2].id = 0;
+otherclient->cskills[2].level = 1;
+otherclient->cskills[3].id = 0;
+otherclient->cskills[3].level = 1;
+otherclient->cskills[4].id = 0;
+otherclient->cskills[4].level = 1;
+otherclient->cskills[5].id = 0;
+otherclient->cskills[5].level = 1;
+otherclient->cskills[6].id = 0;
+otherclient->cskills[6].level = 1;
+otherclient->cskills[7].id = 0;
+otherclient->cskills[7].level = 1;
+otherclient->cskills[8].id = 0;
+otherclient->cskills[8].level = 1;
+otherclient->cskills[9].id = 0;
+otherclient->cskills[9].level = 1;
+otherclient->cskills[10].id = 0;
+otherclient->cskills[10].level = 1;
+otherclient->cskills[11].id = 0;
+otherclient->cskills[11].level = 1;
+otherclient->cskills[12].id = 0;
+otherclient->cskills[12].level = 1;
+otherclient->cskills[13].id = 0;
+otherclient->cskills[13].level = 1;
+otherclient->cskills[14].id = 0;
+otherclient->cskills[14].level = 1;
+otherclient->cskills[15].id = 0;
+otherclient->cskills[15].level = 1;
+otherclient->cskills[16].id = 0;
+otherclient->cskills[16].level = 1;
+otherclient->cskills[17].id = 0;
+otherclient->cskills[17].level = 1;
+otherclient->cskills[18].id = 0;
+otherclient->cskills[18].level = 1;
+otherclient->cskills[19].id = 0;
+otherclient->cskills[19].level = 1;
+otherclient->cskills[20].id = 0;
+otherclient->cskills[20].level = 1;
+otherclient->cskills[21].id = 0;
+otherclient->cskills[21].level = 1;
+otherclient->cskills[22].id = 0;
+otherclient->cskills[22].level = 1;
+otherclient->cskills[23].id = 0;
+otherclient->cskills[23].level = 1;
+otherclient->cskills[24].id = 0;
+otherclient->cskills[24].level = 1;
+otherclient->cskills[25].id = 0;
+otherclient->cskills[25].level = 1;
+otherclient->cskills[26].id = 0;
+otherclient->cskills[26].level = 1;
+otherclient->cskills[27].id = 0;
+otherclient->cskills[27].level = 1;
+otherclient->cskills[28].id = 0;
+otherclient->cskills[28].level = 1;
+otherclient->cskills[29].id = 0;
+otherclient->cskills[29].level = 1;
+otherclient->cskills[30].id = 0;
+otherclient->cskills[30].level = 1;
+otherclient->cskills[31].id = 0;
+otherclient->cskills[31].level = 1;
+otherclient->cskills[32].id = 0;
+otherclient->cskills[32].level = 1;
+otherclient->cskills[33].id = 0;
+otherclient->cskills[33].level = 1;
+otherclient->cskills[34].id = 0;
+otherclient->cskills[34].level = 1;
+otherclient->cskills[35].id = 0;
+otherclient->cskills[35].level = 1;
+otherclient->cskills[36].id = 0;
+otherclient->cskills[36].level = 1;
+otherclient->cskills[37].id = 0;
+otherclient->cskills[37].level = 1;
+otherclient->cskills[38].id = 0;
+otherclient->cskills[38].level = 1;
+otherclient->cskills[39].id = 0;
+otherclient->cskills[39].level = 1;
+otherclient->cskills[40].id = 0;
+otherclient->cskills[40].level = 1;
+otherclient->cskills[41].id = 0;
+otherclient->cskills[41].level = 1;
+otherclient->cskills[42].id = 0;
+otherclient->cskills[42].level = 1;
+otherclient->cskills[43].id = 0;
+otherclient->cskills[43].level = 1;
+otherclient->cskills[44].id = 0;
+otherclient->cskills[44].level = 1;
+otherclient->cskills[45].id = 0;
+otherclient->cskills[45].level = 1;
+otherclient->cskills[46].id = 0;
+otherclient->cskills[46].level = 1;
+otherclient->cskills[47].id = 0;
+otherclient->cskills[47].level = 1;
+otherclient->cskills[48].id = 0;
+otherclient->cskills[48].level = 1;
+otherclient->cskills[49].id = 0;
+otherclient->cskills[49].level = 1;
+otherclient->cskills[50].id = 0;
+otherclient->cskills[50].level = 1;
+otherclient->cskills[51].id = 0;
+otherclient->cskills[51].level = 1;
+otherclient->cskills[52].id = 0;
+otherclient->cskills[52].level = 1;
+otherclient->cskills[53].id = 0;
+otherclient->cskills[53].level = 1;
+otherclient->cskills[54].id = 0;
+otherclient->cskills[54].level = 1;
+otherclient->cskills[55].id = 0;
+otherclient->cskills[55].level = 1;
+
+SendPM (thisclient, "Relogin to remove All Skills");
+}
+    return true;
+}    
