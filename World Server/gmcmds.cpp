@@ -3079,116 +3079,8 @@ bool CWorldServer::pakGMMaxStats( CPlayer* thisclient )
     CPlayer* otherclient = GetClientByCharName( name );
     if(otherclient==NULL)
     return true;
-if ( classid == 321 ) //Raider
-{
-otherclient->cskills[0].id = 1401;
-otherclient->cskills[0].level = 9;
-otherclient->cskills[1].id = 1521;
-otherclient->cskills[1].level = 18;
-otherclient->cskills[2].id = 1541;
-otherclient->cskills[2].level = 9;
-otherclient->cskills[3].id = 1551;
-otherclient->cskills[3].level = 9;
-otherclient->cskills[4].id = 1561;
-otherclient->cskills[4].level = 9;
-otherclient->cskills[5].id = 1571;
-otherclient->cskills[5].level = 9;
-otherclient->cskills[6].id = 1581;
-otherclient->cskills[6].level = 9;
-otherclient->cskills[7].id = 1591;
-otherclient->cskills[7].level = 9;
-otherclient->cskills[8].id = 1601;
-otherclient->cskills[8].level = 1;
-otherclient->cskills[9].id = 1606;
-otherclient->cskills[9].level = 9;
-otherclient->cskills[10].id = 1616;
-otherclient->cskills[10].level = 9;
-otherclient->cskills[11].id = 1626;
-otherclient->cskills[11].level = 1;
-otherclient->cskills[12].id = 1631;
-otherclient->cskills[12].level = 2;
-otherclient->cskills[13].id = 1636;
-otherclient->cskills[13].level = 2;
-otherclient->cskills[14].id = 1641;
-otherclient->cskills[14].level = 1;
-otherclient->cskills[15].id = 1646;
-otherclient->cskills[15].level = 1;
-otherclient->cskills[16].id = 1651;
-otherclient->cskills[16].level = 1;
-otherclient->cskills[17].id = 1776;
-otherclient->cskills[17].level = 1;
-otherclient->cskills[18].id = 1781;
-otherclient->cskills[18].level = 18;
-otherclient->cskills[19].id = 1801;
-otherclient->cskills[19].level = 9;
-otherclient->cskills[20].id = 1811;
-otherclient->cskills[20].level = 2;
-otherclient->cskills[21].id = 1946;
-otherclient->cskills[21].level = 2;
-otherclient->cskills[22].id = 1816;
-otherclient->cskills[22].level = 9;
-otherclient->cskills[23].id = 1826;
-otherclient->cskills[23].level = 9;
-otherclient->cskills[24].id = 1951;
-otherclient->cskills[24].level = 2;
-otherclient->cskills[25].id = 1836;
-otherclient->cskills[25].level = 3;
-otherclient->cskills[26].id = 1841;
-otherclient->cskills[26].level = 9;
-otherclient->cskills[27].id = 1851;
-otherclient->cskills[27].level = 1;
-otherclient->cskills[28].id = 1856;
-otherclient->cskills[28].level = 1;
-otherclient->cskills[29].id = 1861;
-otherclient->cskills[29].level = 9;
-otherclient->cskills[30].id = 1871;
-otherclient->cskills[30].level = 3;
-otherclient->cskills[31].id = 1881;
-otherclient->cskills[31].level = 2;
-otherclient->cskills[32].id = 1886;
-otherclient->cskills[32].level = 2;
-otherclient->cskills[33].id = 1891;
-otherclient->cskills[33].level = 2;
-otherclient->cskills[34].id = 1896;
-otherclient->cskills[34].level = 9;
-otherclient->cskills[35].id = 1906;
-otherclient->cskills[35].level = 9;
-otherclient->cskills[36].id = 1916;
-otherclient->cskills[36].level = 9;
-otherclient->cskills[37].id = 1926;
-otherclient->cskills[37].level = 9;
-otherclient->cskills[38].id = 1936;
-otherclient->cskills[38].level = 9;
-otherclient->cskills[39].id = 1876;
-otherclient->cskills[39].level = 2;
-otherclient->cskills[40].id = 1811;
-otherclient->cskills[40].level = 2;
-otherclient->cskills[41].id = 1506;
-otherclient->cskills[41].level = 3;
-otherclient->cskills[42].id = 1511;
-otherclient->cskills[42].level = 2;
-otherclient->cskills[43].id = 1766;
-otherclient->cskills[43].level = 3;
-otherclient->cskills[44].id = 1761;
-otherclient->cskills[44].level = 3;
-otherclient->cskills[45].id = 1516;
-otherclient->cskills[45].level = 1;
-otherclient->cskills[46].id = 1771;
-otherclient->cskills[46].level = 3;
-// Mileage Items - raider - katar
-otherclient->cskills[47].id = 5803; // 861
-otherclient->cskills[47].level = 1;
-otherclient->cskills[48].id = 5804; // 862
-otherclient->cskills[48].level = 1;
-// Mileage Items - raider - dual
-otherclient->cskills[49].id = 5805; // 863
-otherclient->cskills[49].level = 1;
-otherclient->cskills[50].id = 5806; // 864
-otherclient->cskills[50].level = 1;
-SendPM (thisclient, "Relogin For Get All Skills");
 
-}
-else if ( classid == 121 ) //Knight
+if ( classid == 121 ) //Knight
 {
 otherclient->cskills[0].id = 201;
 otherclient->cskills[0].level = 9;
@@ -3265,9 +3157,10 @@ otherclient->cskills[35].id = 5601; // 847
 otherclient->cskills[35].level = 1;
 otherclient->cskills[36].id = 5602; // 848
 otherclient->cskills[36].level = 1;
-SendPM (thisclient, "Relogin For Get All Skills");
 
+SendPM (thisclient, "Relogin For Get All Skills");
 }
+
 else if ( classid == 122 ) //Champion
 {
 otherclient->cskills[0].id = 201;
@@ -3379,96 +3272,10 @@ otherclient->cskills[51].id = 5607; // 853
 otherclient->cskills[51].level = 1;
 otherclient->cskills[52].id = 5608; // 854
 otherclient->cskills[52].level = 1;
-SendPM (thisclient, "Relogin For Get All Skills");
-
-}
-else if ( classid == 222 ) //Cleric
-{
-otherclient->cskills[0].id = 931;
-otherclient->cskills[0].level = 18;
-otherclient->cskills[1].id = 911;
-otherclient->cskills[1].level = 9;
-otherclient->cskills[2].id = 921;
-otherclient->cskills[2].level = 3;
-otherclient->cskills[3].id = 926;
-otherclient->cskills[3].level = 3;
-otherclient->cskills[4].id = 951;
-otherclient->cskills[4].level = 9;
-otherclient->cskills[5].id = 986;
-otherclient->cskills[5].level = 6;
-otherclient->cskills[6].id = 1021;
-otherclient->cskills[6].level = 3;
-otherclient->cskills[7].id = 1031;
-otherclient->cskills[7].level = 5;
-otherclient->cskills[8].id = 976;
-otherclient->cskills[8].level = 1;
-otherclient->cskills[9].id = 996;
-otherclient->cskills[9].level = 6;
-otherclient->cskills[10].id = 1006;
-otherclient->cskills[10].level = 1;
-otherclient->cskills[11].id = 1036;
-otherclient->cskills[11].level = 3;
-otherclient->cskills[12].id = 1041;
-otherclient->cskills[12].level = 4;
-otherclient->cskills[13].id = 961;
-otherclient->cskills[13].level = 9;
-otherclient->cskills[14].id = 971;
-otherclient->cskills[14].level = 3;
-otherclient->cskills[15].id = 981;
-otherclient->cskills[15].level = 3;
-otherclient->cskills[16].id = 1011;
-otherclient->cskills[16].level = 6;
-otherclient->cskills[17].id = 1181;
-otherclient->cskills[17].level = 1;
-otherclient->cskills[18].id = 1186;
-otherclient->cskills[18].level = 18;
-otherclient->cskills[19].id = 1296;
-otherclient->cskills[19].level = 9;
-otherclient->cskills[20].id = 1306;
-otherclient->cskills[20].level = 9;
-otherclient->cskills[21].id = 1241;
-otherclient->cskills[21].level = 1;
-otherclient->cskills[22].id = 1211;
-otherclient->cskills[22].level = 9;
-otherclient->cskills[23].id = 1206;
-otherclient->cskills[23].level = 2;
-otherclient->cskills[24].id = 1246;
-otherclient->cskills[24].level = 6;
-otherclient->cskills[26].id = 1256;
-otherclient->cskills[26].level = 3;
-otherclient->cskills[27].id = 1266;
-otherclient->cskills[27].level = 1;
-otherclient->cskills[28].id = 1276;
-otherclient->cskills[28].level = 6;
-otherclient->cskills[29].id = 1271;
-otherclient->cskills[29].level = 1;
-otherclient->cskills[30].id = 1226;
-otherclient->cskills[30].level = 9;
-otherclient->cskills[31].id = 1236;
-otherclient->cskills[31].level = 3;
-otherclient->cskills[32].id = 1261;
-otherclient->cskills[32].level = 3;
-otherclient->cskills[33].id = 1176;
-otherclient->cskills[33].level = 1;
-otherclient->cskills[34].id = 1286;
-otherclient->cskills[34].level = 6;
-otherclient->cskills[35].id = 1221;
-otherclient->cskills[35].level = 3;
-// Mileage Items - cleric
-otherclient->cskills[36].id = 5704; // 857
-otherclient->cskills[36].level = 1;
-otherclient->cskills[37].id = 5705; // 858
-otherclient->cskills[37].level = 1;
-// Mileage Item - Soul Recall
-otherclient->cskills[38].id = 5701; // 592
-otherclient->cskills[38].level = 1;
-// Unique Item - Soul Recall
-otherclient->cskills[39].id = 4401; // 560
-otherclient->cskills[39].level = 3;
 
 SendPM (thisclient, "Relogin For Get All Skills");
-
 }
+
 else if ( classid == 221 ) //Mage
 {
 otherclient->cskills[0].id = 851;
@@ -3558,8 +3365,205 @@ otherclient->cskills[40].id = 4401; // 560
 otherclient->cskills[40].level = 3;
 
 SendPM (thisclient, "Relogin For Get All Skills");
-
 }
+
+else if ( classid == 222 ) //Cleric
+{
+otherclient->cskills[0].id = 931;
+otherclient->cskills[0].level = 18;
+otherclient->cskills[1].id = 911;
+otherclient->cskills[1].level = 9;
+otherclient->cskills[2].id = 921;
+otherclient->cskills[2].level = 3;
+otherclient->cskills[3].id = 926;
+otherclient->cskills[3].level = 3;
+otherclient->cskills[4].id = 951;
+otherclient->cskills[4].level = 9;
+otherclient->cskills[5].id = 986;
+otherclient->cskills[5].level = 6;
+otherclient->cskills[6].id = 1021;
+otherclient->cskills[6].level = 3;
+otherclient->cskills[7].id = 1031;
+otherclient->cskills[7].level = 5;
+otherclient->cskills[8].id = 976;
+otherclient->cskills[8].level = 1;
+otherclient->cskills[9].id = 996;
+otherclient->cskills[9].level = 6;
+otherclient->cskills[10].id = 1006;
+otherclient->cskills[10].level = 1;
+otherclient->cskills[11].id = 1036;
+otherclient->cskills[11].level = 3;
+otherclient->cskills[12].id = 1041;
+otherclient->cskills[12].level = 4;
+otherclient->cskills[13].id = 961;
+otherclient->cskills[13].level = 9;
+otherclient->cskills[14].id = 971;
+otherclient->cskills[14].level = 3;
+otherclient->cskills[15].id = 981;
+otherclient->cskills[15].level = 3;
+otherclient->cskills[16].id = 1011;
+otherclient->cskills[16].level = 6;
+otherclient->cskills[17].id = 1181;
+otherclient->cskills[17].level = 1;
+otherclient->cskills[18].id = 1186;
+otherclient->cskills[18].level = 18;
+otherclient->cskills[19].id = 1296;
+otherclient->cskills[19].level = 9;
+otherclient->cskills[20].id = 1306;
+otherclient->cskills[20].level = 9;
+otherclient->cskills[21].id = 1241;
+otherclient->cskills[21].level = 1;
+otherclient->cskills[22].id = 1211;
+otherclient->cskills[22].level = 9;
+otherclient->cskills[23].id = 1206;
+otherclient->cskills[23].level = 2;
+otherclient->cskills[24].id = 1246;
+otherclient->cskills[24].level = 6;
+otherclient->cskills[26].id = 1256;
+otherclient->cskills[26].level = 3;
+otherclient->cskills[27].id = 1266;
+otherclient->cskills[27].level = 1;
+otherclient->cskills[28].id = 1276;
+otherclient->cskills[28].level = 6;
+otherclient->cskills[29].id = 1271;
+otherclient->cskills[29].level = 1;
+otherclient->cskills[30].id = 1226;
+otherclient->cskills[30].level = 9;
+otherclient->cskills[31].id = 1236;
+otherclient->cskills[31].level = 3;
+otherclient->cskills[32].id = 1261;
+otherclient->cskills[32].level = 3;
+otherclient->cskills[33].id = 1176;
+otherclient->cskills[33].level = 1;
+otherclient->cskills[34].id = 1286;
+otherclient->cskills[34].level = 6;
+otherclient->cskills[35].id = 1221;
+otherclient->cskills[35].level = 3;
+// Mileage Items - cleric
+otherclient->cskills[36].id = 5704; // 857
+otherclient->cskills[36].level = 1;
+otherclient->cskills[37].id = 5705; // 858
+otherclient->cskills[37].level = 1;
+// Mileage Item - Soul Recall
+otherclient->cskills[38].id = 5701; // 592
+otherclient->cskills[38].level = 1;
+// Unique Item - Soul Recall
+otherclient->cskills[39].id = 4401; // 560
+otherclient->cskills[39].level = 3;
+
+SendPM (thisclient, "Relogin For Get All Skills");
+}
+
+else if ( classid == 321 ) //Raider
+{
+otherclient->cskills[0].id = 1401;
+otherclient->cskills[0].level = 9;
+otherclient->cskills[1].id = 1521;
+otherclient->cskills[1].level = 18;
+otherclient->cskills[2].id = 1541;
+otherclient->cskills[2].level = 9;
+otherclient->cskills[3].id = 1551;
+otherclient->cskills[3].level = 9;
+otherclient->cskills[4].id = 1561;
+otherclient->cskills[4].level = 9;
+otherclient->cskills[5].id = 1571;
+otherclient->cskills[5].level = 9;
+otherclient->cskills[6].id = 1581;
+otherclient->cskills[6].level = 9;
+otherclient->cskills[7].id = 1591;
+otherclient->cskills[7].level = 9;
+otherclient->cskills[8].id = 1601;
+otherclient->cskills[8].level = 1;
+otherclient->cskills[9].id = 1606;
+otherclient->cskills[9].level = 9;
+otherclient->cskills[10].id = 1616;
+otherclient->cskills[10].level = 9;
+otherclient->cskills[11].id = 1626;
+otherclient->cskills[11].level = 1;
+otherclient->cskills[12].id = 1631;
+otherclient->cskills[12].level = 2;
+otherclient->cskills[13].id = 1636;
+otherclient->cskills[13].level = 2;
+otherclient->cskills[14].id = 1641;
+otherclient->cskills[14].level = 1;
+otherclient->cskills[15].id = 1646;
+otherclient->cskills[15].level = 1;
+otherclient->cskills[16].id = 1651;
+otherclient->cskills[16].level = 1;
+otherclient->cskills[17].id = 1776;
+otherclient->cskills[17].level = 1;
+otherclient->cskills[18].id = 1781;
+otherclient->cskills[18].level = 18;
+otherclient->cskills[19].id = 1801;
+otherclient->cskills[19].level = 9;
+otherclient->cskills[20].id = 1811;
+otherclient->cskills[20].level = 2;
+otherclient->cskills[21].id = 1946;
+otherclient->cskills[21].level = 2;
+otherclient->cskills[22].id = 1816;
+otherclient->cskills[22].level = 9;
+otherclient->cskills[23].id = 1826;
+otherclient->cskills[23].level = 9;
+otherclient->cskills[24].id = 1951;
+otherclient->cskills[24].level = 2;
+otherclient->cskills[25].id = 1836;
+otherclient->cskills[25].level = 3;
+otherclient->cskills[26].id = 1841;
+otherclient->cskills[26].level = 9;
+otherclient->cskills[27].id = 1851;
+otherclient->cskills[27].level = 1;
+otherclient->cskills[28].id = 1856;
+otherclient->cskills[28].level = 1;
+otherclient->cskills[29].id = 1861;
+otherclient->cskills[29].level = 9;
+otherclient->cskills[30].id = 1871;
+otherclient->cskills[30].level = 3;
+otherclient->cskills[31].id = 1881;
+otherclient->cskills[31].level = 2;
+otherclient->cskills[32].id = 1886;
+otherclient->cskills[32].level = 2;
+otherclient->cskills[33].id = 1891;
+otherclient->cskills[33].level = 2;
+otherclient->cskills[34].id = 1896;
+otherclient->cskills[34].level = 9;
+otherclient->cskills[35].id = 1906;
+otherclient->cskills[35].level = 9;
+otherclient->cskills[36].id = 1916;
+otherclient->cskills[36].level = 9;
+otherclient->cskills[37].id = 1926;
+otherclient->cskills[37].level = 9;
+otherclient->cskills[38].id = 1936;
+otherclient->cskills[38].level = 9;
+otherclient->cskills[39].id = 1876;
+otherclient->cskills[39].level = 2;
+otherclient->cskills[40].id = 1811;
+otherclient->cskills[40].level = 2;
+otherclient->cskills[41].id = 1506;
+otherclient->cskills[41].level = 3;
+otherclient->cskills[42].id = 1511;
+otherclient->cskills[42].level = 2;
+otherclient->cskills[43].id = 1766;
+otherclient->cskills[43].level = 3;
+otherclient->cskills[44].id = 1761;
+otherclient->cskills[44].level = 3;
+otherclient->cskills[45].id = 1516;
+otherclient->cskills[45].level = 1;
+otherclient->cskills[46].id = 1771;
+otherclient->cskills[46].level = 3;
+// Mileage Items - raider - katar
+otherclient->cskills[47].id = 5803; // 861
+otherclient->cskills[47].level = 1;
+otherclient->cskills[48].id = 5804; // 862
+otherclient->cskills[48].level = 1;
+// Mileage Items - raider - dual
+otherclient->cskills[49].id = 5805; // 863
+otherclient->cskills[49].level = 1;
+otherclient->cskills[50].id = 5806; // 864
+otherclient->cskills[50].level = 1;
+
+SendPM (thisclient, "Relogin For Get All Skills");
+}
+
 else if ( classid == 322 ) //Scout
 {
 otherclient->cskills[0].id = 1401;
@@ -3633,9 +3637,100 @@ otherclient->cskills[33].id = 5801; // 859
 otherclient->cskills[33].level = 1;
 otherclient->cskills[34].id = 5802; // 860
 otherclient->cskills[34].level = 1;
-SendPM (thisclient, "Relogin For Get All Skills");
+// Unique Items - hawker
+otherclient->cskills[35].id = 4601; // 565
+otherclient->cskills[35].level = 9;
 
+SendPM (thisclient, "Relogin For Get All Skills");
 }
+
+else if ( classid == 421 ) //Bourgeois
+{
+otherclient->cskills[0].id = 2001;
+otherclient->cskills[0].level = 9;
+otherclient->cskills[1].id = 2011;
+otherclient->cskills[1].level = 18;
+otherclient->cskills[2].id = 2036;
+otherclient->cskills[2].level = 9;
+otherclient->cskills[3].id = 2031;
+otherclient->cskills[3].level = 3;
+otherclient->cskills[4].id = 2056;
+otherclient->cskills[4].level = 2;
+otherclient->cskills[5].id = 2046;
+otherclient->cskills[5].level = 3;
+otherclient->cskills[6].id = 2051;
+otherclient->cskills[6].level = 3;
+otherclient->cskills[7].id = 2061;
+otherclient->cskills[7].level = 9;
+otherclient->cskills[8].id = 2071;
+otherclient->cskills[8].level = 1;
+otherclient->cskills[9].id = 2076;
+otherclient->cskills[9].level = 9;
+otherclient->cskills[10].id = 2086;
+otherclient->cskills[10].level = 3;
+otherclient->cskills[11].id = 2091;
+otherclient->cskills[11].level = 3;
+otherclient->cskills[12].id = 2096;
+otherclient->cskills[12].level = 2;
+otherclient->cskills[13].id = 2111;
+otherclient->cskills[13].level = 3;
+otherclient->cskills[14].id = 2101;
+otherclient->cskills[14].level = 3;
+otherclient->cskills[15].id = 2106;
+otherclient->cskills[15].level = 3;
+otherclient->cskills[16].id = 2256;
+otherclient->cskills[16].level = 9;
+otherclient->cskills[17].id = 2266;
+otherclient->cskills[17].level = 18;
+otherclient->cskills[18].id = 2286;
+otherclient->cskills[18].level = 9;
+otherclient->cskills[19].id = 2296;
+otherclient->cskills[19].level = 1;
+otherclient->cskills[20].id = 2301;
+otherclient->cskills[20].level = 1;
+otherclient->cskills[21].id = 2316;
+otherclient->cskills[21].level = 9;
+otherclient->cskills[22].id = 2306;
+otherclient->cskills[22].level = 9;
+otherclient->cskills[23].id = 2401;
+otherclient->cskills[23].level = 1;
+otherclient->cskills[24].id = 2326;
+otherclient->cskills[24].level = 9;
+otherclient->cskills[25].id = 2336;
+otherclient->cskills[25].level = 9;
+otherclient->cskills[26].id = 2346;
+otherclient->cskills[26].level = 3;
+otherclient->cskills[27].id = 2356;
+otherclient->cskills[27].level = 3;
+otherclient->cskills[28].id = 2366;
+otherclient->cskills[28].level = 3;
+otherclient->cskills[29].id = 2351;
+otherclient->cskills[29].level = 3;
+otherclient->cskills[30].id = 2376;
+otherclient->cskills[30].level = 3;
+otherclient->cskills[31].id = 2371;
+otherclient->cskills[31].level = 3;
+otherclient->cskills[32].id = 2381;
+otherclient->cskills[32].level = 9;
+otherclient->cskills[33].id = 2391;
+otherclient->cskills[33].level = 9;
+otherclient->cskills[34].id = 2406;
+otherclient->cskills[34].level = 9;
+otherclient->cskills[35].id = 2416;
+otherclient->cskills[35].level = 9;
+otherclient->cskills[36].id = 2426;
+otherclient->cskills[36].level = 3;
+otherclient->cskills[37].id = 2431;
+otherclient->cskills[37].level = 3;
+// Mileage Items - Borg - Launcher
+otherclient->cskills[38].id = 5904; // 867
+otherclient->cskills[38].level = 1;
+otherclient->cskills[39].id = 5905; // 868
+otherclient->cskills[39].level = 1;
+
+SendPM (thisclient, "Relogin For Get All Skills");
+}
+
 else if ( classid == 422 ) //Artisan
 {
 otherclient->cskills[0].id = 2046;
@@ -3747,94 +3842,35 @@ otherclient->cskills[52].id = 5902; // 865
 otherclient->cskills[52].level = 1;
 otherclient->cskills[53].id = 5903; // 866
 otherclient->cskills[53].level = 1;
-SendPM (thisclient, "Relogin For Get All Skills");
+// Unique Items - artisan
+otherclient->cskills[54].id = 4801; // 561
+otherclient->cskills[54].level = 9;
+otherclient->cskills[55].id = 4811; // 562
+otherclient->cskills[55].level = 9;
 
-}
-else if ( classid == 421 ) //Bourgeois
-{
-otherclient->cskills[0].id = 2001;
-otherclient->cskills[0].level = 9;
-otherclient->cskills[1].id = 2011;
-otherclient->cskills[1].level = 18;
-otherclient->cskills[2].id = 2036;
-otherclient->cskills[2].level = 9;
-otherclient->cskills[3].id = 2031;
-otherclient->cskills[3].level = 3;
-otherclient->cskills[4].id = 2056;
-otherclient->cskills[4].level = 2;
-otherclient->cskills[5].id = 2046;
-otherclient->cskills[5].level = 3;
-otherclient->cskills[6].id = 2051;
-otherclient->cskills[6].level = 3;
-otherclient->cskills[7].id = 2061;
-otherclient->cskills[7].level = 9;
-otherclient->cskills[8].id = 2071;
-otherclient->cskills[8].level = 1;
-otherclient->cskills[9].id = 2076;
-otherclient->cskills[9].level = 9;
-otherclient->cskills[10].id = 2086;
-otherclient->cskills[10].level = 3;
-otherclient->cskills[11].id = 2091;
-otherclient->cskills[11].level = 3;
-otherclient->cskills[12].id = 2096;
-otherclient->cskills[12].level = 2;
-otherclient->cskills[13].id = 2111;
-otherclient->cskills[13].level = 3;
-otherclient->cskills[14].id = 2101;
-otherclient->cskills[14].level = 3;
-otherclient->cskills[15].id = 2106;
-otherclient->cskills[15].level = 3;
-otherclient->cskills[16].id = 2256;
-otherclient->cskills[16].level = 9;
-otherclient->cskills[17].id = 2266;
-otherclient->cskills[17].level = 18;
-otherclient->cskills[18].id = 2286;
-otherclient->cskills[18].level = 9;
-otherclient->cskills[19].id = 2296;
-otherclient->cskills[19].level = 1;
-otherclient->cskills[20].id = 2301;
-otherclient->cskills[20].level = 1;
-otherclient->cskills[21].id = 2316;
-otherclient->cskills[21].level = 9;
-otherclient->cskills[22].id = 2306;
-otherclient->cskills[22].level = 9;
-otherclient->cskills[23].id = 2401;
-otherclient->cskills[23].level = 1;
-otherclient->cskills[24].id = 2326;
-otherclient->cskills[24].level = 9;
-otherclient->cskills[25].id = 2336;
-otherclient->cskills[25].level = 9;
-otherclient->cskills[26].id = 2346;
-otherclient->cskills[26].level = 3;
-otherclient->cskills[27].id = 2356;
-otherclient->cskills[27].level = 3;
-otherclient->cskills[28].id = 2366;
-otherclient->cskills[28].level = 3;
-otherclient->cskills[29].id = 2351;
-otherclient->cskills[29].level = 3;
-otherclient->cskills[30].id = 2376;
-otherclient->cskills[30].level = 3;
-otherclient->cskills[31].id = 2371;
-otherclient->cskills[31].level = 3;
-otherclient->cskills[32].id = 2381;
-otherclient->cskills[32].level = 9;
-otherclient->cskills[33].id = 2391;
-otherclient->cskills[33].level = 9;
-otherclient->cskills[34].id = 2406;
-otherclient->cskills[34].level = 9;
-otherclient->cskills[35].id = 2416;
-otherclient->cskills[35].level = 9;
-otherclient->cskills[36].id = 2426;
-otherclient->cskills[36].level = 3;
-otherclient->cskills[37].id = 2431;
-otherclient->cskills[37].level = 3;
-// Mileage Items - Borg - Launcher
-otherclient->cskills[38].id = 5904; // 867
-otherclient->cskills[38].level = 1;
-otherclient->cskills[39].id = 5905; // 868
-otherclient->cskills[39].level = 1;
 SendPM (thisclient, "Relogin For Get All Skills");
 }
+
+/*
+// Mileage Items - For which jobs?
+otherclient->cskills[xx].id = 5501; // 590 - all
+otherclient->cskills[xx].level = 1;
+otherclient->cskills[xx].id = 5502; // 591 - all
+otherclient->cskills[xx].level = 1;
+otherclient->cskills[xx].id = 5901; // 593  (can learn, but not showing)
+otherclient->cskills[xx].level = 1;
+// Unique Items - For which jobs?
+otherclient->cskills[xx].id = 4401; // 567 - all
+otherclient->cskills[xx].level = 1;
+otherclient->cskills[xx].id = 4402; // 568 - all
+otherclient->cskills[xx].level = 1;
+otherclient->cskills[xx].id = xxxx; // 563 - all
+otherclient->cskills[xx].level = x;
+otherclient->cskills[xx].id = xxxx; // 564 - all
+otherclient->cskills[xx].level = x;
+otherclient->cskills[xx].id = xxxx; // 566 - dealer
+otherclient->cskills[xx].level = x;
+*/
 
 else
 {
