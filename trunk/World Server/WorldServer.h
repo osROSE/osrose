@@ -35,8 +35,14 @@
 #define VISUALITY_THREAD 1
 #define SHUTDOWN_THREAD 2
 
+//LMA: Grids
+#define NB_MAPS 120        //Nb maps (120 maps, including bad and non existant).
+#define NB_GRIDS 72        //nb active grids
+
+
 //LMA TESTLOOP
 extern UINT lma_loop;
+
 
 // Main loginserver server class
 class CWorldServer : public CServerSocket
@@ -54,6 +60,12 @@ class CWorldServer : public CServerSocket
     	void LoadConfigurations( char* ); 
         void LoadCommandLevels( void ); 
         void ServerLoop( );  
+        
+        //LMA
+        //Used for Grids
+        CListMap allmaps[NB_MAPS];   //all maps (even those not used)
+        CGridMap gridmaps[NB_GRIDS];  //only active maps
+        //LMA End
         
       	//------------------ WORLD PROCESS (worldprocess.cpp)  	
       	//bool GiveExp( CMonster* thismon );
@@ -139,6 +151,7 @@ class CWorldServer : public CServerSocket
     	CPlayer* GetClientByUserID( UINT userid );   
         UINT GetLevelGhost( UINT map, UINT level );
         UINT GetFairyRange( UINT part );
+        UINT GetGridNumber(int mapid, int posx, int posy);    //LMA: maps
         void RefreshFairy( );
     
         //------------------ Fairies ---------------------
@@ -240,7 +253,8 @@ class CWorldServer : public CServerSocket
     	bool pakGMTele( CPlayer* thisclient, int map, float x, float y );
     	bool pakGMMon( CPlayer* thisclient, int montype, int moncount );    
         bool pakGMZulygive(CPlayer* thisclient, char* name, int zuly);    
-        bool pakGMFairyto(CPlayer* thisclient, char* name, int mode); 
+        bool pakGMFairyto(CPlayer* thisclient, char* name, int mode);
+        bool pakGMClanRewardPoints(CPlayer* thisclient, char* name, int points);    //reward points
         bool pakGMManageFairy(CPlayer* thisclient, int mode); 
         bool pakGMChangeFairyWait(CPlayer* thisclient, int newvalue);
         bool pakGMChangeFairyStay(CPlayer* thisclient, int newvalue); 
@@ -281,6 +295,7 @@ class CWorldServer : public CServerSocket
 	
     	//----------------- Server StartUp Functions (startup.cpp)
     	bool LoadZoneData( );
+    	bool LoadGrids( );         //LMA: maps
     	bool LoadConsItem( );
     	bool LoadSellData( );
     	bool LoadProductItem( );

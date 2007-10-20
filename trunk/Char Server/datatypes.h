@@ -53,6 +53,7 @@ struct CClans
     char name[17];
     char slogan[30];
     char news[260];
+    UINT rankingpoints;          //LMA: ranking points.
     vector<CClanMembers*> ClanMembers;
 };
 

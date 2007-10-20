@@ -1076,3 +1076,30 @@ UINT CWorldServer::GetFairyRange( UINT part )
 	if (part == 0) return Range1[GServer->FairyList.size()];
 	if (part == 1) return Range2[GServer->FairyList.size()];	
 }
+
+//LMA Grid
+//Calculates the grid number using player or monster position
+UINT CWorldServer::GetGridNumber(int mapid, int posx, int posy)
+{
+   UINT res=0;
+   int grid_id=0;
+   
+   
+   grid_id=allmaps[mapid].grid_id;
+   if (grid_id==-1||allmaps[mapid].always_on==true)
+       return 0;
+   
+   //we're on a 8*8 grid basis, we're translating to 10*10 grid basis.
+   //In fact the 8*8 is into 10*10, a 1 border around 8*8, helps with calculations, explains the +1
+   //Log(MSG_INFO,"map %i, O(%i,%i), A(%i,%i),W=%i,L=%i",mapid,gridmaps[grid_id].org_x,gridmaps[grid_id].org_y,posx,posy,gridmaps[grid_id].width,gridmaps[grid_id].length);
+   /*res=(UINT) floor((posy-gridmaps[grid_id].org_y)*8/gridmaps[grid_id].width)+1;
+   res=(UINT) (floor((posx-gridmaps[grid_id].org_x)*8/gridmaps[grid_id].length)+1)+res*10;*/
+   //Log(MSG_INFO,"res: %u",res);
+ 
+   //New way...  
+   res=(UINT) floor((posy-gridmaps[grid_id].org_y)/MINVISUALRANGE)+1;
+   res=(UINT) (floor((posx-gridmaps[grid_id].org_x)/MINVISUALRANGE)+1)+res*(allmaps[mapid].nb_col+2);
+
+     
+   return res;
+}

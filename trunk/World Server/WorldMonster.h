@@ -58,6 +58,7 @@ class CMonster : public CCharacter
       	CPlayer* GetOwner( );
       	void SpawnMonster( CPlayer* player, CMonster* thismon );      	
       	bool PlayerInRange( );
+      	bool PlayerInGrid( );      //LMA: maps
       	CPlayer* GetNearPlayer( UINT mdist = 20 );
         void AddDamage( CCharacter* enemy, long int hitpower);
         CDrop* GetDrop( );

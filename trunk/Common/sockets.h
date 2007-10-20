@@ -119,6 +119,7 @@ struct CROSEServerConfigSQL
 	int         pcPort;                    // port
 };
 
+
 // Server configuration
 struct CROSEServerConfig
 {
@@ -181,6 +182,7 @@ struct CROSEServerConfig
     int EventType; //Event
     int EventNPC;  //Event
     int osRoseVer ; //Revision of server
+    int testgrid; //LMA: maps, testing grids...
     
     // COMMAND LEVELS
     int Command_Go;
@@ -226,8 +228,10 @@ struct CROSEServerConfig
     int Command_ChangeFairyTestMode;
     int Command_Move;
     int Command_Goto;
+    int Command_grid;               //LMA: maps grid test
     int Command_PlayerInfo;
     int Command_Give2;
+    int Command_GiveClanRp;
     int Command_Ban;
     int Command_Ani;
     int Command_Summon;

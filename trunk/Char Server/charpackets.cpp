@@ -192,7 +192,7 @@ bool CCharServer::pakRequestWorld( CCharClient* thisclient, CPacket* P )
 	thisclient->SendPacket( &pak );
 	DB->QFree( );   
 //CHAR INFORMATION        0       1    2    3      4
-	result = DB->QStore("SELECT clanid,clan_rank,id,level,classid FROM characters WHERE char_name='%s'", thisclient->charname);
+	result = DB->QStore("SELECT clanid,clan_rank,id,level,classid,rewardpoints FROM characters WHERE char_name='%s'", thisclient->charname);
 	if(result==NULL) return false;
 	if(mysql_num_rows(result)!=1)
 	{
@@ -206,6 +206,7 @@ bool CCharServer::pakRequestWorld( CCharClient* thisclient, CPacket* P )
 	thisclient->charid = atoi( row[2] );
 	thisclient->level = atoi( row[3] );
 	thisclient->job = atoi( row[4] );
+    thisclient->reward_points=atoi( row[5] );  //LMA: reward points:
 	DB->QFree( );   
 //MESSENGER INFORMATION
 //              //          0        1

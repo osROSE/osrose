@@ -23,15 +23,31 @@
 // Map Process
 PVOID MapProcess( PVOID TS )
 {
+    //LMA: maps TESTS !!!
+    UINT etimetest =0;
+    UINT time_last_test=0;
+    int nb_monsters_done1=0;
+    int nb_monsters_done2=0;
+    UINT time1=0;
+    UINT time2=0;
+    bool ok_cont=false;
+    int nb1=0;
+    int nb2=0;
+    UINT sum1=0;
+    UINT sum2=0;
+    //END TESTS
+                  
     while(GServer->ServerOnline)
     {
         pthread_mutex_lock( &GServer->PlayerMutex );
         pthread_mutex_lock( &GServer->MapMutex );
+                
         for(UINT i=0;i<GServer->MapList.Map.size();i++)
         {
             CMap* map = GServer->MapList.Map.at(i);
             if( map->PlayerList.size()<1 )
                 continue;
+            
             // Player update //------------------------
             for(UINT j=0;j<map->PlayerList.size();j++)
             {
@@ -59,10 +75,65 @@ PVOID MapProcess( PVOID TS )
             }
             // Monster update //------------------------
             pthread_mutex_lock( &map->MonsterMutex );
+            
+            //LMA: maps TESTS !!!
+            //LMA: maps : test
+            if (GServer->Config.testgrid!=0)
+            {
+               nb2++;
+               sum2+=etimetest;
+               sum1=0;
+               nb1=0;
+               Log(MSG_LOAD,"Grid %i/%i: time %u for %i",nb_monsters_done2,map->MonsterList.size(),sum2,nb2);
+            }
+            else
+            {
+               nb1++;
+               sum1+=etimetest;
+               sum2=0;
+               nb2=0;                  
+               Log(MSG_LOAD,"Visu %i/%i: time %u for %i",nb_monsters_done1,map->MonsterList.size(),sum1,nb1);
+            }
+
+            time_last_test=clock();                                    
+            nb_monsters_done1=0;
+            nb_monsters_done2=0;
+            ok_cont=false;
+            
+            //END TESTS
+            
             for(UINT j=0;j<map->MonsterList.size();j++)
             {
                 CMonster* monster = map->MonsterList.at(j);
                 
+                //LMA: maps (using grid now?)
+               //if(!monster->PlayerInRange( )) continue;        //casual way
+                //if(!monster->PlayerInGrid( )) continue;           //grid way
+                 //LMA TESTING !!!
+                 ok_cont=false;
+                 if (GServer->Config.testgrid!=0)
+                 {
+                     ok_cont=monster->PlayerInGrid( );                    
+                    //Log(MSG_INFO,"[GRID]Seen: monster %i",monster->clientid);
+                    if (ok_cont)                                           
+                      nb_monsters_done2++;                         
+                      /*etimetest = (UINT)round((clock( ) - time_last_test));
+                      sum2+=etimetest;*/
+                 }
+                 else
+                 {
+                    ok_cont=monster->PlayerInRange( );
+                    if (ok_cont)                                                               
+                       nb_monsters_done1++;
+                       /*etimetest = (UINT)round((clock( ) - time_last_test));
+                       sum1+=etimetest;*/
+                    //Log(MSG_INFO,"[VIS]monster %i X(%.2f,%.2f)",monster->clientid,monster->Position->current.x,monster->Position->current.y);                        
+                 }
+                 
+                if (!ok_cont)
+                    continue;
+                 //END TESTS
+                                              
                //LMA begin
                //20070621-211100
                 //Beans for CF...
@@ -199,7 +270,8 @@ PVOID MapProcess( PVOID TS )
                 
                 
 //General monsters===============================================================
-                if(!monster->PlayerInRange( )) continue;
+                //LMA: moved to beginning...
+                //if(!monster->PlayerInRange( )) continue;
                 if(!monster->UpdateValues( )) continue;
                     monster->UpdatePosition( );
                 if(monster->IsOnBattle( ))
@@ -212,6 +284,10 @@ PVOID MapProcess( PVOID TS )
         }
         pthread_mutex_unlock( &GServer->MapMutex );
         pthread_mutex_unlock( &GServer->PlayerMutex );
+        
+        //LMA: maps tests
+        etimetest = (UINT)round((clock( ) - time_last_test));
+                        
         #ifdef _WIN32
         Sleep(GServer->Config.MapDelay);
         #else
@@ -220,6 +296,7 @@ PVOID MapProcess( PVOID TS )
     }
     pthread_exit( NULL );
 }
+
 
 // Visibility Process
 PVOID VisibilityProcess(PVOID TS)

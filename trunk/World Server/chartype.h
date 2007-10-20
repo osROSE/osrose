@@ -167,7 +167,8 @@ struct USEDITEM
 struct INFO
 {
 	char charname[17];    		
-	unsigned int charid;	    	
+	unsigned int charid;
+    long int rewardpoints;    //LMA: reward points	    	
     BYTE Sex;
     UINT Face;
     UINT Hair;

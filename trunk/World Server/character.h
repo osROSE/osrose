@@ -31,6 +31,9 @@ class CCharacter
         unsigned int clientid;
         BYTE CharType; // 0 = undefined | 1 = player | 2 = monster | 3 = summon
 
+        //LMA: maps grids
+        int last_map;
+        int last_coords;
         STATS *Stats;
         POSITION *Position;
         BATTLE* Battle;
