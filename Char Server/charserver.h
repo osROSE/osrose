@@ -31,7 +31,10 @@ class CCharClient : public CClientSocket
     	int clan_rank;
     	UINT level;
     	UINT job;
-        UINT charid;	
+        UINT charid;
+        
+        //LMA: reward points...
+        long int reward_points;
 	
     	bool isLoggedIn;
     	bool logout;	
@@ -78,6 +81,8 @@ class CCharServer : public CServerSocket
     
         // Clan Functions
         bool SendClanInfo (CCharClient* thisclient);
+        bool lma_mask (CCharClient* thisclient);   //LMA: Reward points (preparing mask)
+        bool SendRewardPoints (CCharClient* thisclient,long int lma_points);   //LMA: Reward points
         bool ChangeClanStatus (CCharClient* thisclient, CCharClient* otherclient, int channel);
         bool SendToClanMembers( int clanid,CPacket* pak );
         bool pakClanMembers ( CCharClient* thisclient );

@@ -20,14 +20,121 @@
 */
 #include "CharServer.h"
 
-// Send Clan information
-bool CCharServer::SendClanInfo (CCharClient* thisclient)
+//LMA: mask packet?
+bool CCharServer::lma_mask (CCharClient* thisclient)
 {
+    Log(MSG_INFO,"[CS]in lma_mask for %s",thisclient->charname);     
     if( thisclient->clanid > 0 )
     {
+        Log(MSG_INFO,"[CS] lma_mask, trying to get clan %i",thisclient->clanid );
         CClans *thisclan = GetClanByID(thisclient->clanid);
         if(thisclan!=NULL)
         {
+            BEGINPACKET( pak, 0x7e0);
+            ADDBYTE    ( pak, 0x71);//0x71, mask?
+            ADDWORD    ( pak, thisclan->id);// clan id
+            ADDBYTE    ( pak, 0x00);
+            ADDBYTE    ( pak, 0x00);
+            ADDWORD    ( pak, thisclan->back);//Clan Background
+            ADDWORD    ( pak, thisclan->logo);//Clan logo
+            ADDBYTE    ( pak, thisclan->grade);//Clan grade
+            ADDBYTE    ( pak, 0xcc);// Clan rank (0 = red rokie / 6 = master)
+            ADDDWORD    ( pak, thisclan->cp); //Clan Points
+            ADDWORD    ( pak, 0x0064); //always 0x64? having before thisclan->cp            
+            ADDWORD    ( pak, 0x0000); //??
+            ADDQWORD   ( pak, 0x000000000000 );   //Clan Money
+            ADDDWORD    ( pak, 0xcccccccc);  //Nb of clan members.
+            ADDWORD    ( pak, 0xcccc);
+            for(int i=0;i<120;i++)
+                ADDBYTE ( pak, 0x00);
+            ADDDWORD   ( pak, 0x00000000); //Ranking Points
+            ADDDWORD   ( pak, 0xcccccccc);  //LMA 139+ (Reward points for clan shop)
+            thisclient->SendPacket(&pak);
+            Log(MSG_INFO,"[CS]lma_mask sent for %s",thisclient->charname);              
+        }
+             
+    }
+    
+    
+     return true;
+}
+
+//LMA: Reward points
+bool CCharServer::SendRewardPoints (CCharClient* thisclient,long int lma_points)
+{
+    Log(MSG_INFO,"[CS]in SendRewardPoints for %s",thisclient->charname);     
+    if( thisclient->clanid > 0 )
+    {
+        Log(MSG_INFO,"[CS] SendRewardPoints, trying to get clan %i",thisclient->clanid );
+        CClans *thisclan = GetClanByID(thisclient->clanid);
+        if(thisclan!=NULL)
+        {
+            thisclient->reward_points=lma_points;          //reward points is handled by world server.
+                          
+            BEGINPACKET( pak, 0x7e0);
+            ADDBYTE    ( pak, 0x33);//0x33 you have invited to clan
+            ADDWORD    ( pak, thisclan->id);// clan id
+            ADDBYTE    ( pak, 0x00);
+            ADDBYTE    ( pak, 0x00);
+            ADDWORD    ( pak, thisclan->back);//Clan Background
+            ADDWORD    ( pak, thisclan->logo);//Clan logo
+            ADDBYTE    ( pak, thisclan->grade);//Clan grade
+            ADDBYTE    ( pak, thisclient->clan_rank);// Clan rank (0 = red rokie / 6 = master)
+            ADDDWORD    ( pak, thisclan->cp); //Clan Points
+            ADDWORD    ( pak, 0x0064); //always 0x64? having before thisclan->cp            
+            ADDWORD    ( pak, 0x0000); //??
+            ADDQWORD   ( pak, 0x000000000000 );   //Clan Money
+            ADDDWORD    ( pak, thisclan->ClanMembers.size());  //Nb of clan members.
+            ADDWORD    ( pak, 0x0000);
+            for(int i=0;i<120;i++)
+                ADDBYTE ( pak, 0x00);
+            ADDDWORD   ( pak, 0x00000000); //Ranking Points
+            ADDDWORD   ( pak, thisclient->reward_points );  //LMA 139+ (Reward points for clan shop)
+            ADDSTRING  ( pak, thisclan->name);//Clan Name
+            ADDBYTE    ( pak, 0x00);
+                        
+            //Clan slogan
+            if (strlen(thisclan->slogan)==0)
+            {
+                 ADDSTRING  ( pak, thisclan->name);
+                 ADDBYTE    ( pak, 0x00);                                
+            }
+            else
+            {
+                ADDSTRING  ( pak, thisclan->slogan);
+                ADDBYTE    ( pak, 0x00);                
+            }
+
+            //only added to packet if there is actually a news inside.
+            if (strlen(thisclan->news)!=0)
+            {
+               ADDSTRING  ( pak, thisclan->news);
+               ADDBYTE    ( pak, 0x00);
+            }
+            
+            thisclient->SendPacket(&pak);	
+            Log(MSG_INFO,"[CS] Clan packet: 0x7e0, SendRewardPoints %s",thisclan->name);            
+        }
+        else
+        {
+            Log(MSG_INFO,"[CS] clan ID %i not found in SendRewardPoints",thisclient->clanid );
+        }
+        
+    }     
+    return true;
+}
+
+// Send Clan information
+bool CCharServer::SendClanInfo (CCharClient* thisclient)
+{
+        Log(MSG_INFO,"[CS]in SendClanInfo for %s",thisclient->charname);     
+    if( thisclient->clanid > 0 )
+    {
+        Log(MSG_INFO,"[CS] sendclaninfo, trying to get clan %i",thisclient->clanid );
+        CClans *thisclan = GetClanByID(thisclient->clanid);
+        if(thisclan!=NULL)
+        {
+            /* Previous version
             BEGINPACKET( pak, 0x7e0);
             ADDBYTE    ( pak, 0x33);//0x33 you have invited to clan
             ADDWORD    ( pak, thisclan->id);// clan id
@@ -52,14 +159,62 @@ bool CCharServer::SendClanInfo (CCharClient* thisclient)
 //            ADDDWORD   ( pak, 0x00000000 );
 //            ADDBYTE    ( pak, 0x00 );
 //            ADDBYTE    ( pak, 0x00);
-            ADDDWORD   ( pak, 0x00000000 );
-            ADDSTRING  ( pak, thisclan->name);//Clan Name            
+            
+            //ADDDWORD   ( pak, 0x00000000 );  //LMA 139+ (Reward points for clan shop)
+            thisclient->reward_points++;
+            ADDDWORD   ( pak, thisclient->reward_points );  //LMA 139+ (Reward points for clan shop)
+            ADDSTRING  ( pak, thisclan->name);//Clan Name
             ADDBYTE    ( pak, 0x00);            
             ADDSTRING  ( pak, thisclan->slogan);//Clan slogan
             ADDBYTE    ( pak, 0x00);
             ADDSTRING  ( pak, thisclan->news);//Clan news
             ADDBYTE    ( pak, 0x00);
+            */
+            
+            //New Version
+            BEGINPACKET( pak, 0x7e0);
+            ADDBYTE    ( pak, 0x33);//0x33 you have invited to clan
+            ADDWORD    ( pak, thisclan->id);// clan id
+            ADDBYTE    ( pak, 0x00);
+            ADDBYTE    ( pak, 0x00);
+            ADDWORD    ( pak, thisclan->back);//Clan Background
+            ADDWORD    ( pak, thisclan->logo);//Clan logo
+            ADDBYTE    ( pak, thisclan->grade);//Clan grade
+            ADDBYTE    ( pak, thisclient->clan_rank);// Clan rank (0 = red rokie / 6 = master)
+            ADDDWORD    ( pak, thisclan->cp); //Clan Points
+            ADDWORD    ( pak, 0x0064); //always 0x64? having before thisclan->cp            
+            ADDWORD    ( pak, 0x0000); //??
+            ADDQWORD   ( pak, 0x000000000000 );   //Clan Money
+            ADDDWORD    ( pak, thisclan->ClanMembers.size());  //Nb of clan members.
+            ADDWORD    ( pak, 0x0000);
+            for(int i=0;i<120;i++)
+                ADDBYTE ( pak, 0x00);
+            ADDDWORD   ( pak, 0x00000000); //Ranking Points
+            ADDDWORD   ( pak, thisclient->reward_points );  //LMA 139+ (Reward points for clan shop)
+            ADDSTRING  ( pak, thisclan->name);//Clan Name
+            ADDBYTE    ( pak, 0x00);           
+            
+            //Clan slogan
+            if (strlen(thisclan->slogan)==0)
+            {
+                 ADDSTRING  ( pak, thisclan->name);
+                 ADDBYTE    ( pak, 0x00);                                
+            }
+            else
+            {
+                ADDSTRING  ( pak, thisclan->slogan);
+                ADDBYTE    ( pak, 0x00);                
+            }
+
+            //only added to packet if there is actually a news inside.
+            if (strlen(thisclan->news)!=0)
+            {
+               ADDSTRING  ( pak, thisclan->news);
+               ADDBYTE    ( pak, 0x00);
+            }
+                        
             thisclient->SendPacket(&pak);	
+            Log(MSG_INFO,"[CS] Clan packet: 0x7e0, SendClanInfo %s",thisclan->name);            
             
             //Put the player online in clan
             for(UINT i=0;i<thisclan->ClanMembers.size();i++)
@@ -70,6 +225,11 @@ bool CCharServer::SendClanInfo (CCharClient* thisclient)
                     ChangeClanStatus (thisclient, otherclient, thisclient->channel);//send channel here
         	}                      
         }
+        else
+        {
+            Log(MSG_INFO,"[CS] clan ID %i not found in sendclaninfo",thisclient->clanid );
+        }
+        
     }     
     return true;
 }
@@ -88,6 +248,9 @@ bool CCharServer::ChangeClanStatus (CCharClient* thisclient, CCharClient* otherc
         ADDSTRING  ( pak, thisclient->charname );
         ADDBYTE    ( pak, 0x00 );
         otherclient->SendPacket(&pak); 
+        Log(MSG_INFO,"[CS] ChangeClanStatus for %s, job %i, level %i, channel %i",thisclient->charname,thisclient->job,thisclient->level,channel);
+        
+        
         return true;
 }
 
@@ -174,6 +337,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
                 ADDSTRING  ( pak, thisclient->charname );
                 ADDBYTE    ( pak, 0x0 );
                 otherclient->SendPacket( &pak );
+                Log(MSG_INFO,"[CS] Clan invite %s",thisclient->charname);
             }
             delete []nick;
         }
@@ -232,12 +396,14 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
                 delete []nick;
                 return false;            
             }
+            Log(MSG_INFO,"[CS] delete %s from clan by %s",nick,thisclient->charname);
             delete []nick;
         }  
         break;        
         case 0x04://up rank
         {
             char* nick = new (nothrow) char[P->Size-7];
+            Log(MSG_INFO,"[CS] clan, %s is trying to up %s",thisclient->charname,nick);
             if(nick==NULL)
             {
                 Log(MSG_ERROR, "Error allocing memory" );
@@ -336,6 +502,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             int job=0;
             int channel=0xff;
             char* nick = new (nothrow) char[P->Size-7];
+            Log(MSG_INFO,"[CS] clan, %s is trying to down %s",thisclient->charname,nick);
             if(nick==NULL)
             {
                 Log(MSG_ERROR, "Error allocing memory" );
@@ -482,9 +649,10 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
 	        ADDSTRING  ( pak, thisclient->charname ); 
 	        ADDBYTE    ( pak, 0x00 );
 	        cryptPacket( (char*)&pak, NULL );
- 	        CChanels* thischannel = GetChannelByID( thisclient->channel );
+ 	        CChanels* thischannel = GetChannelByID( thisclient->channel ); 	        
  	        if(thischannel!=NULL)
-        	    send( thischannel->sock, (char*)&pak, pak.Size, 0 );            
+        	    send( thischannel->sock, (char*)&pak, pak.Size, 0 );      
+            Log(MSG_INFO,"[CS] clan, %s leaves clan",thisclient->charname);
         }
         break;
         case 0x08:
@@ -573,6 +741,8 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
  	        if(thischannel!=NULL)
         	    send( thischannel->sock, (char*)&pak, pak.Size, 0 );  
 
+            Log(MSG_INFO,"[CS] clan, %s makes %s master",thisclient->charname,nick);
+
             //Convert to commander	        
             clan_rank = 4;        
             thisclient->clan_rank=clan_rank;                                         
@@ -653,7 +823,8 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
  	        if(thischannel!=NULL)
         	    send( thischannel->sock, (char*)&pak, pak.Size, 0 );	                                            
             thisclient->clanid = 0;
-            thisclient->clan_rank = 1; 	        
+            thisclient->clan_rank = 1;
+            Log(MSG_INFO,"[CS] clan, %s disorg clan",thisclient->charname);
  	        //send( wct
         }
         break;
@@ -716,7 +887,9 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
            ADDSTRING  ( pak, thisclient->charname );
            ADDBYTE    ( pak, 0x00 );
            SendToClanMembers(thisclient->clanid,&pak);           
-                                                        
+
+           Log(MSG_INFO,"[CS] clan, %s accepted invitation",otherclient->charname);
+                       
 	       RESETPACKET( pak, 0x7e1 );//update clan info in world
 	       ADDBYTE( pak, 0xfa );
 	       ADDWORD( pak, thisclient->charid );
@@ -728,7 +901,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
  	       CChanels* otherchannel = GetChannelByID( otherclient->channel );
  	       if(otherchannel!=NULL && thischannel!=otherchannel)
                 send( thischannel->sock, (char*)&pak, pak.Size, 0 );          
-           delete []nick;	            	    
+           delete []nick;
         }                    
         break;
         case 0x0d://invitation no accepted
@@ -748,6 +921,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
                 ADDSTRING  ( pak, thisclient->charname );
                 ADDBYTE    ( pak, 0x00 );
                 otherclient->SendPacket(&pak);
+                Log(MSG_INFO,"[CS] clan, %s refused invitation",nick);
             }             
             delete []nick;           
         }            
@@ -761,6 +935,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             ADDSTRING  ( pak, thisclient->charname );
             ADDBYTE    ( pak, thisclient->channel );
             SendToClanMembers(thisclient->clanid,&pak);
+            Log(MSG_INFO,"[CS] clan, update clan window for %s, %i, %i, channel %i",thisclient->charname,GETWORD ((*P),1),GETWORD ((*P),3),thisclient->channel);
         }
         break;        
         case 0xfa://message from worldserver to load the new clan information
@@ -773,7 +948,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
                return true;                        
         	// Load all our clan information
         	            //     0    1  2    3    4   5   6       7
-        	result = DB->QStore("SELECT id,logo,back,name,cp,grade,slogan,news FROM list_clan where id=%i",id);
+        	result = DB->QStore("SELECT id,logo,back,name,cp,grade,slogan,news,rankingpoints FROM list_clan where id=%i",id);
             if(result == NULL) return false;        	
             if(mysql_num_rows(result)!=1)
             {
@@ -793,6 +968,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
         	newclan->grade = atoi(row[5]);	
             strncpy(newclan->slogan,row[6],29);	
             strcpy(newclan->news,row[7]);
+            newclan->rankingpoints=atoi(row[8]);
             DB->QFree( );
             //member info
             CClanMembers* newmember = new CClanMembers;
@@ -809,11 +985,13 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             ADDWORD    ( pak, clientid);
             ADDWORD    ( pak, 0x0100);//
             ADDWORD    ( pak, newclan->back );//clan background
-            ADDWORD    ( pak, newclan->logo );//clanlogo            
+            ADDWORD    ( pak, newclan->logo );//clanlogo
+            
             ADDBYTE    ( pak, 0x01);//clan grade
             ADDBYTE    ( pak, otherclient->clan_rank);// clan rank
             for(int i=0;i<146;i++)//clan skills
                 ADDBYTE ( pak, 0x00);
+            ADDDWORD    ( pak, 0x00000000 );  //LMA 139+: Reward points
             ADDSTRING  ( pak, newclan->name);//clan name
             ADDBYTE    ( pak, 0x00);
             ADDWORD    ( pak, 0x0000 );
@@ -822,9 +1000,34 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             ADDWORD    ( pak, 0x0000 );                                                
             ADDSTRING  ( pak, newclan->slogan);//clan slogan
             ADDBYTE    ( pak, 0x00);
-            otherclient->SendPacket(&pak);                      
+            otherclient->SendPacket(&pak);
+            Log(MSG_INFO,"[CS] Clan load info %s",newclan->name);
         }
-        break;
+        break;        
+        case 0xff:
+             {
+                  //LMA: adding reward points (bogus command)
+                  //We have to reload player's information...
+                  int lma_id = GETWORD((*P),1); // client ID
+                  long int lma_points = GETDWORD((*P),3); // reward points (TOTAL)
+                CCharClient* otherclient = GetClientByID( lma_id );
+                
+                if(otherclient!=NULL)
+                {
+                     Log(MSG_INFO,"[CS] Forcing clan info for %i, %s, total points %li",lma_id,otherclient->charname,lma_points);
+                     //test
+                     lma_mask(otherclient);
+                     SendRewardPoints(otherclient,0);
+                     SendRewardPoints(otherclient,lma_points);
+                }              
+                else
+                {
+                    Log(MSG_INFO,"[CS] ERROR Forcing clan info for %i, not found, total points %li!",lma_id,lma_points);
+                }  
+                  
+             }
+             break;
+             
         default:
             Log( MSG_INFO, "Clan action unknow %i ", action);
         break;
@@ -854,6 +1057,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
                 ADDWORD    ( pak, 0x0000 );                   
                 ADDWORD    ( pak, otherclient->level );// Level
                 ADDWORD    ( pak, otherclient->job );// Job
+                Log(MSG_INFO,"[CS] Clan, pakClanMembers online %s, channel %i, level %i, job %i",otherclient->charname,otherclient->channel,otherclient->level,otherclient->job);
             }
             else
             {          
@@ -863,6 +1067,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
                 ADDWORD    ( pak, 0x0000 );                   
                 ADDWORD    ( pak, 0x0000 );// Level     
                 ADDWORD    ( pak, 0x0000 );// Job                 
+                Log(MSG_INFO,"[CS] Clan, pakClanMembers OFFLINE %s",otherclient->charname);
             }                
             ADDSTRING  ( pak, thismember->name );
             ADDBYTE    ( pak, 0x00 );  
@@ -875,6 +1080,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
         ADDBYTE    ( pak, 0x0f );
         ADDDWORD   ( pak, 0x00000001 );
         thisclient->SendPacket( &pak );
+        Log(MSG_INFO,"[CS] Clan, pakClanMembers CLAN NOT FOUND %i",thisclient->clanid);
     }
     return true;
 }
@@ -882,6 +1088,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
 // Logout from clan
 bool CCharServer::ClanLogout ( CCharClient* thisclient )
 {    
+    Log(MSG_INFO,"[CS] ClanLogout %s",thisclient->charname);     
     CClans* thisclan = (CClans*) GetClanByID(thisclient->clanid);             
     if(thisclan!=NULL)
     {       

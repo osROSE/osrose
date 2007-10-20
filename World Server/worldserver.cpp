@@ -462,6 +462,7 @@ bool CWorldServer::OnServerReady( )
 
     //Load our Server Info
     LoadZoneData( );
+    LoadGrids( );   //resetting grids...
     LoadConsItem( );
     LoadSellData( );
     LoadProductItem( );
@@ -618,6 +619,7 @@ void CWorldServer::LoadConfigurations( char* file )
     Config.MonsterDmg           = ConfigGetInt    ( file, "monsterdmg", 100);
     Config.Cfmode               = ConfigGetInt    ( file, "cfmode", 0);
     Config.osRoseVer             = ConfigGetInt    ( file, "osRoseVer", 79);
+    Config.testgrid             = ConfigGetInt    ( file, "testgrid", 0); //LMA: maps tests grids (0=usual, 1=grid)
     
     Log (MSG_INFO, "osRose Revision %i", Config.osRoseVer );
         
@@ -652,6 +654,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Exp = ConfigGetInt    ( "commands.ini", "exp", 299 );
     Config.Command_Face = ConfigGetInt    ( "commands.ini", "face", 299 );
     Config.Command_Give2 = ConfigGetInt    ( "commands.ini", "give2", 299 );
+    Config.Command_GiveClanRp = ConfigGetInt    ( "commands.ini", "giveclanrp", 299 );       //Reward points
     Config.Command_GiveFairy = ConfigGetInt    ( "commands.ini", "givefairy", 299 );
     Config.Command_GiveZuly = ConfigGetInt    ( "commands.ini", "givezuly", 299 );
     Config.Command_GmList = ConfigGetInt ( "commands.ini", "gmlist", 299 );
@@ -707,6 +710,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Tele = ConfigGetInt    ( "commands.ini", "tele", 299 );
     Config.Command_TeleToMe = ConfigGetInt    ( "commands.ini", "teletome", 299 );
     Config.Command_Transx = ConfigGetInt    ( "commands.ini", "transx", 299 );
+    Config.Command_grid = ConfigGetInt    ( "commands.ini", "grid", 299 );   //LMA: maps grids.  
     Config.Command_Who = ConfigGetInt    ( "commands.ini", "who", 299 );
     Config.Command_Who2 = ConfigGetInt    ( "commands.ini", "who2", 299 );
     Config.Command_Broadcast = ConfigGetInt    ( "commands.ini", "broadcast", 299 );

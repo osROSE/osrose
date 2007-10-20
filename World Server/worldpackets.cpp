@@ -253,11 +253,18 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
     } 
     //ADDBYTE( pak, 0x00 );
     
+    //quest Flags are here :)
     ADDDWORD( pak, thisclient->speaksLuna ? 8 : 0 ); //Enable luna language (currently enabled for all b4 I make a proper quest for it)
     ADDDWORD( pak, thisclient->canUseFlyingVessel ? 32 : 0 ); //Enable flying vessel    
+    
+    
+    //TESTS
+    //ADDDWORD( pak, 0xbfc2) //TEST LMA
+    //ADDDWORD( pak, 0)
+    //
 
     for(int i=4;i<41;i++)
-        ADDWORD( pak, 0 );
+        ADDWORD( pak, 0);
              
     ADDBYTE( pak, 0x00 );        
     for(int i=0;i<30;i++) // Wish list [Caali]
@@ -445,7 +452,7 @@ bool CWorldServer::pakMoveChar( CPlayer* thisclient, CPacket* P )
 	ADDFLOAT   ( pak, GETFLOAT((*P), 0x02 ) );	// POSITION X
 	ADDFLOAT   ( pak, GETFLOAT((*P), 0x06 ) );	// POSITION Y
 	ADDWORD    ( pak, GETWORD((*P), 0x0a ) );		// POSITION Z (NOT USED)
-	SendToVisible( &pak, thisclient );    
+	SendToVisible( &pak, thisclient );
 	return true;
 }
 
@@ -506,10 +513,12 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
         
         if (thisnpc->dialog!=0)
         {
+            Log(MSG_INFO,"Special dialog %i for NPC %i",thisnpc->dialog, thisnpc->npctype);       
             ADDWORD( pak, thisnpc->dialog );    
         }
         else
         {
+            Log(MSG_INFO,"Dialog %i for NPC %i",thisnpc->npctype - factor, thisnpc->npctype);            
             ADDWORD( pak, thisnpc->npctype - factor );    
         }
         
@@ -524,7 +533,7 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
     //Event:
     if (thisnpc->event!=0&&thisnpc->npctype!=1115)
     {
-        Log(MSG_INFO,"Event number %i",thisnpc->event);
+        Log(MSG_INFO,"Event number %i for NPC %i",thisnpc->event, thisnpc->npctype);
         ADDBYTE ( pak, thisnpc->event);
     }
     else
@@ -1302,7 +1311,8 @@ bool CWorldServer::pakCharSelect ( CPlayer* thisclient, CPacket* P )
 	return true;
 }
 
-// Buy from NPC
+// Buy from NPC (usual and Clan Shop).
+//2do: Count and check Z and reward points BEFORE giving the items...
 bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 {        
     if(thisclient->Shop->open)
@@ -1311,14 +1321,33 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 	CNPC* thisnpc = GetNPCByID( NPC, thisclient->Position->Map );
 	if( thisnpc==NULL )  
 	   return true;
+	   
 	BYTE buycount = GETBYTE((*P), 2);
 	BYTE sellcount = GETBYTE((*P), 3);
+	
+     //Clan Shop case...
+     Log(MSG_INFO,"Buying /selling from NPC %i",thisnpc->npctype);
+     bool is_clanshop=false;
+     bool hack_detected=false;
+     if (thisnpc->npctype==1752)
+     {
+        is_clanshop=true;
+        
+        //impossible to buy from clan shop if you don't have a clan
+        if (thisclient->Clan->clanid==0)
+        {
+            return true;
+        }
+        
+     }
+     	
 	BYTE ncount = 0;
 	BEGINPACKET( pak, 0x717 );
 	ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
 	ADDBYTE    ( pak, 0x00 );
 	for (int i=0; i<buycount; i++) 
-    {       
+    {   
+        hack_detected=false;
 		BYTE tabid = GETBYTE((*P), 8+(i*4));
 		BYTE itemid = GETBYTE((*P), 9+(i*4));
 		WORD count = GETWORD((*P), 10+(i*4));
@@ -1362,11 +1391,16 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 			thisitem.stats = 0;
 			thisitem.gem = 0;
 			thisclient->items[newslot] = thisitem;
+			
+			//checking money / reward points now...
+			/*
 			ADDBYTE  ( pak, newslot );
 			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
 			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
-                ADDDWORD( pak, 0x00000000 );
-                ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
+             */
+             
     		switch(thisitem.itemtype)
     		{			
                 case 1:
@@ -1399,7 +1433,34 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                     price /= 100;
                     price = (float)round(price);            
                     Log( MSG_WARNING, "Item bought: itemnum %i, itemtype %i, itemcount %i, price %0.0f", thisitem.itemnum, thisitem.itemtype, thisitem.count, price);                                                            
-                    thisclient->CharInfo->Zulies -= (long int)price;  
+                    
+                    if (is_clanshop)
+                    {
+                        if (thisclient->CharInfo->rewardpoints<(long int) price)
+                        {
+                          hack_detected=true;
+                          Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price);                                    
+                        }
+                        else
+                        {
+                           thisclient->CharInfo->rewardpoints -= (long int) price;
+                        }
+                        
+                    }
+                    else
+                    {
+                        if (thisclient->CharInfo->Zulies<(long int)price)
+                        {
+                          hack_detected=true;
+                          Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int) price);                                    
+                        }
+                        else
+                        {
+                           thisclient->CharInfo->Zulies -= (long int)price;
+                        }                     
+
+                    }
+                      
                 }     
                 break;
                 case 10:                
@@ -1459,7 +1520,34 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                         price += 0.5;
                         price = (float)floor(price);
                         Log( MSG_WARNING, "Item bought: itemnum %i, itemtype %i, itemcount %i, price %0.0f", thisitem.itemnum, thisitem.itemtype, thisitem.count, price);                                                            
-                        thisclient->CharInfo->Zulies -= (long int)price*count;                            
+                        
+                        if (is_clanshop)
+                        {
+                            if (thisclient->CharInfo->rewardpoints<(long int) price*count)
+                            {
+                              hack_detected=true;
+                              Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price*count);                                    
+                            }
+                            else
+                            {
+                               thisclient->CharInfo->rewardpoints -= (long int) price*count;
+                            }
+                            
+                        }
+                        else
+                        {
+                            if (thisclient->CharInfo->Zulies<(long int)price*count)
+                            {
+                              hack_detected=true;
+                              Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int)price*count);                                    
+                            }
+                            else
+                            {
+                               thisclient->CharInfo->Zulies -= (long int)price*count;
+                            }                     
+    
+                        }
+                        
                     }
                     else
                     {
@@ -1472,7 +1560,34 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                         price += 0.5;
                         price = (float)floor(price);          
                 		Log( MSG_WARNING, "Item bought: itemnum %i, itemtype %i, itemcount %i, price %0.0f", thisitem.itemnum, thisitem.itemtype, thisitem.count, price);                                                                    			
-                    	thisclient->CharInfo->Zulies -= (long int)price*count;                                             
+                    	
+                        if (is_clanshop)
+                        {
+                            if (thisclient->CharInfo->rewardpoints<(long int) price*count)
+                            {
+                              hack_detected=true;
+                              Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price*count);                                    
+                            }
+                            else
+                            {
+                               thisclient->CharInfo->rewardpoints -= (long int) price*count;
+                            }
+                            
+                        }
+                        else
+                        {
+                            if (thisclient->CharInfo->Zulies<(long int)price*count)
+                            {
+                              hack_detected=true;
+                              Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int)price*count);                                    
+                            }
+                            else
+                            {
+                               thisclient->CharInfo->Zulies -= (long int)price*count;
+                            }                     
+    
+                        }
+                                                                                             
                     }
                 }   
                 break;    
@@ -1508,15 +1623,60 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                     price += 0.5;
                     price = (float)round(price);          
             		Log( MSG_WARNING, "Item bought: itemnum %i, itemtype %i, itemcount %i, price %0.0f", thisitem.itemnum, thisitem.itemtype, thisitem.count, price);                                                                    			
-                	thisclient->CharInfo->Zulies -= (long int)price*count;                     
+                	                	
+                    if (is_clanshop)
+                    {
+                        if (thisclient->CharInfo->rewardpoints<(long int) price*count)
+                        {
+                          hack_detected=true;
+                          Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price*count);                                    
+                        }
+                        else
+                        {
+                           thisclient->CharInfo->rewardpoints -= (long int) price*count;
+                        }
+                        
+                    }
+                    else
+                    {
+                        if (thisclient->CharInfo->Zulies<(long int)price*count)
+                        {
+                          hack_detected=true;
+                          Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int)price*count);                                    
+                        }
+                        else
+                        {
+                           thisclient->CharInfo->Zulies -= (long int)price*count;
+                        }                     
+
+                    }
+                                                                 
                 }
                 break;
                 default:
                     Log( MSG_WARNING, "Invalid Item Type: %i", thisitem.itemtype );                            
-            }            
+            }
+            
+            //LMA: giving item only is everything went ok (enough money / reward points).
+            if (!hack_detected)
+            {
+      			ADDBYTE  ( pak, newslot );
+    			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
+    			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
+                ADDDWORD( pak, 0x00000000 );
+                ADDWORD ( pak, 0x0000 );           
+            }
+                        
 			ncount++;
 		}
 	}
+	
+	//refresh Reward points from player if needed
+	if (is_clanshop&&buycount>0)
+	{
+       GServer->pakGMClanRewardPoints(thisclient,thisclient->CharInfo->charname,0);
+    }
+	
 	for (int i=0; i<sellcount; i++) 
     {
 		BYTE slotid = GETBYTE((*P), 8+(buycount*4)+(i*3)); 
@@ -2792,6 +2952,7 @@ bool CWorldServer::pakShowShop( CPlayer* thisclient, CPacket* P )
 }
 
 // Buy From Shop
+//LMA: checking for Zuly hacks
 bool CWorldServer::pakBuyShop( CPlayer* thisclient, CPacket* P )
 {
     WORD otherclientid = GETWORD((*P),0);
@@ -2819,7 +2980,15 @@ bool CWorldServer::pakBuyShop( CPlayer* thisclient, CPacket* P )
                 return true;            
             unsigned int newslot = thisclient->GetNewItemSlot ( newitem );
             if(newslot==0xffff)
-                return true;         
+                return true;
+                
+            //LMA: check for hacks...
+            if (thisclient->CharInfo->Zulies < (otherclient->Shop->SellingList[slot].price*count))
+            {
+              Log(MSG_HACK, "[Buy in Shop] Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,otherclient->Shop->SellingList[slot].price*count);
+              return true;
+            }
+            
             thisclient->CharInfo->Zulies -= (otherclient->Shop->SellingList[slot].price*count);
             otherclient->CharInfo->Zulies += (otherclient->Shop->SellingList[slot].price*count);                
             if(otherclient->items[invslot].itemtype>9 && 

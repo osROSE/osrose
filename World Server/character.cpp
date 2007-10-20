@@ -141,6 +141,39 @@ void CCharacter::UpdatePosition( )
         }
         else ClearBattle( Battle );
     }
+    
+    //LMA maps: special case (arrive in Game)
+    //and he changed map (GM or scroll or teleporter or boat?)
+    //2do: other cases too, all in fact...
+    bool is_done=false;
+    if (IsPlayer( )&&((last_map==-1&&last_coords==-1)||(last_map!=Position->Map)))
+    {
+      	//updating player's grid
+    	int new_coords=0;
+    	int new_map=0;
+    	int grid_id=0;
+
+      	//deleting previous presence...
+      	if (last_map!=-1&&last_coords!=-1)
+      	{
+          	grid_id=GServer->allmaps[last_map].grid_id;
+            if (grid_id!=-1&&!GServer->allmaps[last_map].always_on&&GServer->gridmaps[grid_id].coords[last_coords]>0)
+               GServer->gridmaps[grid_id].coords[last_coords]--;
+        }
+  
+        //New coordinates
+    	new_map=Position->Map;
+    	grid_id=GServer->allmaps[new_map].grid_id;          	
+        new_coords=GServer->GetGridNumber(new_map,(UINT) floor(Position->current.x),(UINT) floor(Position->current.y));
+    	last_map=new_map;
+    	last_coords=new_coords;
+        
+    	if (grid_id!=-1||!GServer->allmaps[new_map].always_on)
+           GServer->gridmaps[grid_id].coords[new_coords]++;
+	
+   	    is_done=true;
+    }
+    
     if(!IsMoving()) return;
 	float dx = Position->destiny.x - Position->current.x;
 	float dy = Position->destiny.y - Position->current.y;
@@ -158,5 +191,35 @@ void CCharacter::UpdatePosition( )
 		Position->current.x += dx*(etime/ntime);
 		Position->current.y += dy*(etime/ntime);
 	}
-	Position->lastMoveTime = clock( );    
+	Position->lastMoveTime = clock( );
+	
+	//LMA: maps (for player)
+	if(!IsPlayer()||is_done)
+	   return;
+
+	//updating player's grid
+	int new_coords=0;
+	int new_map=0;
+	int grid_id=0;
+	
+	
+	new_map=Position->Map;
+	grid_id=GServer->allmaps[new_map].grid_id;	
+	new_coords=GServer->GetGridNumber(new_map,(UINT) floor(Position->current.x),(UINT) floor(Position->current.y));
+	//changed?
+    if (last_map==new_map&&new_coords==last_coords)	
+         return;
+    
+     //Let's update.
+	if (grid_id!=-1||!GServer->allmaps[new_map].always_on)
+	   GServer->gridmaps[grid_id].coords[new_coords]++;
+	
+   //deleting player from his previous map
+   grid_id=GServer->allmaps[last_map].grid_id;
+   if (grid_id!=-1&&!GServer->allmaps[last_map].always_on&&GServer->gridmaps[grid_id].coords[last_coords]>0)
+      GServer->gridmaps[grid_id].coords[last_coords]--;
+    
+    //Log(MSG_INFO,"Now[%i,%i],Was[%i,%i]",new_map,new_coords,last_map,last_coords);	
+	last_map=new_map;
+	last_coords=new_coords;
 }

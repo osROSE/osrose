@@ -119,7 +119,7 @@ bool CCharServer::OnServerReady( )
     	send( lsock, (char*)&pak, pak.Size, 0 );
     }
 	// Load all our clans
-	result = DB->QStore("SELECT id,logo,back,name,cp,grade,slogan,news FROM list_clan");
+	result = DB->QStore("SELECT id,logo,back,name,cp,grade,slogan,news,rankingpoints FROM list_clan");
 	if(result==NULL)  return false;
 	while(row = mysql_fetch_row(result))
     {
@@ -132,7 +132,8 @@ bool CCharServer::OnServerReady( )
 		thisclan->cp = atoi(row[4]);
 		thisclan->grade = atoi(row[5]);	
         strcpy(thisclan->slogan,row[6]);	
-        strcpy(thisclan->news,row[7]);	
+        strcpy(thisclan->news,row[7]);
+        thisclan->rankingpoints=atoi(row[8]);	
 		ClanList.push_back( thisclan );				
 	}	
 	DB->QFree( );

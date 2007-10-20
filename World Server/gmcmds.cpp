@@ -1069,6 +1069,15 @@ else if (loc == 10)
         Log( MSG_GMACTION, " %s : /npc %i, %i" , thisclient->CharInfo->charname, npcid, npcdialog);
         return pakGMNpc(thisclient, npcid, npcdialog);
 	}
+    else if(strcmp(command, "giveclanrp")==0) 
+    {
+         if(Config.Command_GiveClanRp > thisclient->Session->accesslevel)
+	                    return true;
+        if ((tmp = strtok(NULL, " "))==NULL) return true; char* name=tmp;
+	    if((tmp = strtok(NULL, " "))==NULL) return true; int points=atoi(tmp);
+	    Log( MSG_GMACTION, " %s : /giveclanrp %s, %i" , thisclient->CharInfo->charname, name, points);
+	    return pakGMClanRewardPoints(thisclient, name, points);
+	}		
     else if(strcmp(command, "givefairy")==0) 
     {
          if(Config.Command_GiveFairy > thisclient->Session->accesslevel)
@@ -1266,7 +1275,7 @@ else if (strcmp(command, "give2")==0)
             thisclient->questdebug = true;
         }
         
-        SendPM(thisclient, line0 );        
+        SendPM(thisclient, line0 );             
     }     
     else if(strcmp(command, "iquest")==0)    
     {
@@ -1602,6 +1611,22 @@ else if (strcmp(command, "give2")==0)
 	    Log( MSG_GMACTION, " Rate for Monster Dmg is now set at %i by %s" , rate, thisclient->CharInfo->charname);
 	    return pakGMChangeMonsterDmg(thisclient, rate);
 	}
+	else if(strcmp(command, "grid")==0)
+    {
+        if(Config.Command_grid > thisclient->Session->accesslevel)
+	                    return true;
+        if (Config.testgrid!=0)
+        {
+           Config.testgrid=0;
+        }
+        else
+        {
+           Config.testgrid=1;
+        }
+        
+	    Log( MSG_GMACTION, " Test Grid set at %i by %s" , Config.testgrid, thisclient->CharInfo->charname);
+	    return true;
+	}	
     else if(strcmp(command, "rules")==0)  // Rules Command by Matt
     {
         if(Config.Command_Rules > thisclient->Session->accesslevel)
@@ -2251,6 +2276,61 @@ bool CWorldServer::pakGMInfo(CPlayer* thisclient, char* name)
 		thisclient->client->SendPacket(&pak);
 	}
 	return true;
+}
+
+//LMA: Give reward clan points to somebody
+//also used when clan shopping.
+bool CWorldServer::pakGMClanRewardPoints(CPlayer* thisclient, char* name, int points)
+{
+  	CPlayer* otherclient = GetClientByCharName (name);
+	if(otherclient==NULL){ 
+        BEGINPACKET(pak, 0x702);
+		ADDSTRING(pak, "User does not exist or is not online.");
+		ADDBYTE(pak, 0);
+		thisclient->client->SendPacket(&pak);
+        return true;
+    }   
+     
+     if (otherclient->Clan->clanid==0)
+     {
+        BEGINPACKET(pak, 0x702);
+		ADDSTRING(pak, "User does not have a clan.");
+		ADDBYTE(pak, 0);
+		thisclient->client->SendPacket(&pak);
+        return true;                                      
+     }
+     
+     //adding points if needed
+     //Asking CharServer to refresh the player's informations.
+    if (points>0)
+    {
+        thisclient->CharInfo->rewardpoints+=points;
+        char buffer[200];
+        sprintf( buffer, "You received %i Clan Reward Points !!", points);
+        BEGINPACKET ( pak, 0x702 );
+        ADDSTRING( pak, buffer );
+        ADDBYTE( pak, 0 );
+        otherclient->client->SendPacket( &pak );
+        
+        RESETPACKET( pak, 0x7e0 );	
+     	ADDBYTE    ( pak, 0xff );
+    	ADDWORD    ( pak, otherclient->CharInfo->charid);  //charid
+    	ADDDWORD    ( pak, thisclient->CharInfo->rewardpoints);  //reward points (TOTAL)
+    	cryptPacket( (char*)&pak, GServer->cct );
+    	send( csock, (char*)&pak, pak.Size, 0 );         
+    }
+    else
+    {
+        BEGINPACKET( pak, 0x7e0 );
+ 	    ADDBYTE    ( pak, 0xff );
+    	ADDWORD    ( pak, otherclient->CharInfo->charid);  //charid
+    	ADDDWORD    ( pak, thisclient->CharInfo->rewardpoints);  //reward points (TOTAL)
+    	cryptPacket( (char*)&pak, GServer->cct );
+    	send( csock, (char*)&pak, pak.Size, 0 );        
+    }
+
+
+     return true;     
 }
 
 // Add Fairy

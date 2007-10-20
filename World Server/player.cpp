@@ -362,7 +362,8 @@ bool CPlayer::SpawnToPlayer( CPlayer* player, CPlayer* otherclient )
         ADDWORD( pak, Clan->logo);           
         ADDBYTE( pak, Clan->grade);
         ADDBYTE( pak, 0x00);   
-        ADDSTRING( pak, Clan->clanname);    
+        ADDSTRING( pak, Clan->clanname);
+        Log(MSG_INFO,"[WS] Clan info in player packet 0x793");
     }
     ADDWORD( pak, 0x0000 );
     player->client->SendPacket(&pak); 

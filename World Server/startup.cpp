@@ -538,6 +538,9 @@ bool CWorldServer::LoadNPCs( )
             DB->QFree( ); 
             return false;
         }
+        
+        thisnpc->event=0; //LMA Event.
+        thisnpc->dialog=0;
 		thisnpc->clientid = GetNewClientID();
 		thisnpc->npctype = atoi(row[0]);
 		thisnpc->posMap = atoi(row[1]);
@@ -1015,6 +1018,7 @@ bool CWorldServer::LoadZoneData( )
         Log(MSG_ERROR, "\nError loading file data/zone_data.csv" );
         return false;
     }
+    
     char line[500];
     fgets( line, 500, fh );// this is the column name
     while(!feof(fh))
@@ -1075,6 +1079,86 @@ bool CWorldServer::LoadZoneData( )
         MapList.Index[newzone->id] = newzone;  
     }         
     fclose(fh);
+    return true;    
+}
+
+//LMA: Grid Maps
+bool CWorldServer::LoadGrids( )
+{
+    Log( MSG_LOAD, "Grid Data                  " );
+    FILE* fh = fopen( "data/map_grid.csv", "r" );
+    if(fh==NULL)
+    {
+        Log(MSG_ERROR, "\nError loading file data/map_grid.csv" );
+        return false;
+    }
+    
+    //LMA maps
+    int k=0;
+    int j=0;
+    for(k=0;k<NB_MAPS;k++)
+    {
+        allmaps[k].grid_id=-1;
+        allmaps[j].always_on=false;
+    }
+    k=0;
+    //LMA END
+    int lx=0;
+    int ly=0;
+    int rx=0;
+    int ry=0;
+    
+    char line[500];
+    fgets( line, 500, fh );// this is the column name
+    while(!feof(fh))
+    {  
+        memset( &line, '\0', 500 );
+        fgets( line, 500, fh );
+        
+        j = GetUIntValue(",", &line);
+        if (j==0)
+           continue;
+           
+        lx = GetUIntValue(",");
+        ly = GetUIntValue(",");
+        rx = GetUIntValue(",");
+        ry = GetUIntValue(",");
+        
+        //Map info
+        allmaps[j].grid_id=k;         //Id of map in gridmaps
+        allmaps[j].always_on=GetUIntValue(",")==0?false:true;
+                        
+        //Grid now        
+        gridmaps[k].always_on=allmaps[j].always_on;
+        gridmaps[k].length=rx-lx;
+        gridmaps[k].width=ly-ry;
+        gridmaps[k].org_x=lx;
+        gridmaps[k].org_y=ry;
+        
+        //getting nb of columns...
+        allmaps[j].nb_col=(int) ceil(gridmaps[k].length/MINVISUALRANGE);
+        allmaps[j].nb_row=(int) ceil(gridmaps[k].width/MINVISUALRANGE);
+        
+        //Log(MSG_INFO,"map %i, row=%i, col=%i",j,allmaps[j].nb_row,allmaps[j].nb_col);
+        
+        if (gridmaps[k].width==0)
+           gridmaps[k].width=1;
+        
+        if (gridmaps[k].length==0)
+           gridmaps[k].length=1;
+        
+         //resetting values...
+         for (j=0;j<NB_CELL_MAX;j++)
+         {
+             gridmaps[k].coords[j]=0;
+         }
+                 
+       k++;
+    }         
+    fclose(fh);
+      
+       
+    Log( MSG_INFO, "Grid reseted.");
     return true;    
 }
 

@@ -32,6 +32,65 @@ bool CMonster::PlayerInRange()
     return false;
 }
 
+//LMA: maps, is there a player in a nearby grid (alternative to PlayerInRange)
+bool CMonster::PlayerInGrid()
+{
+    int grid_id=0;
+    UINT coords=0;
+    
+    
+    CMap* map = GServer->MapList.Index[Position->Map];        
+    grid_id=GServer->allmaps[map->id].grid_id;
+    //we don't handle this map (player shouldn't be here, monster neither, non existing map).
+    //Or no players in map.
+    if (map->PlayerList.size()==0||grid_id==-1)
+        return false;
+    
+    //getting coordinates.    
+    coords=GServer->GetGridNumber((int) map->id,(int) Position->current.x,(int) Position->current.y);
+    
+    //Is there anyone in the grids nearby?
+    int nb_players=0;
+    int col_offset=0;
+    col_offset=GServer->allmaps[map->id].nb_col+2;
+    nb_players=GServer->gridmaps[grid_id].coords[coords]+GServer->gridmaps[grid_id].coords[coords+1]+GServer->gridmaps[grid_id].coords[coords-1];
+    nb_players+=GServer->gridmaps[grid_id].coords[coords+col_offset]+GServer->gridmaps[grid_id].coords[coords+col_offset+1]+GServer->gridmaps[grid_id].coords[coords+col_offset-1];
+    nb_players+=GServer->gridmaps[grid_id].coords[coords-col_offset]+GServer->gridmaps[grid_id].coords[coords-col_offset+1]+GServer->gridmaps[grid_id].coords[coords-col_offset-1];    
+    if (nb_players>0)
+    {
+        //Log(MSG_INFO,"[GRID-%i] Mob %i X(%.2f,%.2f)",coords,clientid,Position->current.x,Position->current.y);
+       return true;
+    }
+    else
+    {
+        /*
+        if (coords==292||coords==294||coords==312||coords==313)
+        {
+          Log(MSG_INFO,"monster %i in cell %i (none)",clientid,coords);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords]: %i",GServer->gridmaps[grid_id].coords[coords]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords+1]: %i",GServer->gridmaps[grid_id].coords[coords+1]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords-1]: %i",GServer->gridmaps[grid_id].coords[coords-1]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords+col_offset]: %i",GServer->gridmaps[grid_id].coords[coords+col_offset]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords+col_offset+1]: %i",GServer->gridmaps[grid_id].coords[coords+col_offset+1]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords+col_offset-1]: %i",GServer->gridmaps[grid_id].coords[coords+col_offset-1]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords-col_offset]: %i",GServer->gridmaps[grid_id].coords[coords-col_offset]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords-col_offset+1]: %i",GServer->gridmaps[grid_id].coords[coords-col_offset+1]);
+            Log(MSG_INFO,"GServer->gridmaps[grid_id].coords[coords-col_offset-1]: %i",GServer->gridmaps[grid_id].coords[coords-col_offset-1]);
+            Log(MSG_INFO,"total %i",GServer->gridmaps[grid_id].coords[coords]+GServer->gridmaps[grid_id].coords[coords+1]+GServer->gridmaps[grid_id].coords[coords-1]+GServer->gridmaps[grid_id].coords[coords+col_offset]+GServer->gridmaps[grid_id].coords[coords+col_offset+1]+GServer->gridmaps[grid_id].coords[coords+col_offset-1]+GServer->gridmaps[grid_id].coords[coords-col_offset]+GServer->gridmaps[grid_id].coords[coords-col_offset+1]+GServer->gridmaps[grid_id].coords[coords-col_offset-1]);
+        }
+        */
+    }
+     
+    //Still here? Special case for very little maps or special maps.
+    if (map->PlayerList.size()>0&&GServer->allmaps[map->id].always_on==true)
+    {
+        Log(MSG_INFO,"monster in cell %i (AUTO)",coords);
+        return true;
+    }
+        
+    return false;
+}
+
 // get the near player
 CPlayer* CMonster::GetNearPlayer( UINT mdist )
 {

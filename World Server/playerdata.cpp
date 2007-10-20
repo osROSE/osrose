@@ -26,7 +26,7 @@
 bool CPlayer::loaddata( )
 {
 	MYSQL_ROW row;
-	MYSQL_RES *result = GServer->DB->QStore("SELECT level,face,hairStyle,sex,classid,zuly,str,dex,_int, con,cha,sen,curHp,curMp,id,statp,skillp,exp,stamina,quickbar,basic_skills, class_skills,class_skills_level,respawnid,clanid,clan_rank,townid FROM characters WHERE char_name='%s'", CharInfo->charname);
+	MYSQL_RES *result = GServer->DB->QStore("SELECT level,face,hairStyle,sex,classid,zuly,str,dex,_int, con,cha,sen,curHp,curMp,id,statp,skillp,exp,stamina,quickbar,basic_skills, class_skills,class_skills_level,respawnid,clanid,clan_rank,townid,rewardpoints FROM characters WHERE char_name='%s'", CharInfo->charname);
 	if(result==NULL) return false;
 	if(mysql_num_rows(result)!=1)
 	{
@@ -34,6 +34,8 @@ bool CPlayer::loaddata( )
         return false;
     }
 	row = mysql_fetch_row(result);
+    last_map=-1;	//LMA: maps
+    last_coords=-1;	//LMA: maps
 	Stats->Level = atoi(row[0]);
 	CharInfo->Face = atoi(row[1]);
 	CharInfo->Hair = atoi(row[2]);
@@ -57,6 +59,9 @@ bool CPlayer::loaddata( )
     Clan->clanid = atoi(row[24]);
     Clan->clanrank = atoi(row[25]);
     Position->saved = atoi(row[26]);
+    CharInfo->rewardpoints=atoi(row[27]); //LMA: reward points.
+    Log(MSG_INFO,"reward points at loading %i",CharInfo->rewardpoints);
+    
 	p_skills = 0;
 	for(BYTE i=0;i<48;i++) 
     { 
@@ -854,12 +859,16 @@ void CPlayer::savedata( )
     	if(hp<=0)
     	   hp=Stats->MaxHP * 10 / 100;
 	   if(Stats->MP<0)
-	       Stats->MP=0;	   
-        GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i, townid=%i WHERE id=%i", 
+	       Stats->MP=0;
+	       
+    
+           Log(MSG_INFO,"Saving Reward points: %i ",CharInfo->rewardpoints);
+	       
+        GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i, townid=%i, rewardpoints=%i WHERE id=%i", 
                     CharInfo->Job,Stats->Level, CharInfo->Zulies, hp, Stats->MP, 
                     Attr->Str,Attr->Con,Attr->Dex,Attr->Int,Attr->Cha,Attr->Sen,
                     CharInfo->Exp,CharInfo->SkillPoints,CharInfo->StatPoints,CharInfo->stamina, 
-                    quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,Position->saved,CharInfo->charid );
+                    quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,Position->saved,CharInfo->rewardpoints,CharInfo->charid);
     	if(!GServer->DB->QExecute("DELETE FROM items WHERE owner=%i", CharInfo->charid)) return;
     	for(UINT i=0;i<MAX_INVENTORY;i++) 
         {

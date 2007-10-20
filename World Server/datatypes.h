@@ -201,6 +201,9 @@
 #define EVENING 2
 #define NIGHT 3
 
+//LMA: maps
+#define NB_CELL_MAX 400
+
 #include "../common/sockets.h"
 
 // Hold party experience when kill a moster
@@ -789,6 +792,27 @@ struct CFairy
     UINT WaitTime; 
     bool assigned;      
 };
+
+//LMA: for map grids:
+struct CGridMap
+{
+    int coords[NB_CELL_MAX]; //10*10 map grid (8*8 for map and a 1 border) (now it can change according to map size).
+    int length;       //length of the map
+    int width;       //Width of the map
+    bool always_on;              //always display or not? (default 0).
+    int org_x;                   //point of Origine (never 0,0 and sometimes not the same)...
+    int org_y;           
+};
+
+struct CListMap
+{
+    int grid_id;      //Grid ID
+    bool always_on;              //always display or not? (default 0).
+    int nb_col;                //nb col (according to MINVISUALRANGE)
+    int nb_row;                //nb row (according to MINVISUALRANGE)
+};
+
+//LMA End
 
 #endif
 
