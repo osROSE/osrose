@@ -3689,6 +3689,7 @@ bool CWorldServer::pakCharDSClient( CPlayer* thisclient, CPacket* P )
     return true;    
 }
 
+
 // Pack Printscreen
 bool CWorldServer::pakPrintscreen( CPlayer* thisclient, CPacket* P )
 {

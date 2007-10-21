@@ -1682,6 +1682,8 @@ else if (strcmp(command, "give2")==0)
         UINT strength;
         if ((tmp = strtok(NULL, " ")) == NULL) strength = 0; else strength = atoi(tmp);
         if (strength < 15) strength = 15;
+        if (strength > 999999) strength = 999999;  // Max strength to use
+
         Log( MSG_GMACTION, "buff : character [ %s ] Strength [ %d ]", thisclient->CharInfo->charname, strength);
         pakGMBuff(thisclient, strength);
         return true;
