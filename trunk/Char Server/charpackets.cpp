@@ -496,10 +496,8 @@ bool CCharServer::pakUpdateLevel( CCharClient* thisclient, CPacket* P )
 // Disconnect client from char/world server
 bool CCharServer::pakLoginDSClient( CCharClient* thisclient, CPacket* P )
 {
-    if(!thisclient->isLoggedIn) return false;
     unsigned int userid = GETDWORD((*P), 1 );
     CCharClient* otherclient = GetClientByUserID( userid );
-    if(otherclient==NULL) return false;
     BYTE action = GETBYTE((*P),0);
     switch(action)
     {

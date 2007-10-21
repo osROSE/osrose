@@ -69,7 +69,7 @@ bool CLoginServer::pakUserLogin( CLoginClient* thisclient, CPacket* P )
         #endif        
         if ( res == 0 ) 
         {
-            if(atoi(row[4])==1)
+           if(atoi(row[4])==1)
             {
                 // Activation Fix By Rifke 
                 Log( MSG_INFO, "Success login '%s' : Account verfified.", thisclient->username.c_str() );
@@ -80,16 +80,17 @@ bool CLoginServer::pakUserLogin( CLoginClient* thisclient, CPacket* P )
                     ADDDWORD( pak, 0 );        
                     thisclient->SendPacket( &pak );
                     DB->QFree( );
-                    if(!DB->QExecute( "update accounts set online=0 WHERE username='%s'", thisclient->username.c_str() ))
-                      return false;
+                    DB->QExecute( "update accounts set online=0 WHERE username='%s'", thisclient->username.c_str());                 
                        BEGINPACKET( pak2, 0x502 );
                        ADDBYTE    ( pak2, 1 );
                        ADDDWORD   ( pak2, atoi(row[0]) );
-                      cryptPacket( (char*)&pak2, NULL );                  
+                      cryptPacket( (char*)&pak2, NULL );               
                     for(UINT i=0;i<ServerList.size();i++)
-                        send( ServerList.at(i)->sock , (char*)&pak2, pak2.Size, 0 ); 
+                        send( ServerList.at(i)->sock , (char*)&pak2, pak2.Size, 0 );
+                        
                     return false;                
                 }
+
                 thisclient->accesslevel = atoi(row[2]);
                 if( thisclient->accesslevel < Config.MinimumAccessLevel )
                 { //The server are under inspection
