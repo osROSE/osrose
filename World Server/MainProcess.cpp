@@ -84,7 +84,7 @@ PVOID MapProcess( PVOID TS )
                sum2+=etimetest;
                sum1=0;
                nb1=0;
-               Log(MSG_LOAD,"Grid %i/%i: time %u for %i",nb_monsters_done2,map->MonsterList.size(),sum2,nb2);
+               //Log(MSG_LOAD,"Grid %i/%i: time %u for %i",nb_monsters_done2,map->MonsterList.size(),sum2,nb2);
             }
             else
             {
@@ -92,7 +92,7 @@ PVOID MapProcess( PVOID TS )
                sum1+=etimetest;
                sum2=0;
                nb2=0;                  
-               Log(MSG_LOAD,"Visu %i/%i: time %u for %i",nb_monsters_done1,map->MonsterList.size(),sum1,nb1);
+               //Log(MSG_LOAD,"Visu %i/%i: time %u for %i",nb_monsters_done1,map->MonsterList.size(),sum1,nb1);
             }
 
             time_last_test=clock();                                    

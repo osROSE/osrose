@@ -379,11 +379,48 @@ UINT CPlayer::GetNewItemSlot( CItem thisitem )
 // Returns a free slot in the storage (0xffff if is full)
 UINT CPlayer::GetNewStorageItemSlot( CItem thisitem )
 {
+     //LMA: previous algo
+     /*
     for(UINT i=0;i<160;i++)
     {
         if(storageitems[i].itemtype == 0)
             return i;
     }
+    */
+    
+    //LMA: New one, we try to see if we can stack some items...
+    //non stackable items, so a new slot will be enough...
+    if(!(thisitem.itemtype>9 && thisitem.itemtype<14))
+    {
+        for(UINT i=0;i<160;i++)
+        {
+            if(storageitems[i].itemtype == 0)
+                return i;
+        }   
+        
+        //no place...
+        return 0xffff;                     
+    }
+    
+    //stackables items.
+    int free_slot=-1;
+     for(UINT i=0;i<160;i++)
+    { 
+        if(storageitems[i].itemtype == 0)
+        {
+           if (free_slot==-1)
+               free_slot=i;
+           continue;
+        }
+        
+        //same item and enough place? Let's use this slot :)
+        if ((storageitems[i].itemtype==thisitem.itemtype)&&(storageitems[i].itemnum==thisitem.itemnum)&&(storageitems[i].count+thisitem.count<=999))
+           return i;        
+    }       
+    
+    if (free_slot!=-1)
+       return free_slot;
+    
 	return 0xffff;
 }
 

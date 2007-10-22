@@ -523,3 +523,4 @@ bool CCharServer::pakLoginDSClient( CCharClient* thisclient, CPacket* P )
     } 
     return true;
 }
+

@@ -879,7 +879,10 @@ void CPlayer::savedata( )
     								items[i].lifespan, i, items[i].count, items[i].stats, (items[i].socketed?1:0),
     								(items[i].appraised?1:0),items[i].gem );
     		}
-    	}    	
+    	}
+    	
+    	/*
+    	//LMA: We're saving storage separetly now :)
     	if(!GServer->DB->QExecute("DELETE FROM storage WHERE owner=%i", Session->userid)) return;
     	for(UINT i=0;i<160;i++) 
         {
@@ -891,6 +894,8 @@ void CPlayer::savedata( )
                                     (storageitems[i].appraised?1:0), storageitems[i].gem );//Gem Fix by Irulagain
     		}
     	}  
+    	*/
+    	
     	if(!GServer->DB->QExecute( "DELETE FROM list_quest WHERE owner=%i",CharInfo->charid )) return;
     	for(int i=0;i<MyQuest.size();i++)
     	{
@@ -910,7 +915,9 @@ void CPlayer::savedata( )
             GServer->DB->QExecute("INSERT INTO list_quest (owner,questid,nitems,active) VALUES (%i,%i,'%s',%i)",
             CharInfo->charid, myquest->thisquest->id, nqitem, myquest->active );
         }
-		GServer->DB->QExecute("update accounts set zulystorage = %i where id = %i", CharInfo->Storage_Zulies, Session->userid);
+        
+        //We save Zuly storage elsewhere.
+		//GServer->DB->QExecute("update accounts set zulystorage = %i where id = %i", CharInfo->Storage_Zulies, Session->userid);
 		Log(MSG_INFO, "Data Saved for char '%s' ", CharInfo->charname );
     }
 }

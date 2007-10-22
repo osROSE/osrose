@@ -1103,3 +1103,143 @@ UINT CWorldServer::GetGridNumber(int mapid, int posx, int posy)
      
    return res;
 }
+
+//LMA: saving all storage 
+bool CWorldServer::SaveAllStorage( CPlayer* thisclient)
+{
+     
+    if(!GServer->DB->QExecute("DELETE FROM storage WHERE owner=%i", thisclient->Session->userid)) return true;
+    for(UINT i=0;i<160;i++) 
+    {
+    	if (thisclient->storageitems[i].count > 0) 
+        {
+    		GServer->DB->QExecute("INSERT INTO storage (owner,itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)",
+    							thisclient->Session->userid, thisclient->storageitems[i].itemnum, thisclient->storageitems[i].itemtype,thisclient->storageitems[i].refine, thisclient->storageitems[i].durability, 
+    							thisclient->storageitems[i].lifespan, i, thisclient->storageitems[i].count, thisclient->storageitems[i].stats, (thisclient->storageitems[i].socketed?1:0), 
+                                (thisclient->storageitems[i].appraised?1:0), thisclient->storageitems[i].gem );//Gem Fix by Irulagain
+    	}
+    }  
+    	
+    return true;
+}
+
+//LMA: getting all storage.
+bool CWorldServer::GetAllStorage( CPlayer* thisclient)
+{
+    //resetting array
+    for(int k=0;k<160;k++)
+    {
+        thisclient->storageitems[k].itemnum = 0;
+        thisclient->storageitems[k].itemtype = 0;
+        thisclient->storageitems[k].refine = 0;
+        thisclient->storageitems[k].durability = 0;
+        thisclient->storageitems[k].lifespan = 0;
+        thisclient->storageitems[k].count = 0;
+        thisclient->storageitems[k].stats = 0;
+        thisclient->storageitems[k].socketed = false;
+        thisclient->storageitems[k].appraised = false;
+        thisclient->storageitems[k].gem = 0;                 
+    }
+ 
+	MYSQL_ROW row;
+	MYSQL_RES *result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM storage WHERE owner=%i", thisclient->Session->userid);
+    if(result==NULL) return false;
+    thisclient->nstorageitems = mysql_num_rows(result);
+    while(row = mysql_fetch_row(result)) 
+    {
+        if(!GServer->IsValidItem( atoi(row[1]), atoi(row[0]) ) || atoi(row[6])==0)
+        {
+            Log(MSG_WARNING, "char %s have a invalid or empty item in storage: %i%i [%i], this item will be deleted", thisclient->CharInfo->charname, atoi(row[1]), atoi(row[0]), atoi(row[6]) );
+            continue;
+        }        
+        UINT itemnum = atoi(row[5]);    
+        thisclient->storageitems[itemnum].itemnum = atoi(row[0]);
+        thisclient->storageitems[itemnum].itemtype = atoi(row[1]);
+        thisclient->storageitems[itemnum].refine = atoi(row[2]);
+        thisclient->storageitems[itemnum].durability = atoi(row[3]);
+        thisclient->storageitems[itemnum].lifespan = atoi(row[4]);
+        thisclient->storageitems[itemnum].count = atoi(row[6]);
+        thisclient->storageitems[itemnum].stats = atoi(row[7]);
+        thisclient->storageitems[itemnum].socketed = (atoi(row[8])==1)?true:false;
+        thisclient->storageitems[itemnum].appraised = (atoi(row[9])==1)?true:false;
+        thisclient->storageitems[itemnum].gem = atoi(row[10]);
+    }
+    GServer->DB->QFree( );
+
+  
+     return true;     
+}
+
+//LMA: Get Zuly from Storage (from MySQL)
+bool CWorldServer::GetZulyStorage( CPlayer* thisclient)
+{
+	MYSQL_ROW row;
+	MYSQL_RES *result = DB->QStore("SELECT zulystorage FROM accounts WHERE id=%i", thisclient->Session->userid);
+    if(result==NULL) return false;
+	row = mysql_fetch_row(result);
+	thisclient->CharInfo->Storage_Zulies = atoi( row[0] );
+	DB->QFree( );
+	
+	
+     return true;    
+}
+
+
+//LMA: Save Zuly to Storage (to MySQL)
+bool CWorldServer::SaveZulyStorage( CPlayer* thisclient)
+{
+     GServer->DB->QExecute("update accounts set zulystorage = %i where id = %i", thisclient->CharInfo->Storage_Zulies, thisclient->Session->userid);
+
+
+     return true;     
+}
+
+//LMA: Get a slot storage (Mysql)
+bool CWorldServer::GetSlotStorage( CPlayer* thisclient,UINT slotnum)
+{
+	MYSQL_ROW row;
+	MYSQL_RES *result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM storage WHERE owner=%i AND slotnum=%i", thisclient->Session->userid,slotnum);
+     if(result==NULL)
+     {
+         Log(MSG_INFO,"in GetSlotStorage False");                
+         return false;
+     }
+     
+    row = mysql_fetch_row(result);
+    //we refresh only the item storage we need.
+    thisclient->storageitems[slotnum].itemnum = atoi(row[0]);
+    thisclient->storageitems[slotnum].itemtype = atoi(row[1]);
+    thisclient->storageitems[slotnum].refine = atoi(row[2]);
+    thisclient->storageitems[slotnum].durability = atoi(row[3]);
+    thisclient->storageitems[slotnum].lifespan = atoi(row[4]);
+    thisclient->storageitems[slotnum].count = atoi(row[6]);
+    thisclient->storageitems[slotnum].stats = atoi(row[7]);
+    thisclient->storageitems[slotnum].socketed = (atoi(row[8])==1)?true:false;
+    thisclient->storageitems[slotnum].appraised = (atoi(row[9])==1)?true:false;
+    thisclient->storageitems[slotnum].gem = atoi(row[10]); 
+    GServer->DB->QFree( );
+
+          
+     return true;    
+}
+
+//LMA: Saving one slot in storage
+bool CWorldServer::SaveSlotStorage( CPlayer* thisclient,UINT slotnum)
+{
+    UINT i=0;
+    i=slotnum;
+         
+    if(!GServer->DB->QExecute("DELETE FROM storage WHERE owner=%i AND slotnum=%i", thisclient->Session->userid,i))
+       return false;
+        
+    if (thisclient->storageitems[i].count > 0) 
+    {
+    	GServer->DB->QExecute("INSERT INTO storage (owner,itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)",
+    						thisclient->Session->userid, thisclient->storageitems[i].itemnum, thisclient->storageitems[i].itemtype,thisclient->storageitems[i].refine, thisclient->storageitems[i].durability, 
+    						thisclient->storageitems[i].lifespan, i, thisclient->storageitems[i].count, thisclient->storageitems[i].stats, (thisclient->storageitems[i].socketed?1:0), 
+                            (thisclient->storageitems[i].appraised?1:0), thisclient->storageitems[i].gem );//Gem Fix by Irulagain
+    }
+        
+
+    return true;
+}
