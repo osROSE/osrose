@@ -152,6 +152,12 @@ class CWorldServer : public CServerSocket
         UINT GetLevelGhost( UINT map, UINT level );
         UINT GetFairyRange( UINT part );
         UINT GetGridNumber(int mapid, int posx, int posy);    //LMA: maps
+        bool SaveAllStorage( CPlayer* thisclient);    //LMA: Saving Storage (all).
+        bool GetAllStorage( CPlayer* thisclient);     //LMA: Getting Storage (all).
+        bool GetSlotStorage( CPlayer* thisclient,UINT slotnum);   //LMA: refreshing one slot from MySQL storage.
+        bool SaveSlotStorage( CPlayer* thisclient,UINT slotnum);  //LMA: Saving one slot into MySQL storage.
+        bool GetZulyStorage( CPlayer* thisclient);     //LMA: Get Zuly from Storage (from MySQL)
+        bool SaveZulyStorage( CPlayer* thisclient);    //LMA: Save Zuly to Storage (to MySQL)
         void RefreshFairy( );
     
         //------------------ Fairies ---------------------

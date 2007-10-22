@@ -513,12 +513,12 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
         
         if (thisnpc->dialog!=0)
         {
-            Log(MSG_INFO,"Special dialog %i for NPC %i",thisnpc->dialog, thisnpc->npctype);       
+            //Log(MSG_INFO,"Special dialog %i for NPC %i",thisnpc->dialog, thisnpc->npctype);       
             ADDWORD( pak, thisnpc->dialog );    
         }
         else
         {
-            Log(MSG_INFO,"Dialog %i for NPC %i",thisnpc->npctype - factor, thisnpc->npctype);            
+            //Log(MSG_INFO,"Dialog %i for NPC %i",thisnpc->npctype - factor, thisnpc->npctype);            
             ADDWORD( pak, thisnpc->npctype - factor );    
         }
         
@@ -2643,6 +2643,9 @@ bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
     {
         case 0x00:
         {
+             //LMA: get storage from database to be sure.
+             //GetAllStorage(thisclient);
+             
             BEGINPACKET( pak, 0x7ad );
             ADDBYTE    ( pak, 0x00 );            
             ADDBYTE    ( pak, thisclient->nstorageitems ); //numero de items
@@ -2653,8 +2656,8 @@ bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
                     ADDBYTE    ( pak, i );
                   	ADDDWORD   ( pak, BuildItemHead( thisclient->storageitems[i] ) );
                		ADDDWORD   ( pak, BuildItemData( thisclient->storageitems[i] ) );
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
+                    ADDDWORD( pak, 0x00000000 );
+                    ADDWORD ( pak, 0x0000 );   
                 }            
             }
             ADDQWORD( pak, thisclient->CharInfo->Storage_Zulies );
@@ -2668,6 +2671,7 @@ bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
 }
 
 // Change Storage (Deposit/Withdraw items)
+//2do: take Zulyes from player's money when getting / putting items from / into storage.
 bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
 {
     BYTE action = GETBYTE((*P),0);
@@ -2678,6 +2682,18 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             BYTE itemslot = GETBYTE((*P),1);
             if(!CheckInventorySlot( thisclient, itemslot ))
                 return false;
+            
+            /*
+            //LMA: checking if item is the same we get from packet, testing itemtype and itemnum...
+            //2do: test other things too (later)
+            CItem testitem = GetItemByHeadAndData(GETDWORD((*P),2),GETDWORD((*P),6));
+            if ((testitem.itemnum!=thisclient->items[itemslot].itemnum)||(testitem.itemtype!=thisclient->items[itemslot].itemtype))
+            {
+               Log(MSG_HACK,"%s, Different object in Packet [%i:%i] and in inventory slot %i [%i:%i]",thisclient->CharInfo->charname,testitem.itemtype,testitem.itemnum,itemslot,thisclient->items[itemslot].itemtype,thisclient->items[itemslot].itemnum);
+               return false;
+            }
+            */
+            
             CItem newitem = thisclient->items[itemslot];   
             if(newitem.itemtype>9 && newitem.itemtype<14)
             {
@@ -2694,6 +2710,21 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
                 ClearItem(thisclient->items[itemslot]);                
             }        
             int newslot = thisclient->GetNewStorageItemSlot ( newitem );
+            //Log(MSG_INFO,"New (?) slot for deposit: %i",newslot);
+            
+            //LMA: New code (stackables?)
+            if (thisclient->storageitems[newslot].itemnum!=0)
+            {
+               //Log(MSG_INFO,"it should be a stackable in slot: %i, from %i (+%i)",newslot,thisclient->storageitems[newslot].count,newitem.count);
+               newitem.count+=thisclient->storageitems[newslot].count;
+               //Log(MSG_INFO,"so new=%i",newitem.count);               
+            }
+            else
+            {
+                //Log(MSG_INFO,"it should be a new slot: %i",newslot);
+                thisclient->nstorageitems++;
+            }
+                        
             if(newslot==0xffff)
                 return true;
             BEGINPACKET( pak, 0x7ae );
@@ -2701,27 +2732,56 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             ADDWORD    ( pak, newslot ); 
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[itemslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[itemslot] ) );
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
             ADDDWORD   ( pak, BuildItemHead( newitem ) ); 
             ADDDWORD   ( pak, BuildItemData( newitem ) ); 
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
     		ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
-            thisclient->client->SendPacket( &pak ); 
+            thisclient->client->SendPacket( &pak );
+            
+            //LMA: previous code:
+            /* 
             thisclient->storageitems[newslot] = newitem;    
-            thisclient->nstorageitems++;            
+            thisclient->nstorageitems++;
+            */
+                       
+            thisclient->storageitems[newslot] = newitem;
+            
+            //LMA: need to save the storage item...
+            SaveSlotStorage(thisclient,newslot);
         }
         break;//thanks to anon for post that this break was missing 
         case 0x01: //Withdraw
-        {            
+        {   
             BYTE storageslot = GETBYTE((*P),1);            
             if(storageslot>=160)
             {
-                Log( MSG_HACK, "Invalid storage slot %i from %s", storageslot, thisclient->Session->username );
+                Log( MSG_HACK, "%s, Invalid storage slot %i from %s",thisclient->CharInfo->charname, storageslot, thisclient->Session->username );
                 return false;
             }
-            CItem newitem =  newitem = thisclient->storageitems[storageslot];                  
+            
+            //LMA: get the slot concerned to refresh it from MySQL storage
+            if(!GetSlotStorage(thisclient,storageslot))
+            {
+                Log( MSG_HACK, "%s, Invalid storage slot %i from %s (from Mysql)",thisclient->CharInfo->charname, storageslot, thisclient->Session->username );
+                return false;             
+            }
+            
+            /*
+            //LMA: checking if item is the same we get from packet, testing itemtype and itemnum...
+            //2do: test other things too (later)
+            CItem testitem = GetItemByHeadAndData(GETDWORD((*P),2),GETDWORD((*P),6));
+            if ((testitem.itemnum!=thisclient->storageitems[storageslot].itemnum)||(testitem.itemtype!=thisclient->storageitems[storageslot].itemtype))
+            {
+               Log(MSG_HACK,"%s, Different object in Packet [%i:%i] and in storage slot %i [%i:%i]",thisclient->CharInfo->charname,testitem.itemtype,testitem.itemnum,storageslot,thisclient->storageitems[storageslot].itemtype,thisclient->storageitems[storageslot].itemnum);
+               return false;
+            }            
+            */
+            
+            //CItem newitem =  newitem = thisclient->storageitems[storageslot];                  
+            CItem newitem = thisclient->storageitems[storageslot];
             if(newitem.itemtype>9 && newitem.itemtype<14)
             {
                 WORD count = GETWORD((*P),6);                
@@ -2736,7 +2796,9 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             {
                 ClearItem(thisclient->storageitems[storageslot]);                
             }                             
-            int newslot= thisclient->GetNewItemSlot ( newitem ); 
+            
+            int newslot= thisclient->GetNewItemSlot ( newitem );
+            //no place in player's inventory, so back to storage. 
             if(newslot==0xffff)
             {
                 thisclient->storageitems[storageslot] = newitem;
@@ -2773,17 +2835,20 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             ADDWORD    ( pak, storageslot );
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
                   
             ADDDWORD   ( pak, BuildItemHead( thisclient->storageitems[storageslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->storageitems[storageslot] ) );
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
     		ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
             ADDBYTE    ( pak, 0x00 );    		
             thisclient->client->SendPacket( &pak );            
-            thisclient->nstorageitems--;                                    
+            thisclient->nstorageitems--;
+            
+            //LMA: need to save the storage item...
+            SaveSlotStorage(thisclient,storageslot);                                  
         }        
         break;
         default:
@@ -2800,7 +2865,7 @@ bool CWorldServer::pakStoreZuly( CPlayer* thisclient, CPacket* P)
     switch(action)
     {
         case 0x10://deposit'
-        {
+        {            
             if(zuly > thisclient->CharInfo->Zulies)
                 return true;
             thisclient->CharInfo->Zulies -= zuly;
@@ -2809,11 +2874,17 @@ bool CWorldServer::pakStoreZuly( CPlayer* thisclient, CPacket* P)
             ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
             ADDQWORD   ( pak, thisclient->CharInfo->Storage_Zulies );
             ADDBYTE    ( pak, 0x00 );
-            thisclient->client->SendPacket( &pak );        
+            thisclient->client->SendPacket( &pak ); 
+            
+            //LMA: Saving Zuly Storage
+            SaveZulyStorage(thisclient);                   
         }
         break;
         case 0x11://withdraw
         {
+             //LMA: refreshing Zuly from MySQL...
+             if(!GetZulyStorage(thisclient))
+                   return true;
             if(zuly > thisclient->CharInfo->Storage_Zulies )
                 return true;
             thisclient->CharInfo->Zulies += zuly;
@@ -2822,7 +2893,10 @@ bool CWorldServer::pakStoreZuly( CPlayer* thisclient, CPacket* P)
             ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
             ADDQWORD   ( pak, thisclient->CharInfo->Storage_Zulies );            
             ADDBYTE    ( pak, 0x00 );
-            thisclient->client->SendPacket( &pak );          
+            thisclient->client->SendPacket( &pak );
+            
+            //LMA: Saving Zuly Storage
+            SaveZulyStorage(thisclient);    
         }
         break;
         default:
