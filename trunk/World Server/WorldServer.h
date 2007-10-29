@@ -379,6 +379,11 @@ class CWorldServer : public CServerSocket
         unsigned ATTK_SPEED_MODIF;
         unsigned HIT_DELAY_MODIF;
         unsigned MOVE_SPEED_MODIF;
+       // geo edit for disassemble // 22 oct 07
+        UINT BreakListSize;
+        bool LoadBreakList();
+        CBreakList BreakList[1000];
+ 
 };
 extern class CWorldServer* GServer;
 

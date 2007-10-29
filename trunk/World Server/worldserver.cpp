@@ -471,6 +471,7 @@ bool CWorldServer::OnServerReady( )
     LoadJemItem( );
     LoadEquip( );
     LoadItemStats( );
+    LoadBreakList( );     // geo edit for disassemble // 22 oct 07
     LoadSkillData( );
     LoadDropsData( );
     LoadChestData( );

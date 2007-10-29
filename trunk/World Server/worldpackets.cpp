@@ -3349,7 +3349,8 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
         }   
         break; //case 0x02 ( Surprise gift box )       
 
-        case 0x02: // Treasure Chests
+       case 0x02: // Treasure Chests, Gift Box - by Drakia
+                  // Disassemble - by Geobot
         {
             CItem item;
             CItem itemextra;
@@ -3358,13 +3359,94 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             CChest* thischest = GetChestByID(thisclient->items[chestSlot].itemnum);
             if (thischest == NULL)
             {
-                Log(MSG_WARNING, "No reward found for chest %i", thisclient->items[chestSlot].itemnum);
-                return true;
+/////////////////////////////////////   start disassemble           
+            BYTE src = GETBYTE((*P),3);
+            if(!CheckInventorySlot( thisclient, src))
+                return false;
+            if(thisclient->items[src].count < 1)
+                return false;
+           
+           int k = 9999;
+           for(int i=0;i<1000;i++)
+           {
+               if(thisclient->items[src].itemnum == BreakList[i].itemnum && thisclient->items[src].itemtype == BreakList[i].itemtype)
+                   k = i;
+           }
+           if(k==9999)
+               return false;
+           
+           UINT totalprob = 0;
+           for(int i=0;i<BreakList[k].total;i++)
+           {
+               totalprob += BreakList[k].prob[i];
+           }
+           if(totalprob==0)
+               return false;
+               
+           UINT rand = RandNumber(0,99999);
+           UINT m = 99;
+           for(int i=0;i<BreakList[k].total;i++)
+           {
+               if(rand < BreakList[k].prob[i])
+                   m = i;
+               else
+                   rand -= BreakList[k].prob[i];
+           }
+           if(m>14)
+               return false;
+               
+           UINT num = BreakList[k].product[m] % 1000;
+           UINT type = int(BreakList[k].product[m] / 1000);
+               
+               CItem newitem;
+               newitem.itemnum = num;
+               newitem.itemtype = type;
+               newitem.count = BreakList[k].amount[m];
+               newitem.refine = 0;
+               newitem.lifespan = 100;
+               newitem.durability = RandNumber(40,50);
+               newitem.socketed=0;
+               newitem.appraised=0;
+               newitem.stats=0;
+               newitem.gem=0;
+         
+               unsigned newslot = thisclient->GetNewItemSlot(newitem);
+               if(newslot == 0xffff) return false;
+ 
+               if(thisclient->items[newslot].count > 0)
+               {
+                   thisclient->items[newslot].count += newitem.count;
+                   if(thisclient->items[newslot].count > 999)
+                       thisclient->items[newslot].count = 999;
+               }
+               else
+                   thisclient->items[newslot] = newitem;  
+             
+              thisclient->items[src].count -= 1;
+              if( thisclient->items[src].count < 1)
+                  ClearItem( thisclient->items[src] );      
+              thisclient->UpdateInventory(src);        
+ 
+              BEGINPACKET( pak, 0x7bc );
+              ADDBYTE    ( pak, 0x07 );//disassemble success
+              ADDBYTE    ( pak, 0x02 );//number of items to follow  
+              ADDBYTE    ( pak, newslot );
+              ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
+              ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );      
+              ADDWORD    ( pak, 0x0000);
+              ADDWORD    ( pak, 0x0000);
+              ADDWORD    ( pak, 0x0000);
+              ADDBYTE    ( pak, src );
+              ADDDWORD   ( pak, BuildItemHead( thisclient->items[src] ) );
+              ADDDWORD   ( pak, BuildItemData( thisclient->items[src] ) );              
+              ADDWORD    ( pak, 0x0000);
+              ADDWORD    ( pak, 0x0000);
+              ADDWORD    ( pak, 0x0000);
+              thisclient->client->SendPacket( &pak );        
+              return true;
+/////////////////////////////////////    end disassemble            
             }
             unsigned int randv = RandNumber( 1, thischest->probmax );
-            //int Unk1 = GETBYTE((*P), 1);  // I don't know what these 2 values are for...
-            //int Unk2 = GETBYTE((*P), 2);
-            //Log(MSG_INFO, "Slot: %u  Unk1: %u  Unk2: %u", Slot, Unk1, Unk2);  // Just a debug message
  
             DWORD prob = 1;
             for(UINT i=0;i<thischest->Rewards.size();i++)

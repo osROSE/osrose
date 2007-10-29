@@ -1188,3 +1188,44 @@ bool CWorldServer::LoadItemStats( )
     fclose(fh);
     return true;
 }
+
+// geo edit for disassemble // 22 oct 07
+bool CWorldServer::LoadBreakList()
+{
+    Log( MSG_LOAD, "Disassembly List      " );    
+    FILE* fh = NULL;
+    fh = fopen("data/break_data.csv", "r");
+    if(fh==NULL)
+    {
+        Log(MSG_ERROR, "\nError loading file data/break_data.csv" );
+        return false;
+    }    
+    char line[500];
+    char* temp;
+    fgets( line, 500, fh );// this is the column name
+    int i=0;
+    while(!feof(fh))
+    {       
+      if(i<1000)
+      { 
+        memset( &line, '\0', 500 );
+        fgets( line, 500, fh );    
+        UINT itemid = GetUIntValue(",",&line);
+        BreakList[i].itemtype = int(itemid / 1000);
+        BreakList[i].itemnum = itemid % 1000;
+        for(int j=0;j<15;j++)
+        {
+            BreakList[i].product[j] = GetUIntValue(",");
+            BreakList[i].amount[j] = GetUIntValue(",");
+            BreakList[i].prob[j] = GetUIntValue(",");
+        }
+        BreakList[i].numToGive = GetUIntValue(",");
+        BreakList[i].total = GetUIntValue(",");
+        i++;  
+      }         
+    }
+    BreakListSize = i-1;
+    fclose(fh);
+    return true;     
+}
+ 
