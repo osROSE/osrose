@@ -1618,10 +1618,12 @@ else if (strcmp(command, "give2")==0)
         if (Config.testgrid!=0)
         {
            Config.testgrid=0;
+           SendPM(thisclient,"We are in Range Mode.");
         }
         else
         {
            Config.testgrid=1;
+           SendPM(thisclient,"We are in Grid Mode.");         
         }
         
 	    Log( MSG_GMACTION, " Test Grid set at %i by %s" , Config.testgrid, thisclient->CharInfo->charname);
