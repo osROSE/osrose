@@ -1328,7 +1328,6 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
      //Clan Shop case...
      Log(MSG_INFO,"Buying /selling from NPC %i",thisnpc->npctype);
      bool is_clanshop=false;
-     bool hack_detected=false;
      if (thisnpc->npctype==1752)
      {
         is_clanshop=true;
@@ -1347,7 +1346,6 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 	ADDBYTE    ( pak, 0x00 );
 	for (int i=0; i<buycount; i++) 
     {   
-        hack_detected=false;
 		BYTE tabid = GETBYTE((*P), 8+(i*4));
 		BYTE itemid = GETBYTE((*P), 9+(i*4));
 		WORD count = GETWORD((*P), 10+(i*4));
@@ -1390,17 +1388,18 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 			thisitem.socketed = false;
 			thisitem.stats = 0;
 			thisitem.gem = 0;
-			thisclient->items[newslot] = thisitem;
 			
 			//checking money / reward points now...
 			/*
+			thisclient->items[newslot] = thisitem;
+			
 			ADDBYTE  ( pak, newslot );
 			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
 			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
             ADDDWORD( pak, 0x00000000 );
             ADDWORD ( pak, 0x0000 );   
-             */
-             
+            */
+            
     		switch(thisitem.itemtype)
     		{			
                 case 1:
@@ -1438,27 +1437,19 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                     {
                         if (thisclient->CharInfo->rewardpoints<(long int) price)
                         {
-                          hack_detected=true;
                           Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price);                                    
+                          return true;
                         }
-                        else
-                        {
-                           thisclient->CharInfo->rewardpoints -= (long int) price;
-                        }
-                        
+                        thisclient->CharInfo->rewardpoints -= (long int) price;
                     }
                     else
                     {
                         if (thisclient->CharInfo->Zulies<(long int)price)
                         {
-                          hack_detected=true;
                           Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int) price);                                    
+                          return true;
                         }
-                        else
-                        {
-                           thisclient->CharInfo->Zulies -= (long int)price;
-                        }                     
-
+                        thisclient->CharInfo->Zulies -= (long int)price;
                     }
                       
                 }     
@@ -1525,27 +1516,19 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                         {
                             if (thisclient->CharInfo->rewardpoints<(long int) price*count)
                             {
-                              hack_detected=true;
                               Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price*count);                                    
+                              return true;
                             }
-                            else
-                            {
-                               thisclient->CharInfo->rewardpoints -= (long int) price*count;
-                            }
-                            
+                            thisclient->CharInfo->rewardpoints -= (long int) price*count;
                         }
                         else
                         {
                             if (thisclient->CharInfo->Zulies<(long int)price*count)
                             {
-                              hack_detected=true;
                               Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int)price*count);                                    
+                              return true;
                             }
-                            else
-                            {
-                               thisclient->CharInfo->Zulies -= (long int)price*count;
-                            }                     
-    
+                            thisclient->CharInfo->Zulies -= (long int)price*count;
                         }
                         
                     }
@@ -1565,27 +1548,19 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                         {
                             if (thisclient->CharInfo->rewardpoints<(long int) price*count)
                             {
-                              hack_detected=true;
                               Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price*count);                                    
+                              return true;
                             }
-                            else
-                            {
-                               thisclient->CharInfo->rewardpoints -= (long int) price*count;
-                            }
-                            
+                            thisclient->CharInfo->rewardpoints -= (long int) price*count;
                         }
                         else
                         {
                             if (thisclient->CharInfo->Zulies<(long int)price*count)
                             {
-                              hack_detected=true;
                               Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int)price*count);                                    
+                              return true;
                             }
-                            else
-                            {
-                               thisclient->CharInfo->Zulies -= (long int)price*count;
-                            }                     
-    
+                            thisclient->CharInfo->Zulies -= (long int)price*count;
                         }
                                                                                              
                     }
@@ -1628,27 +1603,20 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                     {
                         if (thisclient->CharInfo->rewardpoints<(long int) price*count)
                         {
-                          hack_detected=true;
                           Log(MSG_HACK, "Not enough reward points player %s, have %u, need %u",thisclient->CharInfo->charname,thisclient->CharInfo->rewardpoints,(long int) price*count);                                    
+                          return true;
                         }
-                        else
-                        {
-                           thisclient->CharInfo->rewardpoints -= (long int) price*count;
-                        }
-                        
+                        thisclient->CharInfo->rewardpoints -= (long int) price*count;
                     }
                     else
                     {
                         if (thisclient->CharInfo->Zulies<(long int)price*count)
                         {
-                          hack_detected=true;
                           Log(MSG_HACK, "Not enough Zuly player %s, have %li, need %li",thisclient->CharInfo->charname,thisclient->CharInfo->Zulies,(long int)price*count);                                    
+                          return true;
                         }
-                        else
-                        {
-                           thisclient->CharInfo->Zulies -= (long int)price*count;
-                        }                     
-
+                          
+                        thisclient->CharInfo->Zulies -= (long int)price*count;
                     }
                                                                  
                 }
@@ -1656,17 +1624,16 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                 default:
                     Log( MSG_WARNING, "Invalid Item Type: %i", thisitem.itemtype );                            
             }
-            
-            //LMA: giving item only is everything went ok (enough money / reward points).
-            if (!hack_detected)
-            {
-      			ADDBYTE  ( pak, newslot );
-    			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
-    			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
-                ADDDWORD( pak, 0x00000000 );
-                ADDWORD ( pak, 0x0000 );           
-            }
-                        
+
+            //We add item at the end when checks done.
+			thisclient->items[newslot] = thisitem;
+			
+			ADDBYTE  ( pak, newslot );
+			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
+			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
+            ADDDWORD( pak, 0x00000000 );
+            ADDWORD ( pak, 0x0000 );   
+                      
 			ncount++;
 		}
 	}
@@ -1685,6 +1652,13 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
            return true;
 		CItem thisitem = thisclient->items[slotid];
 		thisitem.count = count;
+		
+		if (thisclient->items[slotid].count<thisitem.count)
+		{
+          Log(MSG_HACK, "[NPC-SELL] Player %s tryes to sell %i [%i:%i], but has only %i",thisclient->CharInfo->charname,thisitem.count,thisitem.itemtype,thisitem.itemnum,thisclient->items[slotid].count);
+          return true;
+        }
+		
 		switch(thisitem.itemtype)
 		{
             case 1:
@@ -1805,11 +1779,11 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                 {
                     case 7:              
                         pricerate = EquipList[thisitem.itemtype].Index[thisitem.itemnum]->pricerate;
-                        bprice = EquipList[thisitem.itemtype].Index[thisitem.itemnum]->price;                 
+                        bprice = EquipList[thisitem.itemtype].Index[thisitem.itemnum]->price;
                     break;
                     case 11:
                         pricerate = JemList.Index[thisitem.itemnum]->pricerate;
-                        bprice = JemList.Index[thisitem.itemnum]->price;             
+                        bprice = JemList.Index[thisitem.itemnum]->price;
                     break;
                     case 13:continue;//can we sell quest items? :S
                         
@@ -1834,8 +1808,8 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
 		ADDBYTE( pak, slotid );
 		ADDDWORD( pak, BuildItemHead( thisclient->items[slotid] ) );
 		ADDDWORD( pak, BuildItemData( thisclient->items[slotid] ) );
-            ADDDWORD( pak, 0x00000000 );
-            ADDWORD ( pak, 0x0000 );   
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );   
 
 		ncount++;
 	}
@@ -1858,7 +1832,7 @@ bool CWorldServer::pakStartSkill ( CPlayer* thisclient, CPacket* P )
         Log( MSG_HACK, "Invalid Skill id %i for %s ", skillnum, thisclient->CharInfo->charname );
         return false;
     }    
-    unsigned int skillid = thisclient->cskills[skillnum].id+thisclient->cskills[skillnum].level-1;	    
+    unsigned int skillid = thisclient->cskills[skillnum].id+thisclient->cskills[skillnum].level-1;
     CMap* map = MapList.Index[thisclient->Position->Map];
     CCharacter* character = map->GetCharInMap( targetid );
     if(character==NULL) return true;
@@ -1965,10 +1939,26 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 				otherclient->client->SendPacket( &pak );
 				
 				// Check if user has enough zuly
-                if ( thisclient->CharInfo->Zulies < thisclient->Trade->trade_count[0x0a]) return true;
-                if ( thisclient->CharInfo->Zulies < otherclient->Trade->trade_count[0x0a]) return true;
+                if ( thisclient->CharInfo->Zulies < thisclient->Trade->trade_count[0x0a])
+                {
+                  Log(MSG_HACK, "[TRADE] Player %s has to trade %li, but has only %li",thisclient->CharInfo->charname,thisclient->Trade->trade_count[0x0a],thisclient->CharInfo->Zulies);
+                  return true;
+                }
+                //LMA: bug... surely...
+                //if ( thisclient->CharInfo->Zulies < otherclient->Trade->trade_count[0x0a]) return true;
+                if ( otherclient->CharInfo->Zulies < otherclient->Trade->trade_count[0x0a])
+                {
+                  Log(MSG_HACK, "[TRADE] Player %s has to trade %li, but has only %li",otherclient->CharInfo->charname,otherclient->Trade->trade_count[0x0a],otherclient->CharInfo->Zulies);
+                  return true;
+                }
 
 				// Update the zuly
+				//LMA: anti hack...
+				long int zulythis=0;
+				long int zulyother=0;
+				zulythis=thisclient->CharInfo->Zulies;
+				zulyother=otherclient->CharInfo->Zulies;
+				
 				thisclient->CharInfo->Zulies -= thisclient->Trade->trade_count[0x0a];
 				otherclient->CharInfo->Zulies -= otherclient->Trade->trade_count[0x0a];
 				thisclient->CharInfo->Zulies += otherclient->Trade->trade_count[0x0a];
@@ -1986,7 +1976,37 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 				BEGINPACKET( pako, 0x717 );
 				ADDQWORD( pako, otherclient->CharInfo->Zulies );
 				ADDBYTE( pako, 0 );
+                
+                //LMA: check before actually giving the items to players...
+  				for (unsigned i=0; i<10; i++) 
+                {
+					if(thisclient->Trade->trade_count[i] > 0) 
+                    {
+						//LMA: anti hack check.
+						if(thisclient->items[thisclient->Trade->trade_itemid[i]].count < thisclient->Trade->trade_count[i])
+						{
+                          Log(MSG_HACK, "[TRADE] Player %s has to trade %i [%i:%i], but has only %i",thisclient->CharInfo->charname,thisclient->Trade->trade_count[i],thisclient->items[thisclient->Trade->trade_itemid[i]].itemtype,thisclient->items[thisclient->Trade->trade_itemid[i]].itemnum,thisclient->items[thisclient->Trade->trade_itemid[i]].count);
+          				  thisclient->CharInfo->Zulies=zulythis;
+        				  otherclient->CharInfo->Zulies=zulyother;
+                          return true;
+                        }
 
+					}
+					if(otherclient->Trade->trade_count[i] > 0) 
+                    {
+						//LMA: anti hack check.
+						if(otherclient->items[otherclient->Trade->trade_itemid[i]].count<otherclient->Trade->trade_count[i])
+						{
+                          Log(MSG_HACK, "[TRADE] Player %s has to trade %i [%i:%i], but has only %i",otherclient->CharInfo->charname,otherclient->Trade->trade_count[i],otherclient->items[otherclient->Trade->trade_itemid[i]].itemtype,otherclient->items[otherclient->Trade->trade_itemid[i]].itemnum,otherclient->items[otherclient->Trade->trade_itemid[i]].count);                                                                                                                            
+          				  thisclient->CharInfo->Zulies=zulythis;
+        				  otherclient->CharInfo->Zulies=zulyother;
+                          return true;
+                        }
+                        						
+					}
+				}              
+            
+                //Ok, go, it should be ok now...
 				for (unsigned i=0; i<10; i++) 
                 {
 					if(thisclient->Trade->trade_count[i] > 0) 
@@ -1994,6 +2014,16 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						CItem thisitem = thisclient->items[thisclient->Trade->trade_itemid[i]];
 						unsigned newslot = otherclient->GetNewItemSlot( thisitem );
 						if(newslot==0xffff) continue;
+						
+						//LMA: anti hack check.
+						if(thisclient->items[thisclient->Trade->trade_itemid[i]].count < thisclient->Trade->trade_count[i])
+						{
+                          Log(MSG_HACK, "[TRADE] Player %s has to trade %i [%i:%i], but has only %i",thisclient->CharInfo->charname,thisclient->Trade->trade_count[i],thisclient->items[thisclient->Trade->trade_itemid[i]].itemtype,thisclient->items[thisclient->Trade->trade_itemid[i]].itemnum,thisclient->items[thisclient->Trade->trade_itemid[i]].count);
+          				  thisclient->CharInfo->Zulies=zulythis;
+        				  otherclient->CharInfo->Zulies=zulyother;
+                          return true;
+                        }
+                        
 						thisclient->items[thisclient->Trade->trade_itemid[i]].count -= thisclient->Trade->trade_count[i];
 						if( thisclient->items[thisclient->Trade->trade_itemid[i]].count<=0)
       						ClearItem(thisclient->items[thisclient->Trade->trade_itemid[i]]);
@@ -2020,6 +2050,16 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						CItem thisitem = otherclient->items[otherclient->Trade->trade_itemid[i]];
 						unsigned newslot = thisclient->GetNewItemSlot( thisitem );
 						if(newslot==0xffff) continue;
+						
+						//LMA: anti hack check.
+						if(otherclient->items[otherclient->Trade->trade_itemid[i]].count<otherclient->Trade->trade_count[i])
+						{
+                          Log(MSG_HACK, "[TRADE] Player %s has to trade %i [%i:%i], but has only %i",otherclient->CharInfo->charname,otherclient->Trade->trade_count[i],otherclient->items[otherclient->Trade->trade_itemid[i]].itemtype,otherclient->items[otherclient->Trade->trade_itemid[i]].itemnum,otherclient->items[otherclient->Trade->trade_itemid[i]].count);                                                                                                                            
+          				  thisclient->CharInfo->Zulies=zulythis;
+        				  otherclient->CharInfo->Zulies=zulyother;
+                          return true;
+                        }
+                        						
 						otherclient->items[otherclient->Trade->trade_itemid[i]].count -= otherclient->Trade->trade_count[i];
 						if( otherclient->items[otherclient->Trade->trade_itemid[i]].count<=0 )
       						ClearItem( otherclient->items[otherclient->Trade->trade_itemid[i]] );
