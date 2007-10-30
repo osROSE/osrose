@@ -695,7 +695,7 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 useitem->usescript = 2;
                 switch( useitem->itemnum )
                 {
-                    //Adventure plain [credits to tomiz]
+                    //Adventure's Plains - Drop only - [credits to tomiz]
                     case 350:
                         useitem->usetype = 22;
                         useitem->usevalue = 51105310;                        
@@ -705,7 +705,7 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                         useitem->usetype = 1;
                         useitem->usevalue = 52405192;
                     break;
-                    //Junon
+                    //Junon Polis
                     case 352:
                         useitem->usetype = 2;
                         useitem->usevalue = 55095283;                        
@@ -715,42 +715,42 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                         useitem->usetype = 51;
                         useitem->usevalue = 53665099;                        
                     break;          
-                    //Xita
+                    //Xita Refuge
                     case 354:
                         useitem->usetype = 61;
                         useitem->usevalue = 54344607;                        
                     break;                                
-                    //Goblin cave
+                    //Goblin Cave - Mileage Scroll
                     case 360:
                         useitem->usetype = 22; //31 Value Before - rl2171
                         useitem->usevalue = 54105040; //55185444 Value Before - rl2171                        
                     break;
-                    //Desert of dead
+                    //Desert of the Dead - Mileage Scroll
                     case 361:
                         useitem->usetype = 29;
                         useitem->usevalue = 51405160; //50825013 Value Before - rl2171
                     break;                    
-                    //El Verloon
+                    //El Verloon - Mileage Scroll
                     case 362:
                         useitem->usetype = 24;
-                        useitem->usevalue = 55275377;                        
+                        useitem->usevalue = 55205370;                        
                     break;                    
-                    //George of Silence
+                    //George of Silence - Mileage Scroll
                     case 363:
                         useitem->usetype = 28;
                         useitem->usevalue = 53005100; //54674783 Value before - rl2171
                     break;                    
-                    //Shady Jungle
+                    //Shady Jungle - Mileage Scroll
                     case 364:
                         useitem->usetype = 62;
                         useitem->usevalue = 58405170; //57515196 Value before - rl2171                       
                     break;  
-                    //Sikuku Underground Prison - added by rl2171
+                    //Sikuku Underground Prison - Mileage Scroll - added by rl2171
                     case 365:
                         useitem->usetype = 63;
                         useitem->usevalue = 54004440;                        
                     break;                    
-                    //Junon's Order Return Scroll - added by rl2171
+                    //Junon's Order Return Scroll - Quest Scroll - added by rl2171
                     case 945:
                         useitem->usetype = 2;
                         useitem->usevalue = 53225100;                        
@@ -789,7 +789,7 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];                                  
             }
             else // Summons
-            if( (useitem->itemnum>400 && useitem->itemnum<440) || (useitem->itemnum>915 && useitem->itemnum<918) || (useitem->itemnum>939 && useitem->itemnum<943) )
+            if( (useitem->itemnum>400 && useitem->itemnum<440) || (useitem->itemnum==496) || (useitem->itemnum==594) || (useitem->itemnum>915 && useitem->itemnum<918) || (useitem->itemnum>939 && useitem->itemnum<943) )
             {
                 if( thisclient->CharInfo->stamina<101 )
                     return NULL;
@@ -802,6 +802,8 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 else if(useitem->itemnum==940){useitem->usevalue = 994;} // Easter Bunny
                 else if(useitem->itemnum==941){useitem->usevalue = 995;} // Easter Egg
                 else if(useitem->itemnum==942){useitem->usevalue = 1472;} // Soccer Ball Pet
+                else if(useitem->itemnum==594) {useitem->usevalue = 941;} // Lucky Ghost
+                else if(useitem->itemnum==496) {useitem->usevalue = 992;} // Christmas Tree
 //                else if(useitem->itemnum==943) {useitem->usevalue;} // Event Scroll
 //                else if(useitem->itemnum==944){useitem->usevalue = 172;} // Arua's Blessing
                 else{ useitem->usevalue = useitem->itemnum + 500; }                
