@@ -782,7 +782,8 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];                  
             }
             else // Emotions
-            if( (useitem->itemnum>970 && useitem->itemnum<979) )
+            if( (useitem->itemnum>970 && useitem->itemnum<979) || 
+                (useitem->itemnum>599 && useitem->itemnum<608) )
             {
                 useitem->usescript = 4;
                 useitem->usetype = UseList.Index[useitem->itemnum]->useeffect[0];
@@ -838,7 +839,7 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
            delete useitem;        
            return NULL;
         break;
-        case 317://Engine Fuel
+        case 317://Engine Fuel - items 293-295
 //DreamRose Updates - needs updating before use
 /*        {
             useitem->usescript = 1;
@@ -865,7 +866,7 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
             return NULL;
             }
         break;
-        case 321://Time Coupon
+        case 321://Time Coupon - items 201-203, 948, 952-957
 //DreamRose Updates - needs updating before use
 /*        {
             if(thisclient->PlayerSession->MedalUsed == false)
@@ -883,6 +884,8 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
         }
         break;
 */
+        case 323://Job Skill, Unique Kill, Mileage Skill and All Skill Reset Books
+
             delete useitem;        
             return NULL;
         break;
