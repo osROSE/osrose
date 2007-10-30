@@ -1805,11 +1805,11 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
                 {
                     case 7:              
                         pricerate = EquipList[thisitem.itemtype].Index[thisitem.itemnum]->pricerate;
-                        bprice *= EquipList[thisitem.itemtype].Index[thisitem.itemnum]->price;                 
+                        bprice = EquipList[thisitem.itemtype].Index[thisitem.itemnum]->price;                 
                     break;
                     case 11:
                         pricerate = JemList.Index[thisitem.itemnum]->pricerate;
-                        bprice *= JemList.Index[thisitem.itemnum]->price;              
+                        bprice = JemList.Index[thisitem.itemnum]->price;             
                     break;
                     case 13:continue;//can we sell quest items? :S
                         
