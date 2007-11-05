@@ -1,42 +1,51 @@
--- -------------------------------
--- Table structure for skills_data
--- -------------------------------
-DROP TABLE IF EXISTS skills_data;
-CREATE TABLE skills_data (
-	id int(11) NOT NULL default 0,
-	level int(11) NOT NULL,
-	sp int(11) NOT NULL,
-	type int(11) NOT NULL,
-	range int(11) NOT NULL,
-	target int(11) NOT NULL,
-	power int(11) NOT NULL,
-	duration int(11) NOT NULL,
-	mp int(11) NOT NULL,
-	success int(11) NOT NULL,
-	weapon varchar(200) NOT NULL,
-	class varchar(200) NOT NULL,
-	rskills varchar(200) NOT NULL,
-	lskills varchar(200) NOT NULL,
-	buff1 int(11) NOT NULL,
-	buffv11 int(11) NOT NULL,
-	buffv12 int(11) NOT NULL,
-	buff2 int(11) NOT NULL,
-	buffv21 int(11) NOT NULL,
-	buffv22 int(11) NOT NULL,
-	buff3 int(11) NOT NULL,
-	buffv31 int(11) NOT NULL,
-	buffv32 int(11) NOT NULL,
-	clevel int(11) NOT NULL,
-	aoe tinyint(1) NOT NULL,
-	aoeradius int(11) NOT NULL,
-	script int(11) NOT NULL default 0,
-	value1 int(11) NOT NULL default 0,
-	  PRIMARY KEY  (id)
-	) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+/*
+MySQL Data Transfer
+Source Host: localhost
+Source Database: osrose
+Target Host: localhost
+Target Database: osrose
+Date: 11/5/2007 8:03:59 AM
+*/
 
--- ---------------------------
--- Records skills_data / tomiz
--- ---------------------------
+SET FOREIGN_KEY_CHECKS=0;
+-- ----------------------------
+-- Table structure for skills_data
+-- ----------------------------
+CREATE TABLE `skills_data` (
+  `id` int(11) NOT NULL default '0',
+  `level` int(11) NOT NULL,
+  `sp` int(11) NOT NULL,
+  `type` int(11) NOT NULL,
+  `range` int(11) NOT NULL,
+  `target` int(11) NOT NULL,
+  `power` int(11) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `mp` int(11) NOT NULL,
+  `success` int(11) NOT NULL,
+  `weapon` varchar(200) NOT NULL,
+  `class` varchar(200) NOT NULL,
+  `rskills` varchar(200) NOT NULL,
+  `lskills` varchar(200) NOT NULL,
+  `buff1` int(11) NOT NULL,
+  `buffv11` int(11) NOT NULL,
+  `buffv12` int(11) NOT NULL,
+  `buff2` int(11) NOT NULL,
+  `buffv21` int(11) NOT NULL,
+  `buffv22` int(11) NOT NULL,
+  `buff3` int(11) NOT NULL,
+  `buffv31` int(11) NOT NULL,
+  `buffv32` int(11) NOT NULL,
+  `clevel` int(11) NOT NULL,
+  `aoe` tinyint(1) NOT NULL,
+  `aoeradius` int(11) NOT NULL,
+  `script` int(11) NOT NULL default '0',
+  `value1` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records 
+-- ----------------------------
 INSERT INTO `skills_data` VALUES ('10', '0', '0', '1', '1', '0', '0', '0', '0', '100', '0|0|0|0|0', '0|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0');
 INSERT INTO `skills_data` VALUES ('11', '0', '0', '1', '2', '0', '0', '0', '0', '100', '0|0|0|0|0', '0|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0');
 INSERT INTO `skills_data` VALUES ('12', '0', '0', '1', '6', '0', '0', '0', '0', '0', '0|0|0|0|0', '0|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0');
@@ -1320,9 +1329,9 @@ INSERT INTO `skills_data` VALUES ('2097', '2', '1', '15', '0', '0', '0', '0', '0
 INSERT INTO `skills_data` VALUES ('2101', '1', '1', '14', '0', '0', '0', '0', '120', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '70', '0', '0', '1', '853');
 INSERT INTO `skills_data` VALUES ('2102', '2', '1', '14', '0', '0', '0', '0', '130', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '75', '0', '0', '1', '854');
 INSERT INTO `skills_data` VALUES ('2103', '3', '1', '14', '0', '0', '0', '0', '140', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '80', '0', '0', '1', '855');
-INSERT INTO `skills_data` VALUES ('2106', '1', '1', '14', '0', '0', '0', '0', '150', '100', '0|0|0|0|0', '44|0|0|0|0', '2096|2101|0', '1|1|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '85', '0', '0', '0', '0');
-INSERT INTO `skills_data` VALUES ('2107', '2', '1', '14', '0', '0', '0', '0', '160', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '90', '0', '0', '0', '0');
-INSERT INTO `skills_data` VALUES ('2108', '3', '1', '14', '0', '0', '0', '0', '170', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '95', '0', '0', '0', '0');
+INSERT INTO `skills_data` VALUES ('2106', '1', '1', '14', '0', '0', '0', '0', '150', '100', '0|0|0|0|0', '44|0|0|0|0', '2096|2101|0', '1|1|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '85', '0', '0', '1', '863');
+INSERT INTO `skills_data` VALUES ('2107', '2', '1', '14', '0', '0', '0', '0', '160', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '90', '0', '0', '1', '864');
+INSERT INTO `skills_data` VALUES ('2108', '3', '1', '14', '0', '0', '0', '0', '170', '100', '0|0|0|0|0', '44|0|0|0|0', '0|0|0', '0|0|0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '95', '0', '0', '1', '865');
 INSERT INTO `skills_data` VALUES ('2111', '1', '1', '8', '0', '0', '0', '30', '100', '100', '0|0|0|0|0', '44|0|0|0|0', '2031|2076|0', '1|1|0', '18', '0', '30', '0', '0', '0', '0', '0', '0', '55', '0', '0', '0', '0');
 INSERT INTO `skills_data` VALUES ('2112', '2', '1', '8', '0', '0', '0', '30', '120', '100', '0|0|0|0|0', '44|0|0|0|0', '2031|2076|0', '2|4|0', '18', '0', '40', '0', '0', '0', '0', '0', '0', '70', '0', '0', '0', '0');
 INSERT INTO `skills_data` VALUES ('2113', '3', '1', '8', '0', '0', '0', '30', '140', '100', '0|0|0|0|0', '44|0|0|0|0', '2031|2076|0', '3|7|0', '18', '0', '50', '0', '0', '0', '0', '0', '0', '85', '0', '0', '0', '0');

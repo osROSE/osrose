@@ -183,6 +183,7 @@ struct CROSEServerConfig
     int EventNPC;  //Event
     int osRoseVer ; //Revision of server
     int testgrid; //LMA: maps, testing grids...
+    int jrose; //LMA: for handling jRose (163)
     
     // COMMAND LEVELS
     int Command_Go;

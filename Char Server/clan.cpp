@@ -178,7 +178,7 @@ bool CCharServer::SendClanInfo (CCharClient* thisclient)
             ADDBYTE    ( pak, 0x00);
             ADDBYTE    ( pak, 0x00);
             ADDWORD    ( pak, thisclan->back);//Clan Background
-            ADDWORD    ( pak, thisclan->logo);//Clan logo
+            ADDWORD    ( pak, thisclan->logo);//Clan logo           
             ADDBYTE    ( pak, thisclan->grade);//Clan grade
             ADDBYTE    ( pak, thisclient->clan_rank);// Clan rank (0 = red rokie / 6 = master)
             ADDDWORD    ( pak, thisclan->cp); //Clan Points
@@ -948,7 +948,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
                return true;                        
         	// Load all our clan information
         	            //     0    1  2    3    4   5   6       7
-        	result = DB->QStore("SELECT id,logo,back,name,cp,grade,slogan,news,rankingpoints FROM list_clan where id=%i",id);
+        	result = DB->QStore("SELECT id,logo,back,name,cp,grade,slogan,news,rankingpoints,siglogo FROM list_clan where id=%i",id);
             if(result == NULL) return false;        	
             if(mysql_num_rows(result)!=1)
             {
@@ -969,6 +969,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             strncpy(newclan->slogan,row[6],29);	
             strcpy(newclan->news,row[7]);
             newclan->rankingpoints=atoi(row[8]);
+            newclan->siglogo=atoi(row[9]);
             DB->QFree( );
             //member info
             CClanMembers* newmember = new CClanMembers;
@@ -986,7 +987,6 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             ADDWORD    ( pak, 0x0100);//
             ADDWORD    ( pak, newclan->back );//clan background
             ADDWORD    ( pak, newclan->logo );//clanlogo
-            
             ADDBYTE    ( pak, 0x01);//clan grade
             ADDBYTE    ( pak, otherclient->clan_rank);// clan rank
             for(int i=0;i<146;i++)//clan skills
@@ -1119,16 +1119,19 @@ bool CCharServer::pakUploadCM ( CCharClient* thisclient, CPacket* P )
     rewind(fh);
     unsigned int cmid = 0;// this will be our clanmark id
     unsigned int tcmid = 0;// this will be to update the id
+    unsigned int real_logo=0; //LMA: the real logo to be sent to server
     fread( &cmid, 1, 4, fh );  
     tcmid = cmid+1;
     rewind(fh);    
     fwrite( &tcmid, 1, 4, fh );
-    fclose(fh);   
-    thisclan->logo = cmid;
+    fclose(fh);
+    thisclan->siglogo = cmid;
     thisclan->back = 0;
     char filename[30];
     sprintf( filename, "clanmark/%u.cm", cmid );
-    fh = fopen( filename, "w+" );
+
+    //LMA: switched to binary mode
+    fh = fopen( filename, "w+b" );
     if(fh==NULL)
     {
         Log( MSG_WARNING, "Error creating clanmark file" );
@@ -1137,42 +1140,105 @@ bool CCharServer::pakUploadCM ( CCharClient* thisclient, CPacket* P )
     rewind(fh);
     for(unsigned int i=0;i<P->Size-6;i++)
         fwrite( &P->Buffer[i], 1, 1, fh );
-    fclose(fh);        
-    DB->QExecute("UPDATE list_clan SET logo=%i,back=0 WHERE id=%i",cmid, thisclient->clanid );      
+    fclose(fh);
+    
+    //LMA: getting real logo ID (more like a signature)
+    fh = fopen( filename, "rb" );
+    if(fh==NULL)
+    {
+        Log( MSG_WARNING, "Error opening clanmark for signature" );
+        return true;
+    }
+    fread( &real_logo, 1, 2, fh );
+    Log(MSG_INFO,"Signature detected is %u for file %i",real_logo,cmid);
+    fclose(fh);
+    
+    thisclan->logo = real_logo;
+
+    //LMA: the logo stored server side and the custom are different
+    //DB->QExecute("UPDATE list_clan SET logo=%i,back=0 WHERE id=%i",cmid, thisclient->clanid );      
+    DB->QExecute("UPDATE list_clan SET siglogo=%i,back=0,logo=%i WHERE id=%i",cmid,real_logo,thisclient->clanid);
+    
+    //LMA: Downloading back to the client:
+    pakDownloadCMNow(thisclient,cmid);
+        
 	BEGINPACKET( pak, 0x7e1 );//update clan info in world
 	ADDBYTE    ( pak, 0xff );
 	ADDWORD    ( pak, thisclient->clanid );
-	ADDDWORD   ( pak, cmid );
+	
+    //ADDDWORD   ( pak, cmid );
+    ADDDWORD   ( pak, real_logo );
+	
 	cryptPacket( (char*)&pak, NULL );
 	for(int i=0;i<ChannelList.size();i++)
-        send( ChannelList.at(i)->sock, (char*)&pak, pak.Size, 0 );    
+        send( ChannelList.at(i)->sock, (char*)&pak, pak.Size, 0 );
+        
+    Log(MSG_INFO,"[CS] ClanMark uploaded %i for clan %i",cmid,thisclient->clanid);    
+    return true;
+}
+
+//LMA: special when clan mark upload.
+bool CCharServer::pakDownloadCMNow ( CCharClient* thisclient, unsigned int cmid)
+{
+    Log(MSG_INFO,"[CS] ClanMark download (after upload) %i for clan %i",cmid,thisclient->clanid);    
+    char filename[30];
+    sprintf( filename, "clanmark/%u.cm", cmid ); 
+    FILE* fh = fopen( filename, "rb" );
+    if(fh==NULL)
+    {
+        Log( MSG_WARNING, "Invalid clanmark ID %i", cmid );
+        return true;
+    }  
+    
+    //LMA: switched to binary mode and checked if something actually read.
+    long data_read=0;    
+    BEGINPACKET( pak, 0x7e7 );
+    ADDDWORD   ( pak, thisclient->clanid );
+    while(!feof(fh))
+    {
+        unsigned char charvalue = '\0';
+        data_read=fread( &charvalue, 1 , 1, fh );
+        
+        if (data_read>0)
+           ADDBYTE( pak, charvalue );         
+    }
+    thisclient->SendPacket( &pak );
+    fclose(fh);
     return true;
 }
 
 bool CCharServer::pakDownloadCM ( CCharClient* thisclient, CPacket* P )
 {
     unsigned int clanid = GETDWORD((*P), 0 );
-    MYSQL_RES* result = DB->QStore("SELECT logo FROM list_clan WHERE id=%i",clanid );
+    //LMA: we use a new field because there is a logo and the logo stored server side
+    //MYSQL_RES* result = DB->QStore("SELECT logo FROM list_clan WHERE id=%i",clanid );
+    MYSQL_RES* result = DB->QStore("SELECT siglogo FROM list_clan WHERE id=%i",clanid );
     if(result==NULL) return true;
     if(mysql_num_rows(result)!=1) return true;
     MYSQL_ROW row = mysql_fetch_row(result);
-    unsigned int cmid = atoi(row[0]);
+    unsigned int cmid = atoi(row[0]);    
     DB->QFree( );          
+    Log(MSG_INFO,"[CS] ClanMark download %i for clan %i",cmid,clanid);    
     char filename[30];
     sprintf( filename, "clanmark/%u.cm", cmid ); 
-    FILE* fh = fopen( filename, "r" );
+    FILE* fh = fopen( filename, "rb" );
     if(fh==NULL)
     {
         Log( MSG_WARNING, "Invalid clanmark ID %i", cmid );
         return true;
     }  
+    
+    //LMA: switched to binary mode and checked if something actually read.
+    long data_read=0;    
     BEGINPACKET( pak, 0x7e7 );
     ADDDWORD   ( pak, clanid );
     while(!feof(fh))
     {
         unsigned char charvalue = '\0';
-        fread( &charvalue, 1 , 1, fh );
-        ADDBYTE( pak, charvalue );         
+        data_read=fread( &charvalue, 1 , 1, fh );
+        
+        if (data_read>0)
+           ADDBYTE( pak, charvalue );         
     }
     thisclient->SendPacket( &pak );
     fclose(fh);
@@ -1181,5 +1247,19 @@ bool CCharServer::pakDownloadCM ( CCharClient* thisclient, CPacket* P )
 
 bool CCharServer::pakClanIconTime ( CCharClient* thisclient, CPacket* P ) //FORMAT UNKNOWN
 {
+    //LMA: Used when a ClanMark 
+    //returned nothing when downloaded.
+    //d7 07 0b 02 06 1b 1f
+    BEGINPACKET( pak, 0x7e8 );
+    ADDBYTE    ( pak, 0xd7 );
+    ADDBYTE    ( pak, 0x07 );
+    ADDBYTE    ( pak, 0x0b );
+    ADDBYTE    ( pak, 0x02 );
+    ADDBYTE    ( pak, 0x06 );
+    ADDBYTE    ( pak, 0x1b );
+    ADDBYTE    ( pak, 0x1f );
+    thisclient->SendPacket( &pak );
+    
+    
     return true;
 }

@@ -91,6 +91,7 @@ class CCharServer : public CServerSocket
         bool ClanLogout ( CCharClient* thisclient );
         bool pakUploadCM ( CCharClient* thisclient, CPacket* P );
         bool pakDownloadCM( CCharClient* thisclient, CPacket* P );
+        bool pakDownloadCMNow( CCharClient* thisclient, unsigned int cmid);  //LMA: for upload
         bool pakClanIconTime( CCharClient* thisclient, CPacket* P );
     
         // General Packets
