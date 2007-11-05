@@ -255,7 +255,7 @@ class CWorldServer : public CServerSocket
         bool pakGMItemQuest( CPlayer* thisclient, UINT itemid, UINT itemtype, UINT itemamount, UINT itemrefine, UINT itemls, UINT itemstats, UINT itemsocket, char buffer2[200] );
         bool pakGMTeleOtherPlayer( CPlayer *thisclient, char* name, int map, float x, float y );    
         bool pakGMZuly( CPlayer* thisclient, int mode, int amount, char* charname );
-        bool pakGMEventType(CPlayer* thisclient, int npctype, int dialog, int type); //Event
+        bool pakGMEventType(CPlayer* thisclient, int npctype, int dialog, long int type); //Event
     	bool pakGMTele( CPlayer* thisclient, int map, float x, float y );
     	bool pakGMMon( CPlayer* thisclient, int montype, int moncount );    
         bool pakGMZulygive(CPlayer* thisclient, char* name, int zuly);    

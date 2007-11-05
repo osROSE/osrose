@@ -181,7 +181,7 @@ bool CWorldServer::pakGMCommand( CPlayer* thisclient, CPacket* P )
         int dialog=atoi(tmp);        
         if ((tmp = strtok(NULL, " "))==NULL)
                 return true;  
-        int type=atoi(tmp);
+        long int type=atoi(tmp);
         Log( MSG_GMACTION, " %s : /event %i %i %i" ,thisclient->CharInfo->charname, npctype,dialog,type);
         return pakGMEventType(thisclient,npctype,dialog,type);
     }    
@@ -2001,7 +2001,7 @@ bool CWorldServer::pakGMReborn(CPlayer* thisclient)
 }
 
 //Event function credits Welson
-bool CWorldServer::pakGMEventType(CPlayer* thisclient, int npctype, int dialog, int type)
+bool CWorldServer::pakGMEventType(CPlayer* thisclient, int npctype, int dialog, long int type)
 {
     CNPC* thisnpc = GetNPCByType(npctype);
     if(thisnpc == NULL)
@@ -2024,8 +2024,11 @@ bool CWorldServer::pakGMEventType(CPlayer* thisclient, int npctype, int dialog, 
 
     RESETPACKET( pak, 0x790 );
     ADDWORD    ( pak, thisnpc->clientid );
+    /*
     ADDBYTE    ( pak, thisnpc->event );
 	ADDBYTE    ( pak, 0 );
+	*/
+    ADDWORD    ( pak, thisnpc->event );	
     thisclient->client->SendPacket(&pak);
     
     
@@ -2522,6 +2525,7 @@ bool CWorldServer::pakGMNpc(CPlayer* thisclient, int npcid,int dialogid)
 	thisnpc->posMap = thisclient->Position->Map;
 	thisnpc->thisnpc = GetNPCDataByID( npcid );
 	thisnpc->thisnpc->dialogid = dialogid;
+	thisnpc->event=0;
 	if( thisnpc->thisnpc==NULL ) return true;
 	CMap* map = MapList.Index[thisclient->Position->Map];	
 	map->AddNPC( thisnpc );

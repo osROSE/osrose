@@ -621,6 +621,7 @@ void CWorldServer::LoadConfigurations( char* file )
     Config.Cfmode               = ConfigGetInt    ( file, "cfmode", 0);
     Config.osRoseVer             = ConfigGetInt    ( file, "osRoseVer", 79);
     Config.testgrid             = ConfigGetInt    ( file, "testgrid", 0); //LMA: maps tests grids (0=usual, 1=grid)
+    Config.jrose             = ConfigGetInt    ( file, "jrose", 0); //LMA: Special code for jRose handling (163)
     
     Log (MSG_INFO, "osRose Revision %i", Config.osRoseVer );
         

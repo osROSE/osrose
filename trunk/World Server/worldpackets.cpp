@@ -66,8 +66,16 @@ void CWorldServer::pakPlayer( CPlayer *thisclient )
     ADDBYTE    ( pak, 0 );
     ADDWORD    ( pak, 0x140f );
 	ADDWORD    ( pak, thisclient->CharInfo->Job );			         // Job
-    ADDBYTE    ( pak, 0 );
-    ADDWORD    ( pak, 0 );
+	
+	//LMA: Union ID
+    //ADDBYTE    ( pak, 0 );
+    ADDBYTE    ( pak, 1 );
+    
+    //LMA: Union Fame
+    //ADDWORD    ( pak, 0 );
+    ADDBYTE( pak, 0 );
+    ADDBYTE( pak, 5 );
+    
     ADDWORD    ( pak, thisclient->Attr->Str );			             // Str
     ADDWORD    ( pak, thisclient->Attr->Dex );				         // Dex
     ADDWORD    ( pak, thisclient->Attr->Int );				         // Int
@@ -77,24 +85,50 @@ void CWorldServer::pakPlayer( CPlayer *thisclient )
 	ADDWORD    ( pak, thisclient->Stats->HP );                 // Current HP
 	ADDWORD    ( pak, thisclient->Stats->MP );                 // Current MP
 	ADDWORD    ( pak, thisclient->CharInfo->Exp );                       // Exp
-	ADDWORD    ( pak, 0 );			
+    ADDWORD    ( pak, 0 );			
 	ADDWORD    ( pak, thisclient->Stats->Level );			         // Level
 	ADDWORD    ( pak, thisclient->CharInfo->StatPoints );				 // Stat Points 
 	ADDWORD    ( pak, thisclient->CharInfo->SkillPoints );               // Skill Points
 	ADDWORD    ( pak, 0x6464 );
-	for(int i=0; i<37; i++) ADDBYTE( pak, 0 );					 
-	ADDWORD( pak, thisclient->CharInfo->stamina );						 // Stamina
-	for(int i=0; i<326; i++) ADDBYTE( pak, 0 );					
+	
+	//LMA: Union people killed?
+    //for(int i=0; i<37; i++) ADDBYTE( pak, 0 );
+    for(int i=0; i<4; i++)
+       ADDWORD( pak,0);       //null
+       
+	for(int i=0; i<5; i++)
+        ADDWORD( pak, i+1 );  //killed
+    
+    //rest is 0?
+	for(int i=0; i<19; i++)
+        ADDBYTE( pak, 2 );    //null    
+    
+    ADDWORD( pak, thisclient->CharInfo->stamina );						 // Stamina
+    
+    //TEST
+	//for(int i=0; i<326; i++) ADDBYTE( pak, 0 );
+	for(int i=0; i<326; i++) ADDBYTE( pak, 2 );
+	
 	for(int i=0; i<MAX_SKILL; i++) // Class Skills   
         ADDWORD( pak, thisclient->cskills[i].id+thisclient->cskills[i].level-1 );
-	for(int i=0; i<260; i++)  ADDWORD( pak, 0 );
+        
+    //TEST
+	//for(int i=0; i<260; i++)  ADDWORD( pak, 0 );
+	for(int i=0; i<260; i++)  ADDWORD( pak, 3 );
+    	
 	for(int i=0; i<42; i++)       // Basic Skills                               
 		ADDWORD( pak, thisclient->bskills[i] );	
 	for(int i=0; i<48; i++)       // QuickBar
         ADDWORD( pak, thisclient->quickbar[i] );
 	ADDDWORD   ( pak, thisclient->CharInfo->charid );	                     // CharID
-	for(int i=0; i<80;i++) ADDBYTE( pak, 0 );
-	ADDSTRING  ( pak, thisclient->CharInfo->charname );                      // Char Name
+	
+	
+	//TEST
+	//for(int i=0; i<80;i++) ADDBYTE( pak, 0 );
+	for(int i=0; i<80;i++) ADDBYTE( pak, 4 );
+	
+    
+    ADDSTRING  ( pak, thisclient->CharInfo->charname );                      // Char Name
 	ADDBYTE    ( pak, 0 );
     thisclient->client->SendPacket( &pak );
 }
@@ -135,17 +169,18 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
     thisclient->client->SendPacket( &pak );
     return;
 */
-
-    //LMA: Quest Variables (50 bytes)
+    
+    //LMA: Quest Variables (25 Dword)
     for(int i=0;i<25;i++)
     {
          if (thisclient->QuestVariables[i]!=0)
          {
             Log(MSG_INFO,"quest variable %i=%i",i,thisclient->QuestVariables[i]); 
          }
-         
-        ADDBYTE( pak, thisclient->QuestVariables[i] );          
-        ADDBYTE( pak, 0x00 );         
+    
+        ADDBYTE( pak, thisclient->QuestVariables[i] );
+        ADDBYTE( pak, 0x00 );
+        //ADDWORD( pak, thisclient->QuestVariables[i] );
     }
     
     int b = 0;
@@ -254,20 +289,91 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
     //ADDBYTE( pak, 0x00 );
     
     //quest Flags are here :)
-    ADDDWORD( pak, thisclient->speaksLuna ? 8 : 0 ); //Enable luna language (currently enabled for all b4 I make a proper quest for it)
-    ADDDWORD( pak, thisclient->canUseFlyingVessel ? 32 : 0 ); //Enable flying vessel    
-    
-    
-    //TESTS
-    //ADDDWORD( pak, 0xbfc2) //TEST LMA
-    //ADDDWORD( pak, 0)
-    //
+    long int liste_blocks[32];
+    int liste_flags[512];
+    int off_b=0;
+    int off_e=0;
+    int cpt=0;
+    for(int j=0;j<512;j++)
+        liste_flags[j]=0;    
 
+    //flags.
+    if(thisclient->speaksLuna)
+        liste_flags[3]=1;            //Lunar language
+    
+    if(thisclient->canUseFlyingVessel)
+       liste_flags[37]=1;           //Warp vessel
+
+    //1: Stat reset already done
+    //4:stat reset done (event ?)
+    //72: point reset done?
+    //32: lost engagment ring
+    //33: spero top secret schematic (old?)
+    //6->13: tuto quests (lvl 1 to 8, fruits?)
+    //34->36: Level 30 quest
+    //64->65, 72,
+    //77->79: tuto quests? (hunting?)       
+    //150: Spero's stolen formula / vaccine done,
+    //300: Est the wounded shamanist done
+    //301: Flame of Eucar done
+    
+    
+    
+    //32 blocks
+    for(int j=0;j<32;j++)
+    {
+       liste_blocks[j]=0;
+       off_b=16*j;
+       off_e=off_b+16;
+       cpt=0;
+       for(int jj=off_b;jj<off_e;jj++)
+       {
+          if (liste_flags[jj]==1)
+          {
+            Log(MSG_INFO,"Quest flag %i: %i",jj,1);
+            liste_blocks[j]+=(long int) pow(2,cpt);
+          }
+          
+          cpt++;
+       }
+       
+       if(liste_blocks[j]>0)
+         Log(MSG_INFO,"Block Quest flag %i: %li",j,liste_blocks[j]);
+       
+       ADDWORD( pak, liste_blocks[j]);
+    }
+    //End first block
+    
+    //LMA: second quest var zone
+    //Only 10? Used for Clan War...    
+    int qv_part2[10];
+    for(int i=0;i<10;i++)
+      qv_part2[i]=0;
+            
+      //TESTS
+      //qv_part2[0]=0x1f;    //Clan war type (0x01, 0x1f, 0x3d)
+      //qv_part2[3]=0x01;    //Clan war warp or done?
+    
+    for(int i=0;i<10;i++)
+    {
+        ADDBYTE( pak, qv_part2[i]);          
+        ADDBYTE( pak, 0x00 );    
+    }
+         
+    //LMA: second quest var zone end.
+  
+
+    //Before:
+    /*
+    ADDDWORD( pak, thisclient->speaksLuna ? 8 : 0 ); //Enable luna language (currently enabled for all b4 I make a proper quest for it)
+    ADDDWORD( pak, thisclient->canUseFlyingVessel ? 32 : 0 ); //Enable flying vessel      
     for(int i=4;i<41;i++)
         ADDWORD( pak, 0);
-             
-    ADDBYTE( pak, 0x00 );        
-    for(int i=0;i<30;i++) // Wish list [Caali]
+        
+    ADDBYTE( pak, 0x00 ); 
+    */
+                        
+    for(int i=0;i<32;i++) // Wish list [Caali]
     {
         ADDDWORD( pak, 0x00000000 ); //Item Head
         ADDDWORD( pak, 0x00000000 ); //Item Data
@@ -306,8 +412,18 @@ bool CWorldServer::pakDoIdentify( CPlayer *thisclient, CPacket *P )
     pakPlayer(thisclient);
     pakInventory(thisclient);
     pakQuestData(thisclient);
-	RESETPACKET( pak, 0x7de );
-	/*ADDDWORD   ( pak, 0x000c1003 );
+    
+    
+    //LMA: Jrose unlimited (zrose)
+    RESETPACKET( pak, 0x7de );
+    ADDWORD ( pak, 0x1001 ); // 0x1001 to 0x1013 (game plan?)
+    ADDDWORD ( pak, 2 ); // options (plan time?) [2 = unlimited]
+    thisclient->client->SendPacket( &pak );
+     
+	
+	/*Old way
+	//RESETPACKET( pak, 0x7de );
+    ADDDWORD   ( pak, 0x000c1003 );
 	ADDDWORD   ( pak, 0xffff0000 );
 	ADDDWORD   ( pak, 0x00000000 );
 	ADDDWORD   ( pak, 0x9b000038 );
@@ -316,7 +432,10 @@ bool CWorldServer::pakDoIdentify( CPlayer *thisclient, CPacket *P )
 	ADDDWORD   ( pak, 0x534d5547 );
 	ADDWORD    ( pak, 0x3e3e );
 	ADDBYTE    ( pak, 0x00 );*/
+	
+	/*"new way"
 	// This packet didn't match what I was getting on official. Changing it allowed jRose connections. This is a "Platinum" packet.
+	RESETPACKET( pak, 0x7de );
 	ADDDWORD   ( pak, 0x00011002 );
 	ADDDWORD   ( pak, 0x006f0000 );
 	ADDDWORD   ( pak, 0x32350000 );
@@ -331,6 +450,8 @@ bool CWorldServer::pakDoIdentify( CPlayer *thisclient, CPacket *P )
 	ADDSTRING  ( pak, Config.WELCOME_MSG );
 	ADDBYTE    ( pak, 0 );
 	thisclient->client->SendPacket( &pak );	
+	*/
+	
 	//SendSysMsg( thisclient, "Open Source Rose Online Private Server" );
 	
 	thisclient->SetStats( );
@@ -506,14 +627,16 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
         else if (thisnpc->npctype == 1473 ) factor=1457; // should be ok 1473 Melendino adventure plain
         else if (thisnpc->npctype == 1752 ) factor=1528; // Clan Merchant Aliche Patt ver 141
         else if (thisnpc->npctype == 1121 ) factor=900; // Ikaness Staff Shroon - Anima Lake
-        else if (thisnpc->npctype == 1205 ) factor=901; // Event Santa Claus - Non event factor 896, event 901
-        else if (thisnpc->npctype >= 1122 && thisnpc->npctype <=1130) factor=905;                
-        else if (thisnpc->npctype >= 1500 && thisnpc->npctype <=1599) factor=1210;
+        else if (thisnpc->npctype == 1205 ) factor=901; // Event Santa Claus - Non event factor 896, event 901, stolen suits.
+        else if (thisnpc->npctype == 1502 ) factor=1193; // Event Santa Claus (yeah another one, elfidora and snow crystal)
+        else if (thisnpc->npctype >= 1122 && thisnpc->npctype <=1130) factor=905; 
+        else if (thisnpc->npctype >= 1500 && thisnpc->npctype <1502) factor=1210;               
+        else if (thisnpc->npctype >= 1503 && thisnpc->npctype <=1599) factor=1210;
         else if (thisnpc->npctype >= 1750 && thisnpc->npctype <=1755 || !thisnpc->npctype == 1752 ) factor=1000; //should be ok
         
         if (thisnpc->dialog!=0)
         {
-            //Log(MSG_INFO,"Special dialog %i for NPC %i",thisnpc->dialog, thisnpc->npctype);       
+            Log(MSG_INFO,"Special dialog %i for NPC %i",thisnpc->dialog, thisnpc->npctype);       
             ADDWORD( pak, thisnpc->dialog );    
         }
         else
@@ -528,20 +651,21 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
     if (thisnpc->npctype == 1115)
     { 
        ADDBYTE( pak, GServer->Config.Cfmode ) // Burland Clan Field open/close
+       ADDBYTE( pak, 0 );
     }
     
     //Event:
     if (thisnpc->event!=0&&thisnpc->npctype!=1115)
     {
         Log(MSG_INFO,"Event number %i for NPC %i",thisnpc->event, thisnpc->npctype);
-        ADDBYTE ( pak, thisnpc->event);
+        ADDWORD ( pak, thisnpc->event);
     }
     else
     {
-        ADDBYTE ( pak, 0 );
+        ADDWORD ( pak, 0 );
      }
     
-    ADDBYTE( pak, 0 );
+    //ADDBYTE( pak, 0 );
     thisclient->client->SendPacket( &pak );
 	return true;
 }
@@ -2679,6 +2803,10 @@ bool CWorldServer::pakidentify( CPlayer* thisclient, CPacket* P)
 bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
 {
     BYTE action = GETBYTE((*P),0);
+    //LMA: handling Japanese version
+    BYTE page = GETBYTE((*P),1);
+    Log(MSG_INFO," Page detected: %i", page);
+    
     switch(action)
     {
         case 0x00:
@@ -2769,7 +2897,9 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
                 return true;
             BEGINPACKET( pak, 0x7ae );
             ADDWORD    ( pak, itemslot );
-            ADDWORD    ( pak, newslot ); 
+            ADDWORD    ( pak, newslot );             
+            if (Config.testgrid==1)
+                ADDWORD ( pak, 0x00 );            //LMA:Jrose (thanks z)            
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[itemslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[itemslot] ) );
             ADDDWORD( pak, 0x00000000 );
@@ -2871,19 +3001,24 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
                 thisclient->UpdateInventory( newslot2 );    
             }                                                                                     
             BEGINPACKET( pak, 0x7ae );
-            ADDWORD    ( pak, newslot );
+            ADDWORD    ( pak, newslot );                       
             ADDWORD    ( pak, storageslot );
+            if (Config.testgrid==1)
+                ADDWORD ( pak, 0x00 );            //LMA:Jrose (thanks z) 
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );
             ADDDWORD( pak, 0x00000000 );
             ADDWORD ( pak, 0x0000 );   
-                  
             ADDDWORD   ( pak, BuildItemHead( thisclient->storageitems[storageslot] ) );
             ADDDWORD   ( pak, BuildItemData( thisclient->storageitems[storageslot] ) );
             ADDDWORD( pak, 0x00000000 );
-            ADDWORD ( pak, 0x0000 );   
+            ADDWORD ( pak, 0x0000 ); 
+ 
+              
     		ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
-            ADDBYTE    ( pak, 0x00 );    		
+            ADDBYTE    ( pak, 0x00 );   
+
+                         		
             thisclient->client->SendPacket( &pak );            
             thisclient->nstorageitems--;
             

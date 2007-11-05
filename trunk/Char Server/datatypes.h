@@ -47,6 +47,7 @@ struct CClans
 {
     int id;
     int logo;
+    unsigned int siglogo;       //LMA: logos.
     int back;
     int grade;
     int cp;  

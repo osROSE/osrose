@@ -484,7 +484,7 @@ struct CNPC {
 	unsigned npctype;
 	CNPCData* thisnpc;
 	unsigned dialog;
-	unsigned event;    	
+	long int event;    	
 };
 
 // Item data object
