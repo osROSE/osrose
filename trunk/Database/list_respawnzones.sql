@@ -1,20 +1,29 @@
--- -------------------------------------
--- Table structure for list_respawnzones
--- -------------------------------------
-DROP TABLE IF EXISTS `list_respawnzones`;
-CREATE TABLE `list_respawnzones` (
-	`id` int(11) NOT NULL auto_increment,
-	`map` int(11) NOT NULL,
-	`x` float NOT NULL,
-	`y` float NOT NULL,
-	`radius` float NOT NULL default '10',
-	`type` int(11) NOT NULL default '2',
-	  PRIMARY KEY  (`id`)
-	) ENGINE=MyISAM AUTO_INCREMENT=88 DEFAULT CHARSET=latin1;
+/*
+MySQL Data Transfer
+Source Host: localhost
+Source Database: osrose
+Target Host: localhost
+Target Database: osrose
+Date: 11/8/2007 10:30:43 AM
+*/
 
--- ------------------------------------------
--- Records list_respawnzones / rl2171 / tomiz
--- ------------------------------------------
+SET FOREIGN_KEY_CHECKS=0;
+-- ----------------------------
+-- Table structure for list_respawnzones
+-- ----------------------------
+CREATE TABLE `list_respawnzones` (
+  `id` int(11) NOT NULL auto_increment,
+  `map` int(11) NOT NULL,
+  `x` float NOT NULL,
+  `y` float NOT NULL,
+  `radius` float NOT NULL default '10',
+  `type` int(11) NOT NULL default '2',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=91 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records 
+-- ----------------------------
 INSERT INTO `list_respawnzones` VALUES ('1', '22', '5098', '5322', '10', '1');
 INSERT INTO `list_respawnzones` VALUES ('2', '1', '5239', '5192', '10', '1');
 INSERT INTO `list_respawnzones` VALUES ('3', '24', '5537', '4966', '10', '1');
@@ -67,7 +76,7 @@ INSERT INTO `list_respawnzones` VALUES ('53', '52', '6050', '5020', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('54', '52', '5622', '4866', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('55', '52', '5533', '4555', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('56', '22', '5025', '5522', '10', '1');
-INSERT INTO `list_respawnzones` VALUES ('57', '6', '5200', '5200', '10', '2');
+INSERT INTO `list_respawnzones` VALUES ('57', '6', '5200', '5056', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('58', '58', '5700', '4330', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('59', '31', '5430', '5508', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('60', '32', '5253', '5415', '10', '2');
@@ -100,3 +109,4 @@ INSERT INTO `list_respawnzones` VALUES ('86', '41', '5050', '5250', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('87', '101', '5284', '5038', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('88', '74', '5161', '5302', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('89', '70', '5301', '5039', '10', '2');
+INSERT INTO `list_respawnzones` VALUES ('90', '6', '5200', '5501', '10', '2');
