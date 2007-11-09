@@ -3253,6 +3253,10 @@ otherclient->cskills[35].id = 5601; // 847
 otherclient->cskills[35].level = 1;
 otherclient->cskills[36].id = 5602; // 848
 otherclient->cskills[36].level = 1;
+// Unique Items - knight - 1 handed
+otherclient->cskills[37].id = 4211; // 569
+otherclient->cskills[37].level = 4;
+
 
 SendPM (thisclient, "Relogin For Get All Skills");
 }
@@ -3368,6 +3372,10 @@ otherclient->cskills[51].id = 5607; // 853
 otherclient->cskills[51].level = 1;
 otherclient->cskills[52].id = 5608; // 854
 otherclient->cskills[52].level = 1;
+// Unique Items - 
+otherclient->cskills[53].id = 4211; // 569
+otherclient->cskills[53].level = 4;
+
 
 SendPM (thisclient, "Relogin For Get All Skills");
 }
