@@ -85,6 +85,7 @@ bool CCharServer::SendRewardPoints (CCharClient* thisclient,long int lma_points)
             ADDWORD    ( pak, 0x0000); //??
             ADDQWORD   ( pak, 0x000000000000 );   //Clan Money
             ADDDWORD    ( pak, thisclan->ClanMembers.size());  //Nb of clan members.
+            //ADDDWORD   ( pak, 0x00000000);
             ADDWORD    ( pak, 0x0000);
             for(int i=0;i<120;i++)
                 ADDBYTE ( pak, 0x00);
@@ -186,6 +187,7 @@ bool CCharServer::SendClanInfo (CCharClient* thisclient)
             ADDWORD    ( pak, 0x0000); //??
             ADDQWORD   ( pak, 0x000000000000 );   //Clan Money
             ADDDWORD    ( pak, thisclan->ClanMembers.size());  //Nb of clan members.
+            //ADDDWORD   ( pak, 0x00000000);
             ADDWORD    ( pak, 0x0000);
             for(int i=0;i<120;i++)
                 ADDBYTE ( pak, 0x00);
@@ -1067,7 +1069,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
                 ADDWORD    ( pak, 0x0000 );                   
                 ADDWORD    ( pak, 0x0000 );// Level     
                 ADDWORD    ( pak, 0x0000 );// Job                 
-                Log(MSG_INFO,"[CS] Clan, pakClanMembers OFFLINE %s",otherclient->charname);
+                Log(MSG_INFO,"[CS] Clan, pakClanMembers OFFLINE %s",thismember->name);
             }                
             ADDSTRING  ( pak, thismember->name );
             ADDBYTE    ( pak, 0x00 );  

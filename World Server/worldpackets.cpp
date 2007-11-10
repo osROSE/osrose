@@ -618,7 +618,7 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
     else
     {// fixed by tomiz [npc dialogs fixed [still not all]]
          unsigned int factor;
-        if (thisnpc->npctype >= 1000 && thisnpc->npctype <=1041 || thisnpc->npctype >= 1043 && thisnpc->npctype <=1084 || thisnpc->npctype >= 1086 && thisnpc->npctype <=1119 || thisnpc->npctype >= 1131 && thisnpc->npctype <=1199 || thisnpc->npctype >= 1207 && thisnpc->npctype <=1299) factor=900;
+        if (thisnpc->npctype >= 1000 && thisnpc->npctype <=1041 || thisnpc->npctype >= 1043 && thisnpc->npctype <=1084 || thisnpc->npctype >= 1086 && thisnpc->npctype <=1119 || thisnpc->npctype >= 1131 && thisnpc->npctype <=1199 || thisnpc->npctype >= 1207 && thisnpc->npctype <=1242 || thisnpc->npctype >= 1245 && thisnpc->npctype <=1299) factor=900;
        	//else if (thisnpc->npctype >= 1200 && thisnpc->npctype <=1203 || thisnpc->npctype >= 1205 && thisnpc->npctype <=1206) factor=896; // event npc
        	else if (thisnpc->npctype >= 1200 && thisnpc->npctype <=1203 || thisnpc->npctype >= 1206 && thisnpc->npctype <=1206) factor=896; // event npc
         else if (thisnpc->npctype == 1042 || thisnpc->npctype == 1085 ) factor=899;  // Storage Adventure Plain -> Fabrizio - Junon Clan Field -> Nell
@@ -629,6 +629,7 @@ bool CWorldServer::pakSpawnNPC( CPlayer* thisclient, CNPC* thisnpc )
         else if (thisnpc->npctype == 1121 ) factor=900; // Ikaness Staff Shroon - Anima Lake
         else if (thisnpc->npctype == 1205 ) factor=901; // Event Santa Claus - Non event factor 896, event 901, stolen suits.
         else if (thisnpc->npctype == 1502 ) factor=1193; // Event Santa Claus (yeah another one, elfidora and snow crystal)
+        else if (thisnpc->npctype >= 1243 && thisnpc->npctype <=1244) factor=927;  // Patrol Dogs on Eldeon
         else if (thisnpc->npctype >= 1122 && thisnpc->npctype <=1130) factor=905; 
         else if (thisnpc->npctype >= 1500 && thisnpc->npctype <1502) factor=1210;               
         else if (thisnpc->npctype >= 1503 && thisnpc->npctype <=1599) factor=1210;
