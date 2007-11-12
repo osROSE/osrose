@@ -182,6 +182,12 @@ bool CCharacter::CanAttack( ) // updated by Core
     if (weapontype == 212) 
         return true;
         
+    //MZ 
+    //it's my fix, to protect from exception divide by zero
+    //During fight, at change of the weapon it happens
+        if (0 == Stats->Attack_Speed) return false;
+    //MZ        
+        
     if ( weapontype == 231 || weapontype == 232 || weapontype == 233 )
     {
        if( (etime < CLOCKS_PER_SEC * (GServer->ATTK_SPEED_MODIF*4/3) / Stats->Attack_Speed) || Status->Stun != 0xff ) return false;

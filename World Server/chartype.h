@@ -168,7 +168,14 @@ struct INFO
 {
 	char charname[17];    		
 	unsigned int charid;
-    long int rewardpoints;    //LMA: reward points	    	
+    long int rewardpoints;    //LMA: reward points
+    int unionid;              //LMA: Union
+    int unionfame;            //LMA: Union
+    int union01;              //LMA: Union
+    int union02;              //LMA: Union
+    int union03;              //LMA: Union
+    int union04;              //LMA: Union
+    int union05;              //LMA: Union
     BYTE Sex;
     UINT Face;
     UINT Hair;
