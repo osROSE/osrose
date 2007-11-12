@@ -26,7 +26,7 @@
 bool CPlayer::loaddata( )
 {
 	MYSQL_ROW row;
-	MYSQL_RES *result = GServer->DB->QStore("SELECT level,face,hairStyle,sex,classid,zuly,str,dex,_int, con,cha,sen,curHp,curMp,id,statp,skillp,exp,stamina,quickbar,basic_skills, class_skills,class_skills_level,respawnid,clanid,clan_rank,townid,rewardpoints FROM characters WHERE char_name='%s'", CharInfo->charname);
+	MYSQL_RES *result = GServer->DB->QStore("SELECT level,face,hairStyle,sex,classid,zuly,str,dex,_int, con,cha,sen,curHp,curMp,id,statp,skillp,exp,stamina,quickbar,basic_skills, class_skills,class_skills_level,respawnid,clanid,clan_rank,townid,rewardpoints,unionid,unionfame,union01,union02,union03,union04,union05 FROM characters WHERE char_name='%s'", CharInfo->charname);
 	if(result==NULL) return false;
 	if(mysql_num_rows(result)!=1)
 	{
@@ -60,6 +60,16 @@ bool CPlayer::loaddata( )
     Clan->clanrank = atoi(row[25]);
     Position->saved = atoi(row[26]);
     CharInfo->rewardpoints=atoi(row[27]); //LMA: reward points.
+    //Union
+    CharInfo->unionid=atoi(row[28]);
+    CharInfo->unionfame=atoi(row[29]);
+    CharInfo->union01=atoi(row[30]);
+    CharInfo->union02=atoi(row[31]);
+    CharInfo->union03=atoi(row[32]);
+    CharInfo->union04=atoi(row[33]);
+    CharInfo->union05=atoi(row[34]);
+    
+    
     Log(MSG_INFO,"reward points at loading %i",CharInfo->rewardpoints);
     
 	p_skills = 0;

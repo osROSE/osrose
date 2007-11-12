@@ -40,12 +40,12 @@ void CWorldServer::pakPlayer( CPlayer *thisclient )
     CMap* map = MapList.Index[thisclient->Position->Map];
     map->AddPlayer( thisclient );
     BEGINPACKET( pak, 0x715 );
-    ADDBYTE    ( pak, thisclient->CharInfo->Sex );                       // Sex
-    ADDWORD    ( pak, thisclient->Position->Map );		                 // Map
-    ADDFLOAT   ( pak, thisclient->Position->current.x*100 );	                 // Pos X
-    ADDFLOAT   ( pak, thisclient->Position->current.y*100 );		             // Pos Y
+    ADDBYTE    ( pak, thisclient->CharInfo->Sex );               // Sex
+    ADDWORD    ( pak, thisclient->Position->Map );		         // Map
+    ADDFLOAT   ( pak, thisclient->Position->current.x*100 );	 // Pos X
+    ADDFLOAT   ( pak, thisclient->Position->current.y*100 );	 // Pos Y
     ADDWORD    ( pak, 0x0000 );
-    ADDDWORD   ( pak, thisclient->CharInfo->Face );			             // Face
+    ADDDWORD   ( pak, thisclient->CharInfo->Face );			     // Face
     ADDDWORD   ( pak, thisclient->CharInfo->Hair );	             // Hair
     ADDWORD    ( pak, thisclient->items[2].itemnum );	         // Cap
     ADDWORD    ( pak, BuildItemRefine( thisclient->items[2] ) ); // Cap Refine
@@ -65,70 +65,47 @@ void CWorldServer::pakPlayer( CPlayer *thisclient )
     ADDWORD    ( pak, BuildItemRefine( thisclient->items[8] ) ); // SubWeapon Refine
     ADDBYTE    ( pak, 0 );
     ADDWORD    ( pak, 0x140f );
-	ADDWORD    ( pak, thisclient->CharInfo->Job );			         // Job
-	
-	//LMA: Union ID
-    //ADDBYTE    ( pak, 0 );
-    ADDBYTE    ( pak, 1 );
-    
-    //LMA: Union Fame
-    //ADDWORD    ( pak, 0 );
-    ADDBYTE( pak, 0 );
-    ADDBYTE( pak, 5 );
-    
-    ADDWORD    ( pak, thisclient->Attr->Str );			             // Str
-    ADDWORD    ( pak, thisclient->Attr->Dex );				         // Dex
-    ADDWORD    ( pak, thisclient->Attr->Int );				         // Int
-    ADDWORD    ( pak, thisclient->Attr->Con );				         // Con
-    ADDWORD    ( pak, thisclient->Attr->Cha );				         // Cha
-    ADDWORD    ( pak, thisclient->Attr->Sen );				         // Sen
-	ADDWORD    ( pak, thisclient->Stats->HP );                 // Current HP
-	ADDWORD    ( pak, thisclient->Stats->MP );                 // Current MP
-	ADDWORD    ( pak, thisclient->CharInfo->Exp );                       // Exp
+	ADDWORD    ( pak, thisclient->CharInfo->Job );			     // Job
+    ADDBYTE    ( pak, thisclient->CharInfo->unionid );           //LMA: Union ID
+    ADDBYTE( pak, 0 );                                           //LMA: Union Fame
+    ADDBYTE( pak, thisclient->CharInfo->unionfame );             //LMA: Union Fame    
+    ADDWORD    ( pak, thisclient->Attr->Str );			         // Str
+    ADDWORD    ( pak, thisclient->Attr->Dex );				     // Dex
+    ADDWORD    ( pak, thisclient->Attr->Int );				     // Int
+    ADDWORD    ( pak, thisclient->Attr->Con );				     // Con
+    ADDWORD    ( pak, thisclient->Attr->Cha );				     // Cha
+    ADDWORD    ( pak, thisclient->Attr->Sen );				     // Sen
+	ADDWORD    ( pak, thisclient->Stats->HP );                   // Current HP
+	ADDWORD    ( pak, thisclient->Stats->MP );                   // Current MP
+	ADDWORD    ( pak, thisclient->CharInfo->Exp );               // Exp
     ADDWORD    ( pak, 0 );			
-	ADDWORD    ( pak, thisclient->Stats->Level );			         // Level
-	ADDWORD    ( pak, thisclient->CharInfo->StatPoints );				 // Stat Points 
-	ADDWORD    ( pak, thisclient->CharInfo->SkillPoints );               // Skill Points
+	ADDWORD    ( pak, thisclient->Stats->Level );			      // Level
+	ADDWORD    ( pak, thisclient->CharInfo->StatPoints );		  // Stat Points 
+	ADDWORD    ( pak, thisclient->CharInfo->SkillPoints );        // Skill Points
 	ADDWORD    ( pak, 0x6464 );
-	
-	//LMA: Union people killed?
-    //for(int i=0; i<37; i++) ADDBYTE( pak, 0 );
     for(int i=0; i<4; i++)
-       ADDWORD( pak,0);       //null
-       
-	for(int i=0; i<5; i++)
-        ADDWORD( pak, i+1 );  //killed
-    
+       ADDWORD( pak,0);       //null    
+    //Union killed
+    ADDWORD( pak, thisclient->CharInfo->union01 );
+    ADDWORD( pak, thisclient->CharInfo->union02 );
+    ADDWORD( pak, thisclient->CharInfo->union03 );
+    ADDWORD( pak, thisclient->CharInfo->union04 );
+    ADDWORD( pak, thisclient->CharInfo->union05 );
     //rest is 0?
 	for(int i=0; i<19; i++)
-        ADDBYTE( pak, 2 );    //null    
-    
-    ADDWORD( pak, thisclient->CharInfo->stamina );						 // Stamina
-    
-    //TEST
-	//for(int i=0; i<326; i++) ADDBYTE( pak, 0 );
-	for(int i=0; i<326; i++) ADDBYTE( pak, 2 );
-	
+        ADDBYTE( pak, 0 );    //null        
+    ADDWORD( pak, thisclient->CharInfo->stamina );					// Stamina
+	for(int i=0; i<326; i++) ADDBYTE( pak, 0 );	
 	for(int i=0; i<MAX_SKILL; i++) // Class Skills   
         ADDWORD( pak, thisclient->cskills[i].id+thisclient->cskills[i].level-1 );
-        
-    //TEST
-	//for(int i=0; i<260; i++)  ADDWORD( pak, 0 );
-	for(int i=0; i<260; i++)  ADDWORD( pak, 3 );
-    	
+	for(int i=0; i<260; i++)  ADDWORD( pak, 0 );
 	for(int i=0; i<42; i++)       // Basic Skills                               
 		ADDWORD( pak, thisclient->bskills[i] );	
 	for(int i=0; i<48; i++)       // QuickBar
         ADDWORD( pak, thisclient->quickbar[i] );
-	ADDDWORD   ( pak, thisclient->CharInfo->charid );	                     // CharID
-	
-	
-	//TEST
-	//for(int i=0; i<80;i++) ADDBYTE( pak, 0 );
-	for(int i=0; i<80;i++) ADDBYTE( pak, 4 );
-	
-    
-    ADDSTRING  ( pak, thisclient->CharInfo->charname );                      // Char Name
+	ADDDWORD   ( pak, thisclient->CharInfo->charid );	            // CharID
+	for(int i=0; i<80;i++) ADDBYTE( pak, 0 );
+    ADDSTRING  ( pak, thisclient->CharInfo->charname );             // Char Name
 	ADDBYTE    ( pak, 0 );
     thisclient->client->SendPacket( &pak );
 }
@@ -2800,13 +2777,12 @@ bool CWorldServer::pakidentify( CPlayer* thisclient, CPacket* P)
     return true;
 }
 
-// Show Storge Items
+// Show Storage Items
 bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
 {
     BYTE action = GETBYTE((*P),0);
     //LMA: handling Japanese version
     BYTE page = GETBYTE((*P),1);
-    Log(MSG_INFO," Page detected: %i", page);
     
     switch(action)
     {
@@ -2814,7 +2790,6 @@ bool CWorldServer::pakStorage( CPlayer* thisclient, CPacket* P)
         {
              //LMA: get storage from database to be sure.
              //GetAllStorage(thisclient);
-             
             BEGINPACKET( pak, 0x7ad );
             ADDBYTE    ( pak, 0x00 );            
             ADDBYTE    ( pak, thisclient->nstorageitems ); //numero de items
@@ -2893,13 +2868,13 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
                 //Log(MSG_INFO,"it should be a new slot: %i",newslot);
                 thisclient->nstorageitems++;
             }
-                        
+             
             if(newslot==0xffff)
                 return true;
             BEGINPACKET( pak, 0x7ae );
             ADDWORD    ( pak, itemslot );
             ADDWORD    ( pak, newslot );             
-            if (Config.testgrid==1)
+            if (Config.jrose==1)
                 ADDWORD ( pak, 0x00 );            //LMA:Jrose (thanks z)            
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[itemslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[itemslot] ) );
@@ -3004,7 +2979,7 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             BEGINPACKET( pak, 0x7ae );
             ADDWORD    ( pak, newslot );                       
             ADDWORD    ( pak, storageslot );
-            if (Config.testgrid==1)
+            if (Config.jrose==1)
                 ADDWORD ( pak, 0x00 );            //LMA:Jrose (thanks z) 
 	       	ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
     		ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );

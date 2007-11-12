@@ -189,8 +189,9 @@ bool CCharServer::SendClanInfo (CCharClient* thisclient)
             ADDDWORD    ( pak, thisclan->ClanMembers.size());  //Nb of clan members.
             //ADDDWORD   ( pak, 0x00000000);
             ADDWORD    ( pak, 0x0000);
+            //Skills.
             for(int i=0;i<120;i++)
-                ADDBYTE ( pak, 0x00);
+                ADDBYTE ( pak, 0x00);                
             ADDDWORD   ( pak, 0x00000000); //Ranking Points
             ADDDWORD   ( pak, thisclient->reward_points );  //LMA 139+ (Reward points for clan shop)
             ADDSTRING  ( pak, thisclan->name);//Clan Name
@@ -1041,6 +1042,7 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
 bool CCharServer::pakClanMembers ( CCharClient* thisclient )
 {    
 	CClans* thisclan = (CClans*) GetClanByID( thisclient->clanid );
+	Log(MSG_INFO,"[CS] in pakClanMembers");
 	if(thisclan!=NULL)
 	{
         BEGINPACKET( pak, 0x7e0 );
@@ -1053,6 +1055,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
             CCharClient* otherclient = (CCharClient*) GetClientByID (thismember->id);
             if(otherclient!=NULL)
             {
+               	Log(MSG_INFO,"[CS] in pakClanMembers online");
                 ADDBYTE    ( pak, thismember->clan_rank ); //clan rank
                 ADDBYTE    ( pak, otherclient->channel ); //channel (0x01 = channel 1)
                 ADDWORD    ( pak, 0x0000 );       
@@ -1063,6 +1066,7 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
             }
             else
             {          
+           	    Log(MSG_INFO,"[CS] in pakClanMembers offline");
                 ADDBYTE    ( pak, thismember->clan_rank); //clan rank
                 ADDBYTE    ( pak, 0xff ); //channel (0xff = offline)
                 ADDWORD    ( pak, 0x0000 );       
@@ -1078,12 +1082,15 @@ bool CCharServer::pakClanMembers ( CCharClient* thisclient )
     }
     else
     {
+        	Log(MSG_INFO,"[CS] in pakClanMembers not found");
         BEGINPACKET( pak, 0x7e0 );
         ADDBYTE    ( pak, 0x0f );
         ADDDWORD   ( pak, 0x00000001 );
         thisclient->SendPacket( &pak );
         Log(MSG_INFO,"[CS] Clan, pakClanMembers CLAN NOT FOUND %i",thisclient->clanid);
     }
+    
+   	Log(MSG_INFO,"[CS] out pakClanMembers");
     return true;
 }
 

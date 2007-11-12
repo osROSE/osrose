@@ -311,10 +311,18 @@ bool CPlayer::SpawnToPlayer( CPlayer* player, CPlayer* otherclient )
     ADDWORD( pak, items[7].itemnum );		// WEAPON
     ADDWORD( pak, GServer->BuildItemRefine( items[7] )  );		// WEAPON REFINE
     ADDWORD( pak, items[8].itemnum );		// SUBWEAPON
-    ADDWORD( pak, GServer->BuildItemRefine( items[8] )  );		// SUBWEAPON REFINE        
+    ADDWORD( pak, GServer->BuildItemRefine( items[8] )  );		// SUBWEAPON REFINE
+    
+    /*        
     ADDWORD( pak, ((items[132].itemnum << 5) & 0x3ff) );//arrows
     ADDWORD( pak, ((items[133].itemnum << 5) & 0x3ff) );//bullets
     ADDWORD( pak, ((items[134].itemnum << 5) & 0x3ff) );//cannons    
+    */
+    //Fix from maximz
+    ADDWORD( pak, ((items[132].itemnum << 5) ));//arrows
+    ADDWORD( pak, ((items[133].itemnum << 5) ));//bullets
+    ADDWORD( pak, ((items[134].itemnum << 5) ));//cannons     
+    
     ADDWORD( pak, CharInfo->Job );
     ADDBYTE( pak, Stats->Level );
     ADDWORD( pak, items[135].itemnum);		// CART FRAME

@@ -622,8 +622,14 @@ void CWorldServer::LoadConfigurations( char* file )
     Config.osRoseVer             = ConfigGetInt    ( file, "osRoseVer", 79);
     Config.testgrid             = ConfigGetInt    ( file, "testgrid", 0); //LMA: maps tests grids (0=usual, 1=grid)
     Config.jrose             = ConfigGetInt    ( file, "jrose", 0); //LMA: Special code for jRose handling (163)
-    
+        
     Log (MSG_INFO, "osRose Revision %i", Config.osRoseVer );
+    
+    //LMA: jRose.    
+    if(Config.jrose==1)
+       Log (MSG_INFO, "Handling ONLY jRose client.");
+    else
+       Log (MSG_INFO, "Handling ONLY RoseNA client.");    
         
     //Password
 	Config.LoginPass            = ConfigGetInt    ( file, "loginpass", 123456 );		
