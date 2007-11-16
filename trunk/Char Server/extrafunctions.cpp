@@ -100,6 +100,7 @@ bool CCharServer::SendToClanMembers( int clanid,CPacket* pak )
         CCharClient* otherclient = (CCharClient*) GetClientByID (thismember->id);
         if(otherclient!=0)
         {
+            Log(MSG_INFO,"[CS] Sending intel to clan member %s",otherclient->charname);
             otherclient->SendPacket(pak);
         }
     }    
