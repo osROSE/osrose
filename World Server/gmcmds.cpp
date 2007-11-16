@@ -44,7 +44,7 @@ bool CWorldServer::pakGMCommand( CPlayer* thisclient, CPacket* P )
 		if ((tmp = strtok(NULL, " "))==NULL) return true; float x=(float)atoi(tmp);
 		if ((tmp = strtok(NULL, " "))==NULL) return true; float y=(float)atoi(tmp);
         
-        Log( MSG_GMACTION, " %s : /tele %i,%u,%u" , thisclient->CharInfo->charname, map, round(x), round(y));
+        Log( MSG_GMACTION, " %s : /tele %i,%.2f,%.2f" , thisclient->CharInfo->charname, map, x, y);
         return pakGMTele(thisclient, map, x, y);
     }
    else if (strcmp(command, "allskill")==0) /* Give all Skill to a Player - By CrAshInSiDe */
@@ -1064,10 +1064,13 @@ else if (loc == 10)
 	                    return true;
 		if((tmp = strtok(NULL, " "))==NULL) return true; unsigned npcid=atoi(tmp);
 		unsigned npcdialog = 0;
+		unsigned eventid=0;
 		if((tmp = strtok(NULL, " "))!=NULL) 
             npcdialog=atoi(tmp);
+		if((tmp = strtok(NULL, " "))!=NULL) 
+            eventid=atoi(tmp);            
         Log( MSG_GMACTION, " %s : /npc %i, %i" , thisclient->CharInfo->charname, npcid, npcdialog);
-        return pakGMNpc(thisclient, npcid, npcdialog);
+        return pakGMNpc(thisclient, npcid, npcdialog,eventid);
 	}
     else if(strcmp(command, "giveclanrp")==0) 
     {
@@ -1614,7 +1617,16 @@ else if (strcmp(command, "give2")==0)
 	else if(strcmp(command, "grid")==0)
     {
         if(Config.Command_grid > thisclient->Session->accesslevel)
-	                    return true;
+                return true;
+        if((tmp = strtok(NULL, " "))!=NULL)
+        {
+            if (Config.testgrid==0)
+               SendPM(thisclient,"[Info] We are in Range Mode.");
+            else
+               SendPM(thisclient,"[Info] We are in Grid Mode.");
+               
+            return true;
+        }	                    
         if (Config.testgrid!=0)
         {
            Config.testgrid=0;
@@ -2011,7 +2023,7 @@ bool CWorldServer::pakGMEventType(CPlayer* thisclient, int npctype, int dialog, 
     }
     if(type<0) type = 0;
     char buffer[200];
-    sprintf( buffer, "You activated Event %i for NPC: %i, Dialog: %i", type, npctype, dialog);
+    sprintf( buffer, "Event %i for NPC: %i, Dialog: %i (if dialog has changed, type /here to force refresh)", type, npctype, dialog);
     thisnpc->dialog = dialog;
     thisnpc->event = type;
 
@@ -2024,13 +2036,12 @@ bool CWorldServer::pakGMEventType(CPlayer* thisclient, int npctype, int dialog, 
 
     RESETPACKET( pak, 0x790 );
     ADDWORD    ( pak, thisnpc->clientid );
-    /*
-    ADDBYTE    ( pak, thisnpc->event );
-	ADDBYTE    ( pak, 0 );
-	*/
-    ADDWORD    ( pak, thisnpc->event );	
+    ADDWORD    ( pak, thisnpc->event );	  //LMA: Welcome in the real Word ^_^
     thisclient->client->SendPacket(&pak);
     
+    //Saving in database
+    DB->QExecute("UPDATE npc_data SET dialog=%i, eventid=%i WHERE id=%i", dialog, type,npctype);
+
     
 	return true;
 }
@@ -2514,7 +2525,7 @@ bool CWorldServer::pakGMZulygive(CPlayer* thisclient, char* name, int zuly)
 }
 
 // Spawn a NPC
-bool CWorldServer::pakGMNpc(CPlayer* thisclient, int npcid,int dialogid)
+bool CWorldServer::pakGMNpc(CPlayer* thisclient, int npcid,int dialogid,int eventid)
 {
 	CNPC* thisnpc = new CNPC;
 	assert(thisnpc);
@@ -2525,12 +2536,12 @@ bool CWorldServer::pakGMNpc(CPlayer* thisclient, int npcid,int dialogid)
 	thisnpc->posMap = thisclient->Position->Map;
 	thisnpc->thisnpc = GetNPCDataByID( npcid );
 	thisnpc->thisnpc->dialogid = dialogid;
-	thisnpc->event=0;
+	thisnpc->event=eventid;
 	if( thisnpc->thisnpc==NULL ) return true;
 	CMap* map = MapList.Index[thisclient->Position->Map];	
 	map->AddNPC( thisnpc );
     char buffer[200];
-    sprintf( buffer, "NPC Spawned! (NPC: %i) (Dialog: %i)", npcid, dialogid );
+    sprintf( buffer, "NPC Spawned! (NPC: %i) (Dialog: %i) (Event: %i)", npcid, dialogid,eventid );
     BEGINPACKET ( pak, 0x702 );
     ADDSTRING( pak, buffer );
     ADDBYTE( pak, 0 );

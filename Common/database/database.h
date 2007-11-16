@@ -17,6 +17,7 @@ class CDatabase
         int Reconnect( );
         void Disconnect( );
         bool QExecute( char *format,... );
+        int QExecuteUpdate( char *Format,... ); //LMA: Special Update case (returns nb affected rows).
         MYSQL_RES* QUse( char *format,... );
         MYSQL_RES* QStore( char *format,... );                
         void QFree( );

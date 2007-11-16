@@ -102,6 +102,8 @@ class CPlayer: public CCharacter
         bool CleanPlayerVector( );
        	bool loaddata( );
         void savedata( );        
+        void CalculateSignature( int slot );    //LMA: get item signature
+        int CheckSignature( int slot );         //LMA: check signature
         UINT GetNewStorageItemSlot( CItem thisitem );
         UINT GetNewItemSlot( CItem thisitem );        
         bool ClearObject( unsigned int otherclientid );
@@ -117,11 +119,14 @@ class CPlayer: public CCharacter
         CParty* GetParty( );
         unsigned int AddItem( CItem item );
         void UpdateInventory( unsigned int slot1, unsigned int slot2=0xffff );
+        void SaveSlot( unsigned int slot); //LMA: Saving slot into MySQL database.
+        void SaveSlot41( unsigned int slot); //LMA: Saving slot into MySQL database (Mysql 4.1+ function).
         void reduceItemsLifeSpan( bool attacked);
-        
+        bool SaveQuest( QUESTS* myquest );       //LMA: Saving quests data (Mysql 4.1+ function).
         // quest
         bool AddQuest( unsigned long int questid );
         bool DelInactiveQuest( unsigned long int questid );    //LMA
+        
         bool DelQuest( unsigned long int questid );
         bool GiveQuestReward( CQuest* thisquest );        
         QUESTS* GetQuestByQuestID( unsigned long int questid );

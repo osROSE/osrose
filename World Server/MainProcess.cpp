@@ -23,22 +23,16 @@
 // Map Process
 PVOID MapProcess( PVOID TS )
 {
-    //LMA: maps TESTS !!!
-    UINT etimetest =0;
-    UINT time_last_test=0;
-    int nb_monsters_done1=0;
-    int nb_monsters_done2=0;
-    UINT time1=0;
-    UINT time2=0;
     bool ok_cont=false;
-    int nb1=0;
-    int nb2=0;
-    UINT sum1=0;
-    UINT sum2=0;
-    //END TESTS
+    UINT loopcount=0;
                   
     while(GServer->ServerOnline)
     {
+        loopcount++;            //geobot: refresh only every 100 cycles
+        if (loopcount<100)
+           continue;
+        loopcount=0;
+                                        
         pthread_mutex_lock( &GServer->PlayerMutex );
         pthread_mutex_lock( &GServer->MapMutex );
                 
@@ -75,64 +69,20 @@ PVOID MapProcess( PVOID TS )
             }
             // Monster update //------------------------
             pthread_mutex_lock( &map->MonsterMutex );
-            
-            //LMA: maps TESTS !!!
-            //LMA: maps : test
-            if (GServer->Config.testgrid!=0)
-            {
-               nb2++;
-               sum2+=etimetest;
-               sum1=0;
-               nb1=0;
-               //Log(MSG_LOAD,"Grid %i/%i: time %u for %i",nb_monsters_done2,map->MonsterList.size(),sum2,nb2);
-            }
-            else
-            {
-               nb1++;
-               sum1+=etimetest;
-               sum2=0;
-               nb2=0;                  
-               //Log(MSG_LOAD,"Visu %i/%i: time %u for %i",nb_monsters_done1,map->MonsterList.size(),sum1,nb1);
-            }
-
-            time_last_test=clock();                                    
-            nb_monsters_done1=0;
-            nb_monsters_done2=0;
-            ok_cont=false;
-            
-            //END TESTS
-            
+               
             for(UINT j=0;j<map->MonsterList.size();j++)
             {
                 CMonster* monster = map->MonsterList.at(j);
                 
                 //LMA: maps (using grid now?)
-               //if(!monster->PlayerInRange( )) continue;        //casual way
-                //if(!monster->PlayerInGrid( )) continue;           //grid way
-                 //LMA TESTING !!!
                  ok_cont=false;
                  if (GServer->Config.testgrid!=0)
-                 {
                      ok_cont=monster->PlayerInGrid( );                    
-                    //Log(MSG_INFO,"[GRID]Seen: monster %i",monster->clientid);
-                    if (ok_cont)                                           
-                      nb_monsters_done2++;                         
-                      /*etimetest = (UINT)round((clock( ) - time_last_test));
-                      sum2+=etimetest;*/
-                 }
                  else
-                 {
-                    ok_cont=monster->PlayerInRange( );
-                    if (ok_cont)                                                               
-                       nb_monsters_done1++;
-                       /*etimetest = (UINT)round((clock( ) - time_last_test));
-                       sum1+=etimetest;*/
-                    //Log(MSG_INFO,"[VIS]monster %i X(%.2f,%.2f)",monster->clientid,monster->Position->current.x,monster->Position->current.y);                        
-                 }
+                     ok_cont=monster->PlayerInRange( );
                  
                 if (!ok_cont)
                     continue;
-                 //END TESTS
                                               
                //LMA begin
                //20070621-211100
@@ -143,13 +93,13 @@ PVOID MapProcess( PVOID TS )
                    UINT etime = (UINT)round((clock( ) - monster->SpawnTime));
                    if(etime<20000)
                    {
-                     if(!monster->PlayerInRange( )) continue;
+                     //if(!monster->PlayerInRange( )) continue;
                      if(!monster->UpdateValues( )) continue;
                      monster->UpdatePosition( );
                    }
                    else if(etime>20000 && etime<120000) // convert temporary monster to definitive 20 seconds after the temporary was spawned
                    {
-                    if(!monster->PlayerInRange( )) continue;
+                    //if(!monster->PlayerInRange( )) continue;
                     if(!monster->UpdateValues( )) continue;
                         monster->UpdatePosition( );
                       CPlayer* player = monster->GetNearPlayer( );
@@ -188,7 +138,7 @@ PVOID MapProcess( PVOID TS )
                             map->DeleteMonster( monster, true, j ); continue;
                        }
                        
-                        if(!monster->PlayerInRange( )) continue;
+                        //if(!monster->PlayerInRange( )) continue;
                         if(!monster->UpdateValues( )) continue;
                         monster->UpdatePosition( );                                                     
                   }
@@ -209,7 +159,7 @@ PVOID MapProcess( PVOID TS )
                          continue;
                        }
 
-                        if(!monster->PlayerInRange( )) continue;
+                        //if(!monster->PlayerInRange( )) continue;
                         if(!monster->UpdateValues( )) continue;
                         monster->UpdatePosition( );              
                 }
@@ -221,7 +171,7 @@ PVOID MapProcess( PVOID TS )
                         UINT etime = (UINT)round((clock( ) - monster->SpawnTime));
                         if (etime>120000) // delete our bonfire...
                         {
-                        map->DeleteMonster( monster, true, j ); continue;
+                           map->DeleteMonster( monster, true, j ); continue;
                         }   
                     }
                 
@@ -235,7 +185,7 @@ PVOID MapProcess( PVOID TS )
                         if(etime<20000) {if(!monster->PlayerInRange( )) continue; if(!monster->UpdateValues( )) continue; monster->UpdatePosition( );}
                         else if(etime>20000 && etime<120000) // convert seed to ghost btw 20 and 120sec after the seed was spawned
                         {
-                            if(!monster->PlayerInRange( )) continue;
+                            //if(!monster->PlayerInRange( )) continue;
                             if(!monster->UpdateValues( )) continue;
                                 monster->UpdatePosition( );
                             CPlayer* player = monster->GetNearPlayer( );
@@ -284,9 +234,6 @@ PVOID MapProcess( PVOID TS )
         }
         pthread_mutex_unlock( &GServer->MapMutex );
         pthread_mutex_unlock( &GServer->PlayerMutex );
-        
-        //LMA: maps tests
-        etimetest = (UINT)round((clock( ) - time_last_test));
                         
         #ifdef _WIN32
         Sleep(GServer->Config.MapDelay);

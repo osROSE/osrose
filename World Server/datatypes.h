@@ -345,6 +345,7 @@ struct CNPCData {
     UINT aggresive;
     UINT shp;
     UINT dialogid;
+    UINT eventid;
 };
 
 // Store the damage for monster to give exp
@@ -460,6 +461,9 @@ struct CItem {
 	UINT 	stats;
 	UINT    gem;
 	UINT    durabLeft;
+	long int sig_head;
+	long int sig_data;
+	int sig_gem;
 };
 
 // -----------------------------------------------------------------------------------------
@@ -528,6 +532,7 @@ struct CSkills {
     UINT aoeradius;
     UINT script;
     UINT svalue1;
+    UINT gm_aoe;
 };
 
 // -----------------------------------------------------------------------------------------

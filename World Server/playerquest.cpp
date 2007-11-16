@@ -77,6 +77,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                     Log(MSG_INFO,"deleting old quest id %u",202);
                     myoldquest->active = false;
                     ActiveQuest--;
+                    SaveQuest(myoldquest);
                 }
             }           
             
@@ -125,7 +126,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
             }        
         } 
         
-        MyQuest.push_back( myquest );  
+        MyQuest.push_back( myquest );
         ActiveQuest++;
         
          //LMA begin
@@ -152,6 +153,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                 {
                     LogQuest("Patch for Junon ID.");
                     myquesttemp->active=false;
+                    SaveQuest(myquesttemp);
                     ActiveQuest--;            
                 }
                 
@@ -197,6 +199,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                             myquestlc->items[0] = 1;
                         MyQuest.push_back( myquestlc );  
                         ActiveQuest++;
+                        SaveQuest(myquestlc);
                         LogQuest("Special Activation for Lost children quest...");
                     }
                  }
@@ -260,7 +263,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                          //we deactivate 224 and activate 225
                                          LogQuest("You should have the Red Paper, Special Pomics");
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(225); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -274,7 +278,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                 for(int i=0;i<5;i++)
                                                     myquestlc->items[i] = 0;  
                                                     myquestlc->items[0] = 1;
-                                                MyQuest.push_back( myquestlc );  
+                                                MyQuest.push_back( myquestlc );
+                                                SaveQuest(myquestlc);  
                                                 ActiveQuest++;
                                             }
                                          }                                                
@@ -303,7 +308,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                          //we deactivate 813 and activate 814
                                          LogQuest("You should have received the memorantum");
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(814); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -319,6 +325,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[0] = 1; 
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                                    
                                     }   
@@ -363,6 +370,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                          
                                          myquest->active=false;
                                          ActiveQuest--;
+                                         SaveQuest(myquest);
                                       }
                                       
                                       //Patch for the quest "Toddy stole the jewels"
@@ -400,6 +408,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                          
                                          myquest->active=false;
                                          ActiveQuest--;
+                                         SaveQuest(myquest);
                                       }
                                       
                                    }
@@ -480,7 +489,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                      }
                                      
                                      myquest->active=false;
-                                     ActiveQuest--;                                   
+                                     ActiveQuest--;
+                                     SaveQuest(myquest);
                                 }
                                 break;
                            case 108:
@@ -496,7 +506,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    sprintf ( bufferquest, "You received White Wing Bow!");                                                       
                                                    GServer->pakGMItemQuest(this,205,8,1,0,100,41,0,bufferquest);
                                                    myquest->active = false;
-                                                   ActiveQuest--;                                                 
+                                                   ActiveQuest--;
+                                                   SaveQuest(myquest);                                                 
                                               }
                                               break;
                                             case 2:
@@ -508,6 +519,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    GServer->pakGMItemQuest(this,404,8,1,0,100,41,0,bufferquest);
                                                    myquest->active = false;
                                                    ActiveQuest--;
+                                                   SaveQuest(myquest);
                                               }
                                               break;                                                                                           
                                             default:
@@ -532,7 +544,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    sprintf ( bufferquest, "You received Mage's Rod!");                                                       
                                                    GServer->pakGMItemQuest(this,304,8,1,0,100,33,0,bufferquest);
                                                    myquest->active = false;
-                                                   ActiveQuest--;                                                 
+                                                   ActiveQuest--;
+                                                   SaveQuest(myquest);                                                 
                                               }
                                               break;                                             
                                           case 1:
@@ -543,7 +556,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    sprintf ( bufferquest, "You received Elven Wand!");                                                       
                                                    GServer->pakGMItemQuest(this,334,8,1,0,100,21,0,bufferquest);
                                                    myquest->active = false;
-                                                   ActiveQuest--;                                                 
+                                                   ActiveQuest--;
+                                                   SaveQuest(myquest);
                                               }
                                               break;
                                             case 2:
@@ -557,6 +571,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    GServer->pakGMItemQuest(this,83,7,1,0,100,0,0,bufferquest);
                                                    myquest->active = false;
                                                    ActiveQuest--;
+                                                   SaveQuest(myquest);
                                               }
                                               break;                                                                                           
                                             default:
@@ -592,6 +607,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    GServer->pakGMItemQuest(this,234,8,1,0,100,41,0,bufferquest);                                                   
                                                    myquest->active = false;
                                                    ActiveQuest--;
+                                                   SaveQuest(myquest);
                                               }
                                               break; 
                                             case 4:
@@ -603,6 +619,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    GServer->pakGMItemQuest(this,262,8,1,0,100,41,0,bufferquest);                                                   
                                                    myquest->active = false;
                                                    ActiveQuest--;
+                                                   SaveQuest(myquest);
                                               }
                                               break;                                                                                                                                          
                                             default:
@@ -629,6 +646,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    GServer->pakGMItemQuest(this,35,8,1,0,100,41,0,bufferquest);                                                   
                                                    myquest->active = false;
                                                    ActiveQuest--;
+                                                   SaveQuest(myquest);
                                              }
                                              break;                                                                                       
                                            case 4:
@@ -640,6 +658,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                    GServer->pakGMItemQuest(this,133,8,1,0,100,53,0,bufferquest);                                                   
                                                    myquest->active = false;
                                                    ActiveQuest--;
+                                                   SaveQuest(myquest);
                                              }
                                              break;                                           
                                            default:
@@ -696,6 +715,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                          //we deactivate 236 and activate 237
                                           myquest->active = false;
                                           ActiveQuest--; 
+                                          SaveQuest(myquest);
                                         CQuest* thisquestlc = GServer->GetQuestByID(237); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -712,6 +732,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[1] = 1; 
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                                    
                                     }   
@@ -739,7 +760,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                     {
                                          //we deactivate 239 and activate 240
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(240); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -755,6 +777,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[0] = 10;
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                                    
                                     }   
@@ -777,7 +800,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                     {
                                          //we deactivate 262 and activate 263
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(263); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -794,6 +818,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[1] = 20;
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                                    
                                     }   
@@ -809,7 +834,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                     {
                                          //we deactivate 267 and activate 268
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(268); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -825,6 +851,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[0] = 10;
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                                    
                                     }   
@@ -867,7 +894,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                     {
                                           //we deactivate 274 and activate 275
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(275); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -884,6 +912,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[1] = 1;                                                                                                         
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                       
                                     } 
@@ -900,7 +929,8 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                          //we deactivate 226 and activate 227
                                          LogQuest("You should have finished the slaughter, Special Pomics");
                                           myquest->active = false;
-                                          ActiveQuest--; 
+                                          ActiveQuest--;
+                                          SaveQuest(myquest); 
                                         CQuest* thisquestlc = GServer->GetQuestByID(227); 
                                         if(thisquestlc!=0)
                                         {                   
@@ -915,6 +945,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
                                                     myquestlc->items[i] = 0;  
                                                 MyQuest.push_back( myquestlc );  
                                                 ActiveQuest++;
+                                                SaveQuest(myquestlc);
                                             }
                                          }                                                    
                                     }                                                                    
@@ -1011,6 +1042,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
         } 
            
     }
+    
     if( flag ) // Check if finish the quest
     {  
         if( myquest!=0 )
@@ -1030,10 +1062,14 @@ bool CPlayer::AddQuest( unsigned long int questid )
                 
                   GiveQuestReward( myquest->thisquest );
                   myquest->active = false;
-                  ActiveQuest--;         
+                  ActiveQuest--;                           
             }
         }
     }
+    
+    //Last save.
+    if(myquest!=0)
+       SaveQuest(myquest);
 
     if(finalquest!=0)
     { 
@@ -1057,12 +1093,41 @@ bool CPlayer::AddQuest( unsigned long int questid )
        {
           LogQuest("Reward Santa, deleting Quest %i",finalquest->id);
           DelInactiveQuest(questid);
-       }    
+       }
         
     }
     
     
-    return true;    
+    return true;
+}
+
+//LMA: Saving a quest into database (Mysql 4.1+)
+bool CPlayer::SaveQuest( QUESTS* myquest )
+{
+    char nqitem[200];	
+	for( int j=0;j<5;j++ )
+	{
+        if( j==0 )
+        {
+	       sprintf(&nqitem[j], "%i",myquest->items[j]);
+        }
+        else
+        {
+	       sprintf(&nqitem[strlen(nqitem)], "|%i",myquest->items[j]);
+        }
+    }
+    
+    /*Mysql <4.1+
+    GServer->DB->QExecute("INSERT INTO list_quest (owner,questid,nitems,active) VALUES (%i,%i,'%s',%i)",
+    CharInfo->charid, myquest->thisquest->id, nqitem, myquest->active );    
+     */     
+     LogQuest("Saving quest %i",myquest->thisquest->id);
+     
+     //Mysql 4.1+
+     GServer->DB->QExecute("INSERT INTO list_quest (owner,questid,nitems,active) VALUES (%i,%i,'%s',%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),questid=VALUES(questid),nitems=VALUES(nitems),active=VALUES(active)",
+         CharInfo->charid, myquest->thisquest->id, nqitem, myquest->active ); 
+
+     return true;
 }
 
 //LMA: delete inactive quest
@@ -1073,17 +1138,22 @@ bool CPlayer::DelInactiveQuest( unsigned long int questid )
     if( myquest == 0 )
         return false;
         LogQuest("ok2");
+
+    //Deleting also from MySQL        
     for(UINT i=0;i<MyQuest.size( );i++)
     {
         if(MyQuest.at(i)==myquest)
         {
             LogQuest("deleting Quest %i",myquest->thisquest->id);
+            GServer->DB->QExecute( "DELETE FROM list_quest WHERE owner=%i AND questid=%i",CharInfo->charid,myquest->thisquest->id);
             MyQuest.erase( MyQuest.begin()+i );
             delete myquest;
             break;
         }
     }
-        LogQuest("ok3");	
+    LogQuest("ok3");	
+        
+    
     return true;
 }
 
@@ -1100,6 +1170,7 @@ bool CPlayer::DelQuest( unsigned long int questid )
     {
         if(MyQuest.at(i)==myquest)
         {
+            GServer->DB->QExecute( "DELETE FROM list_quest WHERE owner=%i AND questid=%i",CharInfo->charid,myquest->thisquest->id);
             MyQuest.erase( MyQuest.begin()+i );
             delete myquest;
             break;

@@ -25,7 +25,7 @@ bool CWorldServer::LoadNPCData( )
 {
 	Log( MSG_LOAD, "NPC Data           " );    
 	MYSQL_ROW row;    
-	MYSQL_RES *result = DB->QStore("SELECT id,life,walkspeed,runspeed,drivespeed,weapon, subweapon,level,hp,attackpower,hitpower,defense,strength,evasion,attackspeed,AI,exp,dropid,money,item,tab1,tab2,tab3,specialtab,attackdistance,aggresive,shp,dialog FROM npc_data order by id");
+	MYSQL_RES *result = DB->QStore("SELECT id,life,walkspeed,runspeed,drivespeed,weapon, subweapon,level,hp,attackpower,hitpower,defense,strength,evasion,attackspeed,AI,exp,dropid,money,item,tab1,tab2,tab3,specialtab,attackdistance,aggresive,shp,dialog,eventid FROM npc_data order by id");
     if(result==NULL) return false;
 	while( row = mysql_fetch_row(result) )
     {
@@ -62,7 +62,8 @@ bool CWorldServer::LoadNPCData( )
         newnpc->atkdistance = atof(row[24])/100;
         newnpc->aggresive = atoi(row[25]);
         newnpc->shp = atoi(row[26]);  
-        newnpc->dialogid = atoi(row[27]);  
+        newnpc->dialogid = atoi(row[27]);
+        newnpc->eventid = atoi(row[28]);
         NPCData.push_back( newnpc );
     }     
 	DB->QFree( );	
@@ -73,7 +74,7 @@ bool CWorldServer::LoadSkillData( )
 {
 	Log( MSG_LOAD, "Skills data            " );    
 	MYSQL_ROW row;    
-	MYSQL_RES *result = DB->QStore("SELECT id,level,sp,type,range,target,power,duration,mp, success,weapon,class,rskills,lskills,buff1,buffv11,buffv12, buff2,buffv21,buffv22,buff3,buffv31,buffv32,clevel,aoe,aoeradius,script,value1 FROM skills_data order by id");
+	MYSQL_RES *result = DB->QStore("SELECT id,level,sp,type,range,target,power,duration,mp, success,weapon,class,rskills,lskills,buff1,buffv11,buffv12, buff2,buffv21,buffv22,buff3,buffv31,buffv32,clevel,aoe,aoeradius,script,value1,gm_aoe FROM skills_data order by id");
     if(result==NULL) return false;
 	while( row = mysql_fetch_row(result) )
     {
@@ -111,6 +112,7 @@ bool CWorldServer::LoadSkillData( )
         newskill->aoeradius=atoi(row[25])/100;
         newskill->script=atoi(row[26]);
         newskill->svalue1=atoi(row[27]);
+        newskill->gm_aoe=atoi(row[28]); //LMA: GM AOE buff
         newskill->nbuffs = 0; 
         if(newskill->buff[0]!=0)
             newskill->nbuffs += 1;
@@ -539,8 +541,6 @@ bool CWorldServer::LoadNPCs( )
             return false;
         }
         
-        thisnpc->event=0; //LMA Event.
-        thisnpc->dialog=0;
 		thisnpc->clientid = GetNewClientID();
 		thisnpc->npctype = atoi(row[0]);
 		thisnpc->posMap = atoi(row[1]);
@@ -548,6 +548,9 @@ bool CWorldServer::LoadNPCs( )
 		thisnpc->pos.x = (float)atof(row[3]);
 		thisnpc->pos.y = (float)atof(row[4]);
 		thisnpc->thisnpc = GetNPCDataByID( thisnpc->npctype );
+        thisnpc->dialog=thisnpc->thisnpc->dialogid;
+        thisnpc->event=thisnpc->thisnpc->eventid; //LMA Event.
+		
 		if( thisnpc->thisnpc == NULL)
 		{
             delete thisnpc;

@@ -278,7 +278,7 @@ class CWorldServer : public CServerSocket
     	bool pakGMAnn( CPlayer* thisclient, CPacket *P );    
         bool pakGMBan( CPlayer* thisclient, char* name );   
         bool pakGMInfo(CPlayer* thisclient, char* name);    
-        bool pakGMNpc(CPlayer* thisclient, int npcid, int dialogid);
+        bool pakGMNpc(CPlayer* thisclient, int npcid, int dialogid,int eventid);
       	bool pakGMGotomap( CPlayer* thisclient, int map );
       	bool pakGMMute( CPlayer* thisclient, char* name, int time);
       	bool pakGMPartylvl( CPlayer* partyclient, int level );
