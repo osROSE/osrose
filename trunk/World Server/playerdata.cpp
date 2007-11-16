@@ -69,9 +69,6 @@ bool CPlayer::loaddata( )
     CharInfo->union04=atoi(row[33]);
     CharInfo->union05=atoi(row[34]);
     
-    
-    Log(MSG_INFO,"reward points at loading %i",CharInfo->rewardpoints);
-    
 	p_skills = 0;
 	for(BYTE i=0;i<48;i++) 
     { 
@@ -120,6 +117,15 @@ bool CPlayer::loaddata( )
             cskills[i].thisskill = GServer->GetSkillByID( cskills[i].id+cskills[i].level-1 );                
         }
     }
+    
+    //LMA: reset inventory.
+    for(int i=0;i<MAX_INVENTORY;i++)
+    {
+        items[i].sig_data=-1;
+        items[i].sig_head=-1;
+        items[i].sig_gem-1;                        
+    }
+    
 	GServer->DB->QFree( );	
 	result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM items WHERE owner=%i", CharInfo->charid);
     if(result==NULL) return false;
@@ -141,6 +147,7 @@ bool CPlayer::loaddata( )
 		items[itemnum].socketed = (atoi(row[8])==1)?true:false;
 		items[itemnum].appraised = (atoi(row[9])==1)?true:false;
 		items[itemnum].gem = atoi(row[10])>3999?0:atoi(row[10]);
+		CalculateSignature(itemnum);  //Calculate signature.
 	}
 	GServer->DB->QFree( );
 	result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM storage WHERE owner=%i", Session->userid);
@@ -822,7 +829,103 @@ bool CPlayer::loaddata( )
 	return true;
 }
 
+//LMA: Calculating item signature
+void CPlayer::CalculateSignature( int slot )
+{
+     long int res_head=-1;
+     long int res_data=-1;
+     int res=1;
+     
+     
+     if(items[slot].itemnum==0)
+     {
+        items[slot].sig_head=-1;
+        items[slot].sig_data=-1;
+        items[slot].sig_gem=-1;            
+        return;
+     }
+     
+     res_head=(long int)pow(2,5)*items[slot].itemnum+items[slot].itemtype;
+     
+     if( items[slot].itemtype >= 10 && items[slot].itemtype <= 13 )
+     {
+         res_data=items[slot].count;       
+     }
+     else
+     {
+        res_data=items[slot].stats;
+        if(items[slot].socketed)
+        		res_data+=(long int)pow(2,26);
+        if(items[slot].appraised)
+		        res_data+=(long int)pow(2,27);
+		res_data+=(long int)pow(2,16)*(items[slot].lifespan*10);
+		res_data+=(long int)pow(2,9)*items[slot].durability;
+		res_data+=(long int)pow(2,28)*items[slot].refine;		
+     }
+          
+     items[slot].sig_head=res_head;
+     items[slot].sig_data=res_data;
+     items[slot].sig_gem=items[slot].gem;
+
+     
+     return;
+}
+
+
+//LMA: Checking item signature.
+//0=delete
+//1=add/update
+//2=do nothing
+int CPlayer::CheckSignature( int slot )
+{
+     long int res_head=-1;
+     long int res_data=-1;
+     int res=1;
+     
+     
+     if(items[slot].itemnum==0)
+     {
+        items[slot].sig_head=0;
+        items[slot].sig_data=0;
+        items[slot].sig_gem=0;      
+        return 0;
+     }
+     
+     Log(MSG_INFO,"CheckSignature %i*[%i:%i]",items[slot].count,items[slot].itemtype,items[slot].itemnum);
+     
+     res_head=(long int)pow(2,5)*items[slot].itemnum+items[slot].itemtype;
+     
+     if( items[slot].itemtype >= 10 && items[slot].itemtype <= 13 )
+     {         
+         res_data=items[slot].count;
+         Log(MSG_INFO,"slot %i, count: %i, res_data: %i, sig_data %i",slot,items[slot].count,res_data,items[slot].sig_data);
+         if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data))
+            return 2;         
+     }
+     else
+     {
+        res_data=items[slot].stats;
+        if(items[slot].socketed)
+        		res_data+=(long int)pow(2,26);
+        if(items[slot].appraised)
+		        res_data+=(long int)pow(2,27);
+		res_data+=(long int)pow(2,16)*(items[slot].lifespan*10);
+		res_data+=(long int)pow(2,9)*items[slot].durability;
+		res_data+=(long int)pow(2,28)*items[slot].refine;
+         if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data)&&(items[slot].sig_gem==items[slot].gem))
+            return 2;		
+     }
+          
+     items[slot].sig_head=res_head;
+     items[slot].sig_data=res_data;
+     items[slot].sig_gem=items[slot].gem;
+
+     
+     return res;
+}
+
 // This is a REALLY bad way of saving the character data, but it works ^^
+//LMA: should be more efficient now ;)
 void CPlayer::savedata( )
 {
     lastSaveTime = clock();
@@ -870,26 +973,55 @@ void CPlayer::savedata( )
     	   hp=Stats->MaxHP * 10 / 100;
 	   if(Stats->MP<0)
 	       Stats->MP=0;
-	       
-    
-           Log(MSG_INFO,"Saving Reward points: %i ",CharInfo->rewardpoints);
-	       
+
         GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i, townid=%i, rewardpoints=%i WHERE id=%i", 
                     CharInfo->Job,Stats->Level, CharInfo->Zulies, hp, Stats->MP, 
                     Attr->Str,Attr->Con,Attr->Dex,Attr->Int,Attr->Cha,Attr->Sen,
                     CharInfo->Exp,CharInfo->SkillPoints,CharInfo->StatPoints,CharInfo->stamina, 
                     quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,Position->saved,CharInfo->rewardpoints,CharInfo->charid);
-    	if(!GServer->DB->QExecute("DELETE FROM items WHERE owner=%i", CharInfo->charid)) return;
+
+        //LMA: intelligent item save (?)
+    	//if(!GServer->DB->QExecute("DELETE FROM items WHERE owner=%i", CharInfo->charid)) return;
+    	int res_check=0;
+    	int nb_saved=0;
+    	int nb_delete=0;
     	for(UINT i=0;i<MAX_INVENTORY;i++) 
         {
-    		if (items[i].count > 0) 
+            //Already deleted
+            if ((items[i].itemnum==0)&&(items[i].sig_data==-1))
+               continue;
+            res_check=CheckSignature(i);
+            //not changed
+            if(res_check==2)
+               continue;
+            //2delete
+            if(res_check==0)
             {
-    			GServer->DB->QExecute("INSERT INTO items (owner,itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)",
+                //delete item.
+                GServer->DB->QExecute("DELETE FROM items WHERE owner=%i and slotnum=%i", CharInfo->charid,i);
+                items[i].sig_data=-1;
+                items[i].sig_head=-1;
+                items[i].sig_gem=-1;
+                nb_delete++;
+                continue;
+            }
+            
+            //Add or update item (new way, mysql 4.1+)
+            /*
+    		GServer->DB->QExecute("INSERT INTO items (owner,itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)",
     								CharInfo->charid, items[i].itemnum, items[i].itemtype,items[i].refine, items[i].durability,
     								items[i].lifespan, i, items[i].count, items[i].stats, (items[i].socketed?1:0),
     								(items[i].appraised?1:0),items[i].gem );
-    		}
+            */
+            nb_saved++;
+            GServer->DB->QExecute("INSERT INTO items (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),slotnum=VALUES(slotnum),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+    								CharInfo->charid, i, items[i].itemnum, items[i].itemtype,items[i].refine, items[i].durability,
+    								items[i].lifespan, items[i].count, items[i].stats, (items[i].socketed?1:0),
+    								(items[i].appraised?1:0),items[i].gem );
     	}
+    	
+    	Log(MSG_INFO,"We saved %i slots, deleted %i",nb_saved,nb_delete);
+    	
     	
     	/*
     	//LMA: We're saving storage separetly now :)
@@ -906,6 +1038,8 @@ void CPlayer::savedata( )
     	}  
     	*/
     	
+    	//We save quests elsewhere.
+    	/*
     	if(!GServer->DB->QExecute( "DELETE FROM list_quest WHERE owner=%i",CharInfo->charid )) return;
     	for(int i=0;i<MyQuest.size();i++)
     	{
@@ -925,6 +1059,7 @@ void CPlayer::savedata( )
             GServer->DB->QExecute("INSERT INTO list_quest (owner,questid,nitems,active) VALUES (%i,%i,'%s',%i)",
             CharInfo->charid, myquest->thisquest->id, nqitem, myquest->active );
         }
+        */
         
         //We save Zuly storage elsewhere.
 		//GServer->DB->QExecute("update accounts set zulystorage = %i where id = %i", CharInfo->Storage_Zulies, Session->userid);

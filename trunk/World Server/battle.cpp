@@ -354,6 +354,7 @@ bool CCharacter::AoeSkill( CSkills* skill, CCharacter* Enemy )
 bool CCharacter::AoeBuff( CSkills* skill )
 {
     Position->destiny = Position->current;        
+    
     if(Battle->castTime==0)    
     {
         BEGINPACKET( pak, 0x7bb );
@@ -370,28 +371,51 @@ bool CCharacter::AoeBuff( CSkills* skill )
     }
     Battle->castTime = 0;  
     CMap* map = GServer->MapList.Index[Position->Map];   
-    if(skill->target==1 && GetParty( )==NULL)
+    
+    //LMA: GM AOE Buff (Devilking).    
+    if (skill->gm_aoe!=0)
     {
-        UseBuffSkill( this, skill );
-        ClearBattle( Battle );
-        Battle->lastAtkTime = clock( ); 
-        return true;
-    } 
-    for(UINT i=0;i<map->PlayerList.size();i++)
-    {
-        CPlayer* player = map->PlayerList.at(i);
-        switch(skill->target)
+         Log(MSG_INFO,"GM AOE buff");
+        for(UINT i=0;i<map->PlayerList.size();i++)
         {
-            case 1: // party
+            CPlayer* player = map->PlayerList.at(i);
+            if(GServer->IsMonInCircle( Position->current,player->Position->current,(float)skill->aoeradius+1))
             {
-                if(player->Party->party==GetParty( ))
+                 UseBuffSkill( (CCharacter*)player, skill ); 
+                  Log(MSG_INFO,"Buffing %s ",player->CharInfo->charname);
+            }
+                 
+        }
+                 
+    }
+    else
+    {
+        if(skill->target==1 && GetParty( )==NULL)
+        {
+            UseBuffSkill( this, skill );
+            ClearBattle( Battle );
+            Battle->lastAtkTime = clock( ); 
+            return true;
+        } 
+            
+        for(UINT i=0;i<map->PlayerList.size();i++)
+        {
+            CPlayer* player = map->PlayerList.at(i);
+            switch(skill->target)
+            {
+                case 1: // party
                 {
-                    if(GServer->IsMonInCircle( Position->current,player->Position->current,(float)skill->aoeradius+1))
-                        UseBuffSkill( (CCharacter*)player, skill ); 
+                    if(player->Party->party==GetParty( ))
+                    {
+                        if(GServer->IsMonInCircle( Position->current,player->Position->current,(float)skill->aoeradius+1))
+                            UseBuffSkill( (CCharacter*)player, skill ); 
+                    }
                 }
             }
         }
+        
     }
+    
     Stats->MP -= (skill->mp - (skill->mp * Stats->MPReduction / 100));   
     if(Stats->MP<0) Stats->MP=0;     
     ClearBattle( Battle );

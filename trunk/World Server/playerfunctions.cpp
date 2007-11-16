@@ -652,11 +652,102 @@ unsigned int CPlayer::AddItem( CItem item )
     return newslot;
 }
 
+//LMA: Saving slot with a MySQL 4.1+ function
+void CPlayer::SaveSlot41( unsigned int slot)
+{
+   //Update or add a slot (kinky way).
+    Log(MSG_INFO,"[Slot41] Tryng to alter slot %i for player %i",slot,CharInfo->charid);
+    CalculateSignature(slot);
+    int res_mysql=0;
+    
+	if (items[slot].itemtype > 0) 
+    {
+        //insert/update
+        res_mysql=GServer->DB->QExecuteUpdate("INSERT INTO items (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),slotnum=VALUES(slotnum),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+    								CharInfo->charid, slot, items[slot].itemnum, items[slot].itemtype,items[slot].refine, items[slot].durability,
+    								items[slot].lifespan, items[slot].count, items[slot].stats, (items[slot].socketed?1:0),
+    								(items[slot].appraised?1:0),items[slot].gem );                            	
+        Log(MSG_INFO,"[Slot41] Same Update slot %i for player %i (res=%i)...",slot,CharInfo->charid,res_mysql);
+		return;
+	}
+
+    //delete the slot.
+    GServer->DB->QExecute("DELETE FROM items WHERE owner=%i AND slotnum=%i", CharInfo->charid,slot);
+    Log(MSG_INFO,"[Slot41] Delete slot %i for player %i",slot,CharInfo->charid);
+
+
+   return;   
+}
+
+
+//LMA: saving slot in database.
+void CPlayer::SaveSlot( unsigned int slot)
+{
+    //Update or add a slot (kinky way).
+    Log(MSG_INFO,"Tryng to alter slot %i for player %i",slot,CharInfo->charid);
+    CalculateSignature(slot);
+    int res_mysql=0;
+    
+	if (items[slot].itemtype > 0) 
+    {
+        //insert if update failed.
+        res_mysql=GServer->DB->QExecuteUpdate("UPDATE items  SET itemnum=%i, itemtype=%i, refine=%i, durability=%i, lifespan=%i, count=%i, stats=%i, socketed=%i, appraised=%i ,gem=%i WHERE owner=%i AND slotnum=%i",
+							items[slot].itemnum, items[slot].itemtype,items[slot].refine, items[slot].durability,
+							items[slot].lifespan, items[slot].count, items[slot].stats, (items[slot].socketed?1:0),
+							(items[slot].appraised?1:0),items[slot].gem,CharInfo->charid,slot);
+		
+		Log(MSG_INFO,"After Update attempt");
+        if(res_mysql==0)
+        {
+           //Slot not in database or nothing has changed.
+           Log(MSG_INFO,"Select");
+        	MYSQL_RES *result = GServer->DB->QStore("SELECT owner FROM items WHERE owner=%i AND slotnum=%i",CharInfo->charid,slot);
+        	if(result==NULL)
+            {
+               Log(MSG_WARNING,"MySQL Error in SaveSlot");
+               return;
+            }
+           Log(MSG_INFO,"After Select");
+            
+        	if(mysql_num_rows(result)==0)
+        	{
+                    Log(MSG_INFO,"insert");
+               GServer->DB->QFree( );                                         
+               GServer->DB->QExecute("INSERT INTO items (owner,itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)",
+    							CharInfo->charid, items[slot].itemnum, items[slot].itemtype,items[slot].refine, items[slot].durability,
+    							items[slot].lifespan, slot, items[slot].count, items[slot].stats, (items[slot].socketed?1:0),
+    							(items[slot].appraised?1:0),items[slot].gem );
+               Log(MSG_INFO,"Insert slot %i for player %i",slot,CharInfo->charid);
+               return;                                         
+            }
+            
+            GServer->DB->QFree( );
+            Log(MSG_INFO,"Same Update slot %i for player %i...",slot,CharInfo->charid);
+       }
+       else
+       {
+           Log(MSG_INFO,"Update slot %i for player %i, nb rows=%i",slot,CharInfo->charid,res_mysql);
+       }
+
+		
+		return;
+	}
+
+    //delete the slot.
+    GServer->DB->QExecute("DELETE FROM items WHERE owner=%i AND slotnum=%i", CharInfo->charid,slot);
+    Log(MSG_INFO,"Delete slot %i for player %i",slot,CharInfo->charid);
+
+
+   return;
+}
+
 void CPlayer::UpdateInventory( unsigned int slot1, unsigned int slot2 )
 {
+     Log(MSG_INFO,"In Update Inventory");
     if(slot1==0xffff && slot2==0xffff) return;
     BEGINPACKET( pak, 0x718 );
-    if(slot2!=0xffff && slot2!=0xffff) {ADDBYTE( pak, 2 );}
+    //if(slot2!=0xffff && slot2!=0xffff) {ADDBYTE( pak, 2 );}
+    if(slot1!=0xffff && slot2!=0xffff) {ADDBYTE( pak, 2 );}
     else {ADDBYTE( pak, 1 );}
     if(slot1!=0xffff)
     {
@@ -674,7 +765,13 @@ void CPlayer::UpdateInventory( unsigned int slot1, unsigned int slot2 )
         ADDDWORD( pak, 0x00000000 );
         ADDWORD ( pak, 0x0000 );
     }
-    client->SendPacket( &pak );    
+    client->SendPacket( &pak );
+
+    //LMA: MySQL Save slot    
+    if(slot1!=0xffff)
+         SaveSlot41(slot1);
+    if(slot2!=0xffff)
+         SaveSlot41(slot2);
 }
 
 void CPlayer::reduceItemsLifeSpan( bool attacked)

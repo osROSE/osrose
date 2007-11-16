@@ -57,6 +57,37 @@ int CDatabase::Reconnect( )
     return 0;
 }
 
+
+//LMA: Special Update case, returns nb affected rows.
+int CDatabase::QExecuteUpdate( char *Format,... )
+{
+    bool Qfail = true;
+    char query[1024];
+	va_list ap; 
+    va_start( ap, Format );
+	vsprintf( query, Format, ap ); 
+	va_end  ( ap );    
+    Log( MSG_QUERY, query );	
+    pthread_mutex_lock( &SQLMutex );
+    while(Qfail)
+    {
+        if(mysql_query( Mysql, query )!=0)
+        {
+            Log( MSG_FATALERROR, "Could not execute query: %s", mysql_error( Mysql ) );   
+            if(Reconnect( )==-1)
+            {
+                Log( MSG_FATALERROR, "Could not execute query: %s", mysql_error( Mysql ) );   
+                pthread_mutex_unlock( &SQLMutex );
+                return -1;
+            }
+            else Qfail = false;
+        }
+        else Qfail = false;
+    }
+    pthread_mutex_unlock( &SQLMutex );            
+    return mysql_affected_rows(Mysql);
+}
+
 // execute query
 bool CDatabase::QExecute( char *Format,... )
 {
