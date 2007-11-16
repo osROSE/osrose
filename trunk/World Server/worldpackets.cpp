@@ -1730,6 +1730,9 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
             //We add item at the end when checks done.
 			thisclient->items[newslot] = thisitem;
 			
+			//Saving item in database now.
+			thisclient->SaveSlot41(newslot);
+			
 			ADDBYTE  ( pak, newslot );
 			ADDDWORD ( pak, BuildItemHead( thisclient->items[newslot] ) );
 			ADDDWORD ( pak, BuildItemData( thisclient->items[newslot] ) );
@@ -1914,7 +1917,10 @@ bool CWorldServer::pakNPCBuy ( CPlayer* thisclient, CPacket* P )
         ADDWORD ( pak, 0x0000 );   
 
 		ncount++;
+	   //Saving item in database now.
+	   thisclient->SaveSlot41(slotid);		
 	}
+	
 	SETQWORD( pak, 0, thisclient->CharInfo->Zulies );
 	SETBYTE( pak, 8, ncount );
 	thisclient->client->SendPacket( &pak );
@@ -2114,18 +2120,11 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 					if(thisclient->Trade->trade_count[i] > 0) 
                     {
 						CItem thisitem = thisclient->items[thisclient->Trade->trade_itemid[i]];
+						thisitem.sig_data=0;
+						thisitem.sig_head=0;
+						thisitem.sig_gem=0;
 						unsigned newslot = otherclient->GetNewItemSlot( thisitem );
 						if(newslot==0xffff) continue;
-						
-						//LMA: anti hack check.
-						if(thisclient->items[thisclient->Trade->trade_itemid[i]].count < thisclient->Trade->trade_count[i])
-						{
-                          Log(MSG_HACK, "[TRADE] Player %s has to trade %i [%i:%i], but has only %i",thisclient->CharInfo->charname,thisclient->Trade->trade_count[i],thisclient->items[thisclient->Trade->trade_itemid[i]].itemtype,thisclient->items[thisclient->Trade->trade_itemid[i]].itemnum,thisclient->items[thisclient->Trade->trade_itemid[i]].count);
-          				  thisclient->CharInfo->Zulies=zulythis;
-        				  otherclient->CharInfo->Zulies=zulyother;
-                          return true;
-                        }
-                        
 						thisclient->items[thisclient->Trade->trade_itemid[i]].count -= thisclient->Trade->trade_count[i];
 						if( thisclient->items[thisclient->Trade->trade_itemid[i]].count<=0)
       						ClearItem(thisclient->items[thisclient->Trade->trade_itemid[i]]);
@@ -2146,22 +2145,18 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
                         ADDWORD ( pako, 0x0000 );
 						tucount++;
 						oucount++;
+						//Saving slots in database.
+						otherclient->SaveSlot41(newslot);
+						thisclient->SaveSlot41(thisclient->Trade->trade_itemid[i]);
 					}
 					if(otherclient->Trade->trade_count[i] > 0) 
                     {
 						CItem thisitem = otherclient->items[otherclient->Trade->trade_itemid[i]];
+						thisitem.sig_data=0;
+						thisitem.sig_head=0;
+						thisitem.sig_gem=0;						
 						unsigned newslot = thisclient->GetNewItemSlot( thisitem );
-						if(newslot==0xffff) continue;
-						
-						//LMA: anti hack check.
-						if(otherclient->items[otherclient->Trade->trade_itemid[i]].count<otherclient->Trade->trade_count[i])
-						{
-                          Log(MSG_HACK, "[TRADE] Player %s has to trade %i [%i:%i], but has only %i",otherclient->CharInfo->charname,otherclient->Trade->trade_count[i],otherclient->items[otherclient->Trade->trade_itemid[i]].itemtype,otherclient->items[otherclient->Trade->trade_itemid[i]].itemnum,otherclient->items[otherclient->Trade->trade_itemid[i]].count);                                                                                                                            
-          				  thisclient->CharInfo->Zulies=zulythis;
-        				  otherclient->CharInfo->Zulies=zulyother;
-                          return true;
-                        }
-                        						
+						if(newslot==0xffff) continue;                       						
 						otherclient->items[otherclient->Trade->trade_itemid[i]].count -= otherclient->Trade->trade_count[i];
 						if( otherclient->items[otherclient->Trade->trade_itemid[i]].count<=0 )
       						ClearItem( otherclient->items[otherclient->Trade->trade_itemid[i]] );
@@ -2182,6 +2177,9 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
                         ADDWORD ( pakt, 0x0000 );
 						tucount++;
 						oucount++;
+						//Saving slots in database.
+						thisclient->SaveSlot41(newslot);
+                        otherclient->SaveSlot41(otherclient->Trade->trade_itemid[i]);			
 					}
 				}
 
@@ -3274,6 +3272,10 @@ bool CWorldServer::pakBuyShop( CPlayer* thisclient, CPacket* P )
             ADDWORD ( pak, 0x0000 );   
             otherclient->client->SendPacket( &pak );             
             
+            //LMA: Saving slots
+            thisclient->SaveSlot41(newslot);
+            otherclient->SaveSlot41(invslot);
+            
             //update shop
             RESETPACKET( pak, 0x7c6 );
             ADDWORD    ( pak, otherclient->clientid );
@@ -3403,6 +3405,10 @@ bool CWorldServer::pakSellShop( CPlayer* thisclient, CPacket* P )
         ADDDWORD( pak, 0x00000000 );
         ADDWORD ( pak, 0x0000 );   
             otherclient->client->SendPacket( &pak );     
+            
+            //LMA: Saving slots
+            thisclient->SaveSlot41(invslot);
+            otherclient->SaveSlot41(newslot);            
             
             //update shop
             CItem thisitem = otherclient->Shop->BuyingList[slot].item;
