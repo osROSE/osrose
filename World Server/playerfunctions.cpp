@@ -656,7 +656,7 @@ unsigned int CPlayer::AddItem( CItem item )
 void CPlayer::SaveSlot41( unsigned int slot)
 {
    //Update or add a slot (kinky way).
-    Log(MSG_INFO,"[Slot41] Tryng to alter slot %i for player %i",slot,CharInfo->charid);
+    //Log(MSG_INFO,"[Slot41] Trying to alter slot %i for player %i",slot,CharInfo->charid);
     CalculateSignature(slot);
     int res_mysql=0;
     
@@ -667,13 +667,16 @@ void CPlayer::SaveSlot41( unsigned int slot)
     								CharInfo->charid, slot, items[slot].itemnum, items[slot].itemtype,items[slot].refine, items[slot].durability,
     								items[slot].lifespan, items[slot].count, items[slot].stats, (items[slot].socketed?1:0),
     								(items[slot].appraised?1:0),items[slot].gem );                            	
-        Log(MSG_INFO,"[Slot41] Same Update slot %i for player %i (res=%i)...",slot,CharInfo->charid,res_mysql);
+        Log(MSG_INFO,"[Slot41] Save slot %i for player %i (res=%i)",slot,CharInfo->charid,res_mysql);
 		return;
 	}
 
     //delete the slot.
     GServer->DB->QExecute("DELETE FROM items WHERE owner=%i AND slotnum=%i", CharInfo->charid,slot);
     Log(MSG_INFO,"[Slot41] Delete slot %i for player %i",slot,CharInfo->charid);
+    items[slot].sig_data=-1;
+    items[slot].sig_head=-1;
+    items[slot].sig_gem=-1;
 
 
    return;   

@@ -891,14 +891,12 @@ int CPlayer::CheckSignature( int slot )
         return 0;
      }
      
-     Log(MSG_INFO,"CheckSignature %i*[%i:%i]",items[slot].count,items[slot].itemtype,items[slot].itemnum);
-     
      res_head=(long int)pow(2,5)*items[slot].itemnum+items[slot].itemtype;
-     
+          
      if( items[slot].itemtype >= 10 && items[slot].itemtype <= 13 )
      {         
          res_data=items[slot].count;
-         Log(MSG_INFO,"slot %i, count: %i, res_data: %i, sig_data %i",slot,items[slot].count,res_data,items[slot].sig_data);
+         //Log(MSG_INFO,"item: %i(%i*[%i:%i]), data: (%i:%i)",slot,items[slot].count,items[slot].itemtype,items[slot].itemnum,res_data,items[slot].sig_data,res_head,items[slot].sig_head);
          if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data))
             return 2;         
      }
@@ -911,7 +909,8 @@ int CPlayer::CheckSignature( int slot )
 		        res_data+=(long int)pow(2,27);
 		res_data+=(long int)pow(2,16)*(items[slot].lifespan*10);
 		res_data+=(long int)pow(2,9)*items[slot].durability;
-		res_data+=(long int)pow(2,28)*items[slot].refine;
+		res_data+=(long int)pow(2,28)*items[slot].refine;		
+		//Log(MSG_INFO,"wep/pat: %i(%i*[%i:%i]), data: (%li:%li), head(%li:%li)",slot,items[slot].count,items[slot].itemtype,items[slot].itemnum,res_data,items[slot].sig_data,res_head,items[slot].sig_head);		
          if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data)&&(items[slot].sig_gem==items[slot].gem))
             return 2;		
      }
