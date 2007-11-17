@@ -242,7 +242,30 @@ bool CCharServer::ChangeClanStatus (CCharClient* thisclient, CCharClient* otherc
 {
         BEGINPACKET( pak, 0x7e0 );
         ADDBYTE    ( pak, 0x73 );//Change player status
-        ADDBYTE    ( pak, 0x00 );
+
+        //ADDBYTE    ( pak, 0x00 );
+        //LMA: Nb of people already online in clan?
+        //or clan rank?
+        /*int nb_online=0;
+        CClans* thisclan = (CClans*) GetClanByID( thisclient->clanid );
+        if(thisclan!=NULL)
+        {
+            for(UINT i=0;i<thisclan->ClanMembers.size();i++)
+        	{		
+                CClanMembers*	ClanMember = thisclan->ClanMembers.at( i );;
+                CCharClient* otherclient = GetClientByID( ClanMember->id );
+                if(otherclient!=NULL)
+                    nb_online++;
+        	}          
+        	
+        }
+        ADDBYTE    ( pak, nb_online );
+        */
+        
+        //Clan rank version:
+        ADDBYTE    ( pak, thisclient->clan_rank);
+        //End of test
+                
         ADDBYTE    ( pak, channel );//CANAL
         ADDWORD    ( pak, 0x0000 );
         ADDWORD    ( pak, 0x0000 );
@@ -936,7 +959,10 @@ bool CCharServer::pakClanManager ( CCharClient* thisclient, CPacket* P )
             ADDWORD    ( pak, GETWORD ((*P),1) );
             ADDWORD    ( pak, GETWORD ((*P),3) );
             ADDSTRING  ( pak, thisclient->charname );
-            ADDBYTE    ( pak, thisclient->channel );
+            //ADDBYTE    ( pak, thisclient->channel );
+            //LMA: not the channel in fact
+            ADDBYTE    ( pak, 0x00 );
+            
             SendToClanMembers(thisclient->clanid,&pak);
             Log(MSG_INFO,"[CS] clan, update clan window for %s, %i, %i, channel %i",thisclient->charname,GETWORD ((*P),1),GETWORD ((*P),3),thisclient->channel);
         }

@@ -282,7 +282,7 @@ void CWorldServer::pakQuestData( CPlayer *thisclient )
        liste_flags[37]=1;           //Warp vessel
 
     //1: Stat reset already done
-    //4:stat reset done (event ?)
+    //4: stat reset done (event ?)
     //72: point reset done?
     //32: lost engagment ring
     //33: spero top secret schematic (old?)
@@ -2895,6 +2895,8 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             
             //LMA: need to save the storage item...
             SaveSlotStorage(thisclient,newslot);
+            //We save the inventory slot as well
+            thisclient->SaveSlot41(itemslot);
         }
         break;//thanks to anon for post that this break was missing 
         case 0x01: //Withdraw
@@ -2997,7 +2999,9 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
             thisclient->nstorageitems--;
             
             //LMA: need to save the storage item...
-            SaveSlotStorage(thisclient,storageslot);                                  
+            SaveSlotStorage(thisclient,storageslot);
+            //We save the inventory slot as well
+            thisclient->SaveSlot41(newslot);            
         }        
         break;
         default:
