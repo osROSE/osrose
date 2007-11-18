@@ -106,8 +106,11 @@ CPlayer* CMonster::GetNearPlayer( UINT mdist )
             distance = tempdist;
         }
     }
+    
     if(distance>mdist)
         return NULL; // near player is too far
+    
+    
     return thisplayer;
 }
 

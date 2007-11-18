@@ -293,12 +293,18 @@ bool CCharServer::pakCreateChar( CCharClient* thisclient, CPacket* P )
 		return false;
 	if(!DB->QExecute("INSERT INTO items VALUES(%i,1,8,0,40,100,7,1,0,0,0,0)", mid))
 		return false;
+		
 	if(sex==0)
+	{
 	    if(!DB->QExecute("INSERT INTO items VALUES(%i,221,2,0,40,100,12,1,0,0,0,0)", mid))
 	    	return false;
+     }
 	else
+	{
 	    if(!DB->QExecute("INSERT INTO items VALUES(%i,222,2,0,40,100,12,1,0,0,0,0)", mid))
 	    	return false;	
+    }
+     
 	BEGINPACKET( pak, 0x713 );
 	ADDWORD    ( pak,  0 );
 	thisclient->SendPacket( &pak );

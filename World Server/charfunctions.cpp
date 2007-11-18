@@ -130,6 +130,14 @@ void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, boo
             Battle->skilltarget = Target->clientid;                      
         }
         break;
+        case STAY_STILL_ATTACK:
+        {
+             //LMA: Very special case where the monster don't really attack (mc)
+             Battle->atktype = action; 
+             Battle->skillid = skillid;  
+             Battle->skilltarget = Target->clientid;            
+             return;
+         }
         default: return;              
     }
     //if (getClient()==NULL)
@@ -168,7 +176,12 @@ bool CCharacter::IsOnBattle( )
         {
             if(Battle->skillid!=0) return true; 
         }
-        break;            
+        break;
+        case STAY_STILL_ATTACK:
+        {
+              //LMA: Very special case where the monster don't really attack (mc)
+              return true;
+         }            
         default: return false;        
     }
 }

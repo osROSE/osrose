@@ -22,7 +22,11 @@
 
 // update attack values and destiny  position
 bool CMonster::UpdateValues( )
-{     
+{   
+    //LMA: Some special case where special monsters stay still (mc)
+    if(stay_still)
+       return true;
+       
     if(IsSummon( ) && CanMove( ))
     {
         CPlayer* thisclient = GetOwner( );

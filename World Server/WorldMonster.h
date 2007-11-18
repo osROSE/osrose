@@ -38,6 +38,9 @@ class CMonster : public CCharacter
 
     	unsigned int montype;
     	unsigned int owner;	
+    	unsigned int hitcount;    //LMA: hit count for some monsters (MC and so on...) Arnold.
+    	unsigned int maxhitcount;    //LMA: max hit count for some monsters (MC and so on...) Arnold.
+    	bool stay_still;             //LMA: if yes, the monster will never move from the place it had been placed.
     	
     	CParty* thisparty;
     	CNPCData* thisnpc;   
@@ -87,5 +90,7 @@ class CMonster : public CCharacter
         bool OnSpawn( bool );
         bool OnAlmostDie( );        
         bool OnFar( );
+        bool Guardiantree(CMonster* monster,CMap* map);       //LMA: Arnold function for guardian tree
+        bool MoonChild(CMonster* monster,CMap* map);          //LMA: For Moon Child
 };
 #endif
