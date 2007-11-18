@@ -24,7 +24,19 @@
 bool CMonster::OnBeAttacked( CCharacter* Enemy )
 {
     if(!IsOnBattle( ))
-        StartAction( Enemy, NORMAL_ATTACK, 0 ); 
+    {
+        //Some monsters do not attack and stay still (mc)
+        if(!stay_still)
+        {
+            StartAction( Enemy, NORMAL_ATTACK, 0 ); 
+        }
+        else
+        {
+            StartAction( Enemy, STAY_STILL_ATTACK, 0 ); 
+        }
+        
+    }
+    
     return true;        
 }
 
@@ -143,4 +155,206 @@ bool CMonster::OnFar( )
     ClearBattle( Battle );
     MoveTo( Position->source );
     return true;
+}
+
+
+//LMA: Arnold code for guardiantree
+bool CMonster::Guardiantree(CMonster* monster,CMap* map)
+{
+     if(Stats->HP>9000)monster->hitcount=0;
+     switch (monster->hitcount)
+     {
+         case 0:
+              if(Stats->HP<9000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=1;
+              }
+              break;
+         case 1:
+              if(Stats->HP<8000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=2;
+              }
+              break;
+         case 2:
+              if(Stats->HP<7000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=3;
+              }
+              break;
+         case 3:
+              if(Stats->HP<6000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=4;
+              }
+              break;
+         case 4:
+              if(Stats->HP<5000)
+              {
+                  for(unsigned char i=0;i<5;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=5;
+              }
+              break;
+         case 5:
+              if(Stats->HP<4000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=6;
+              }
+              break;
+         case 6:
+              if(Stats->HP<3000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=7;
+              }
+              break;
+         case 7:
+              if(Stats->HP<2000)
+              {
+                  for(unsigned char i=0;i<5;i++){
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      map->AddMonster( 210, position, 0, NULL, NULL, 0, true );
+                  }
+                  monster->hitcount=8;
+              }
+              break;
+         default:
+                 monster->hitcount=9;
+                 
+     }
+}
+
+//LMA: Handling Moonchild siblings
+bool CMonster::MoonChild(CMonster* monster,CMap* map)
+{
+     if (monster->hitcount>=monster->maxhitcount)
+        return true;
+     
+     if(Stats->HP>(Stats->MaxHP*0.98))
+         monster->hitcount=0;
+         
+     CPlayer* player = NULL;
+     
+         
+     switch (monster->hitcount)
+     {
+         case 0:
+              if(Stats->HP<(Stats->MaxHP*0.98))
+              {
+                  Log(MSG_INFO,"case 0 for the MC");
+                  for(unsigned char i=0;i<2;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      CMonster* monster2=map->AddMonster( 657, position, 0, NULL, NULL, 0, true );
+
+                      if(i==0)
+                         player = monster2->GetNearPlayer(20);    //getting near player.
+
+                     if(player!=NULL)
+                         monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );
+                     
+                  }
+                  for(unsigned char i=0;i<3;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      CMonster* monster2=map->AddMonster( 658, position, 0, NULL, NULL, 0, true );
+
+                     if(player!=NULL)
+                         monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );                      
+                     
+                  }
+                  
+                  monster->hitcount=1;
+              }
+              break;
+         case 1:
+              if(Stats->HP<(Stats->MaxHP*0.80))
+              {
+                  Log(MSG_INFO,"case 1 for the MC");                                               
+                  for(unsigned char i=0;i<3;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      CMonster* monster2=map->AddMonster( 657, position, 0, NULL, NULL, 0, true );
+
+                      if(i==0)
+                         player = monster2->GetNearPlayer(20);    //getting near player.
+
+                     if(player!=NULL)
+                         monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );
+                  }
+                  for(unsigned char i=0;i<4;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      CMonster* monster2=map->AddMonster( 658, position, 0, NULL, NULL, 0, true );
+
+                     if(player!=NULL)
+                         monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );
+                     
+                  }
+                  monster->hitcount=2;
+              }
+              break;
+         case 2:
+              if(Stats->HP<(Stats->MaxHP*0.70))
+              {
+                  Log(MSG_INFO,"case 2 for the MC");                                               
+                  for(unsigned char i=0;i<10;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      CMonster* monster2=map->AddMonster( 657, position, 0, NULL, NULL, 0, true );
+
+                      if(i==0)
+                         player = monster2->GetNearPlayer(20);    //getting near player.
+
+                     if(player!=NULL)
+                         monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );
+                     
+                  }
+                  for(unsigned char i=0;i<5;i++)
+                  {
+                      fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+                      CMonster* monster2=map->AddMonster( 658, position, 0, NULL, NULL, 0, true );
+
+                     if(player!=NULL)
+                         monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );                      
+                     
+                  }
+                  monster->hitcount=monster->maxhitcount;
+              }
+              break;
+
+         default:
+                 monster->hitcount=monster->maxhitcount;
+                 
+     }
+     
+     
+     return true;
 }

@@ -158,6 +158,7 @@
 #define BUFF_SELF 6
 #define BUFF_AOE 7
 #define AOE_TARGET 8
+#define STAY_STILL_ATTACK 15
 
 // other constants
 #define MAX_SKILL 60

@@ -77,7 +77,7 @@ class CCharacter
             // Functions
             virtual CDrop* GetDrop( );
             virtual void AddDamage( CCharacter* enemy, long int hitpower);
-            virtual void UpdatePosition( );
+            virtual void UpdatePosition( bool monster_stay_still );       //LMA: changed for some monsters.
             virtual bool UpdateValues( );
             virtual void ReduceABC( );
             virtual int GetEVBuff( );

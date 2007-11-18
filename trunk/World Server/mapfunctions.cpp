@@ -249,7 +249,7 @@ void CMap::RespawnMonster( )
         if((rtime > thisspawn->respawntime*CLOCKS_PER_SEC && thisspawn->amon<thisspawn->max) || thisspawn->amon<thisspawn->min )
         {         
             fPoint position = GServer->RandInPoly( thisspawn->points, thisspawn->pcount );
-            AddMonster( thisspawn->montype, position, 0, thisspawn->mobdrop, thisspawn->mapdrop, thisspawn->id );              
+            AddMonster( thisspawn->montype, position, 0, thisspawn->mobdrop, thisspawn->mapdrop, thisspawn->id );
             thisspawn->lastRespawnTime = clock();
         }
     }                  

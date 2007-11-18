@@ -142,6 +142,17 @@ CMonster* CMap::AddMonster( UINT montype, fPoint position, UINT owner, CMDrops* 
     */
     //LMA END
     
+    monster->hitcount=0;
+    monster->maxhitcount=0;
+    monster->stay_still=false;
+    
+    if(monster->thisnpc->id==659)
+    {
+       monster->maxhitcount=3;   //LMA: MoonChild
+       monster->stay_still=true;
+    }
+
+    
     return monster; 
 }
 

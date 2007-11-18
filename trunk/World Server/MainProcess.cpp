@@ -57,7 +57,7 @@ PVOID MapProcess( PVOID TS )
                  
                  player->RefreshHPMP();         //LMA HP / MP Jumping
                 if(player->UpdateValues( )) //Does nothing except for rides... equals to true if player isn't on the back seat
-                    player->UpdatePosition( );
+                    player->UpdatePosition(false);
                 if(player->IsOnBattle( ))
                     player->DoAttack( );
                 player->CheckItems( );
@@ -95,13 +95,13 @@ PVOID MapProcess( PVOID TS )
                    {
                      //if(!monster->PlayerInRange( )) continue;
                      if(!monster->UpdateValues( )) continue;
-                     monster->UpdatePosition( );
+                     monster->UpdatePosition(monster->stay_still);
                    }
                    else if(etime>20000 && etime<120000) // convert temporary monster to definitive 20 seconds after the temporary was spawned
                    {
                     //if(!monster->PlayerInRange( )) continue;
                     if(!monster->UpdateValues( )) continue;
-                        monster->UpdatePosition( );
+                        monster->UpdatePosition(monster->stay_still);
                       CPlayer* player = monster->GetNearPlayer( );
                       if(player==NULL) continue;
                       //time for j&b (definitive monster) to come :)
@@ -140,7 +140,7 @@ PVOID MapProcess( PVOID TS )
                        
                         //if(!monster->PlayerInRange( )) continue;
                         if(!monster->UpdateValues( )) continue;
-                        monster->UpdatePosition( );                                                     
+                        monster->UpdatePosition(monster->stay_still);                                                     
                   }
                 //LMA END
                 
@@ -161,7 +161,7 @@ PVOID MapProcess( PVOID TS )
 
                         //if(!monster->PlayerInRange( )) continue;
                         if(!monster->UpdateValues( )) continue;
-                        monster->UpdatePosition( );              
+                        monster->UpdatePosition(monster->stay_still);              
                 }
                 //LMA END
                 
@@ -182,12 +182,12 @@ PVOID MapProcess( PVOID TS )
                     if (monster->IsGhostSeed( ))
                     {
                         UINT etime = (UINT)round((clock( ) - monster->SpawnTime));
-                        if(etime<20000) {if(!monster->PlayerInRange( )) continue; if(!monster->UpdateValues( )) continue; monster->UpdatePosition( );}
+                        if(etime<20000) {if(!monster->PlayerInRange( )) continue; if(!monster->UpdateValues( )) continue; monster->UpdatePosition(monster->stay_still);}
                         else if(etime>20000 && etime<120000) // convert seed to ghost btw 20 and 120sec after the seed was spawned
                         {
                             //if(!monster->PlayerInRange( )) continue;
                             if(!monster->UpdateValues( )) continue;
-                                monster->UpdatePosition( );
+                                monster->UpdatePosition(monster->stay_still);
                             CPlayer* player = monster->GetNearPlayer( );
                             if(player==NULL) continue;
                             UINT montype = GServer->GetLevelGhost( player->Position->Map, player->Stats->Level );
@@ -223,9 +223,15 @@ PVOID MapProcess( PVOID TS )
                 //LMA: moved to beginning...
                 //if(!monster->PlayerInRange( )) continue;
                 if(!monster->UpdateValues( )) continue;
-                    monster->UpdatePosition( );
+                    monster->UpdatePosition(monster->stay_still);
                 if(monster->IsOnBattle( ))
+                {
                     monster->DoAttack( );
+                    if(monster->montype==208)
+                        monster->Guardiantree(monster,map);      //LMA: guardiantree 208 (Arnold)
+                    if((monster->montype==659)&&(monster->hitcount<monster->maxhitcount))
+                        monster->MoonChild(monster,map);      //LMA: Moonchild under attack
+                }
                 monster->RefreshBuff( );
                 if(monster->IsDead( ))
                     monster->OnDie( );

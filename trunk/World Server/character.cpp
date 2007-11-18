@@ -121,7 +121,7 @@ bool CCharacter::UpdateValues( )
 }
 
 // update position
-void CCharacter::UpdatePosition( )
+void CCharacter::UpdatePosition( bool monster_stay_still )
 {
     if(IsOnBattle( ) && Battle->target!=0)
     {
@@ -135,7 +135,14 @@ void CCharacter::UpdatePosition( )
                 {
                     OnFar( );
                 }
-                else Position->destiny = Target->Position->current; //MOBS ONLY
+                else
+                {
+                    if (!monster_stay_still)
+                       Position->destiny = Target->Position->current; //MOBS ONLY
+                    else
+                        Log(MSG_INFO,"This one stays still");
+                }
+                
             }
             else Position->destiny = Target->Position->current; //ONLY IF NO TARGET ON BATTLE
         }
