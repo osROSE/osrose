@@ -358,3 +358,35 @@ bool CMonster::MoonChild(CMonster* monster,CMap* map)
      
      return true;
 }
+
+//LMA: Handling Worm Dragon :)
+bool CMonster::WormDragon(CMonster* monster,CMap* map)
+{
+     if (monster->hitcount>=monster->maxhitcount)
+        return true;
+     
+     if(Stats->HP>(Stats->MaxHP*0.50))
+         return true;
+         
+     CPlayer* player = NULL;
+     int nb_worms =0;
+     nb_worms=GServer->RandNumber(2,4);
+     
+      Log(MSG_INFO,"case 0 for the Worm Dragon (%i)",nb_worms);
+      for(unsigned char i=0;i<nb_worms;i++)
+      {
+          fPoint position = GServer->RandInCircle( monster->Position->current, 5 );
+          CMonster* monster2=map->AddMonster( 202, position, 0, NULL, NULL, 0, true );
+
+          if(i==0)
+             player = monster2->GetNearPlayer(20);    //getting near player.
+
+         if(player!=NULL)
+             monster2->StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 );         
+      }
+      
+      monster->hitcount=monster->maxhitcount;
+     
+     
+     return true;
+}

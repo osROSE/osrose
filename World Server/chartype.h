@@ -68,6 +68,8 @@ struct STATS
     unsigned int MaxWeight;
     unsigned int MaxSummonGauge;
     unsigned int MPReduction;    
+    unsigned int ExtraDamage;
+    unsigned int ExtraDamage_add;
 };
 
 struct BATTLE
@@ -96,6 +98,7 @@ struct STATUS
     BYTE Dash_up;
     BYTE HP_up;
     BYTE MP_up;    
+    BYTE ExtraDamage_up;
     //Stats down
     BYTE Attack_down;
     BYTE Defense_down;
@@ -107,12 +110,13 @@ struct STATUS
     BYTE Dash_down;
     BYTE HP_down;
     BYTE MP_down;   
+    BYTE ExtraDamage_down;
 
     //Status
     BYTE Stun;
     BYTE Poison;
     BYTE Mute;
-    BYTE ExtraDamage;
+    //BYTE ExtraDamage;   //Was not quoted before
     bool CanAttack;
     bool CanRun;
     bool CanMove;

@@ -152,6 +152,12 @@ CMonster* CMap::AddMonster( UINT montype, fPoint position, UINT owner, CMDrops* 
        monster->stay_still=true;
     }
     
+    if(monster->thisnpc->id==201)
+    {
+       monster->maxhitcount=1;   //LMA: Worm dragon
+    }
+    
+    
     //LMA: bonfire (and salamender...) don't move and don't attack ;)
     if (monster->IsBonfire())
        monster->stay_still=true;

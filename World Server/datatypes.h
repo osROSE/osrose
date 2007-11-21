@@ -39,6 +39,7 @@
 #define ATTACK_SPEED 24
 #define INV_CAPACITY 25
 #define CRITICAL 26
+#define EXTRA_DAMAGE 36
 #define ONE_HAND_WEAP_AP 42
 #define TWO_HAND_WEAP_AP 43
 #define MOV_SPEED 52
@@ -91,6 +92,7 @@
 #define A_HP_REC_RATE 27
 #define A_MP_REC_RATE 28
 #define A_MP_CONSUMATION 29
+#define A_Extra_Damage 36
 #define A_MAX_HP 38
 #define A_MAX_MP 39
 #define A_STUN 40

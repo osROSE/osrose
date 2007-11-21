@@ -23,7 +23,7 @@
 
 void CCharacter::DoAttack( )
 {
-     Log(MSG_INFO,"Someone attacks type=%i,skillid=%i",Battle->atktype,Battle->skillid);
+     //Log(MSG_INFO,"Someone attacks type=%i,skillid=%i",Battle->atktype,Battle->skillid);
      
     CMap* map = GServer->MapList.Index[Position->Map];
     switch(Battle->atktype)
@@ -176,6 +176,14 @@ void CCharacter::NormalAttack( CCharacter* Enemy )
         hitpower = (long int)floor(attack * (GServer->Config.PlayerDmg/100.00));
     if(IsMonster( )) //temp fix to find balance btw monster and player
         hitpower = (long int)floor(attack * (GServer->Config.MonsterDmg/100.00));
+    
+    //TEST
+    long int hitsave=hitpower;
+    hitpower+=Stats->ExtraDamage_add;
+    hitpower+=((hitpower*(Stats->ExtraDamage))/100);  //LMA: ED, Devilking / Arnold    
+    Log(MSG_INFO,"ED: before %i, after %i (extra *%i + %i)",hitsave,hitpower,Stats->ExtraDamage,Stats->ExtraDamage_add);
+    
+    
     bool critical = false;
     if(hitpower<=0)
     {
@@ -490,6 +498,12 @@ void CCharacter::UseAtkSkill( CCharacter* Enemy, CSkills* skill, bool deBuff )
     bool bflag = false;
     Enemy->OnBeAttacked( this );
     if(skillpower<=0) skillpower = 0;
+    if(IsPlayer())
+    {
+        //LMA: ED, Devilking / Arnold
+        skillpower+=Stats->ExtraDamage_add;
+        skillpower+=((skillpower*(Stats->ExtraDamage))/100);
+    }    
     if(!Enemy->IsSummon( ) && Enemy->IsMonster( ))
     {
         Enemy->AddDamage( this, skillpower );

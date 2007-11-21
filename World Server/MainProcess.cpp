@@ -231,6 +231,8 @@ PVOID MapProcess( PVOID TS )
                         monster->Guardiantree(monster,map);      //LMA: guardiantree 208 (Arnold)
                     if((monster->montype==659)&&(monster->hitcount<monster->maxhitcount))
                         monster->MoonChild(monster,map);      //LMA: Moonchild under attack
+                    if((monster->montype==201)&&(monster->hitcount<monster->maxhitcount))
+                        monster->WormDragon(monster,map);      //LMA: Worm Dragon under attack
                 }
                 monster->RefreshBuff( );
                 if(monster->IsDead( ))

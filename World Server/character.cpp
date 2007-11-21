@@ -44,6 +44,8 @@ CCharacter::CCharacter( )
     Stats->MaxWeight = 0;
     Stats->MaxSummonGauge = 0;
     Stats->MPReduction = 0;
+    Stats->ExtraDamage = 0; //LMA: Devilking / Arnold
+    Stats->ExtraDamage_add=0;
     // POSITION  
     Position = new POSITION;    
     assert(Position);    
@@ -70,6 +72,7 @@ CCharacter::CCharacter( )
     Status->Dash_up = 0xff;
     Status->HP_up = 0xff;
     Status->MP_up = 0xff;
+    Status->ExtraDamage_up = 0xff;  //LMA: Devilking/Arnold
         //Stats down
     Status->Attack_down = 0xff;
     Status->Defense_down = 0xff;
@@ -81,11 +84,12 @@ CCharacter::CCharacter( )
     Status->Dash_down = 0xff;
     Status->HP_down = 0xff;
     Status->MP_down = 0xff;
+    Status->ExtraDamage_down = 0xff;  //LMA: Devilking/Arnold
         //Status
     Status->Stun = 0xff;
     //Status->Spoisoned = 0xff;
     //Status->Muted = 0xff;
-    Status->ExtraDamage = 0xff;
+    //Status->ExtraDamage = 0xff;  //LMA: Devilking/Arnold (was not quoted before)
     Status->CanAttack = true;
     Status->CanRun = true;
     Status->CanMove = true;
