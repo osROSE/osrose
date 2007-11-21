@@ -23,6 +23,8 @@
 
 void CCharacter::DoAttack( )
 {
+     Log(MSG_INFO,"Someone attacks type=%i,skillid=%i",Battle->atktype,Battle->skillid);
+     
     CMap* map = GServer->MapList.Index[Position->Map];
     switch(Battle->atktype)
     {                    
@@ -89,11 +91,38 @@ void CCharacter::DoAttack( )
                 Enemy = GetCharTarget( );
                 if(Enemy==NULL) 
                 {
-                    ClearBattle( Battle );
-                    return;
+                    //LMA: oups, our temp monster has been killed, let's find another one if possible :)
+                    Log(MSG_INFO,"[DoAttack] In AOE_TARGET (Enemy not found)");                    
+                    CMonster* tempmonster=GServer->LookAOEMonster(this);
+                    if (tempmonster==NULL)
+                    {
+                        Log(MSG_INFO,"[DoAttack] In AOE_TARGET (no new monsters in range)");
+                        ClearBattle( Battle );
+                        return;                                          
+                    }
+                    
+                    Battle->skilltarget = tempmonster->clientid;
+                    Battle->target = tempmonster->clientid;     //LMA: just for compatibility use...
+                    Enemy = GetCharTarget( );
+                    if(Enemy==NULL)
+                    {
+                        Log(MSG_INFO,"[DoAttack] In AOE_TARGET (Enemy2 not found)");
+                        ClearBattle( Battle );
+                        return;                       
+                    }
+                    
                 }     
-                if(IsTargetReached( Enemy, skill ) && CanAttack( )) 
+                
+                if(IsTargetReached( Enemy, skill ) && CanAttack( ))
+                { 
+                    Log(MSG_INFO,"[DoAttack] In AOE_TARGET time for AoeSkill");
                     AoeSkill( skill, Enemy );                           
+                }
+                else
+                {
+                    Log(MSG_INFO,"[DoAttack] In AOE_TARGET not reached or can't attack");
+                }
+                
             }   
             else
             {
@@ -291,7 +320,15 @@ bool CCharacter::BuffSkill( CCharacter* Target, CSkills* skill )
 // do AoE skill
 bool CCharacter::AoeSkill( CSkills* skill, CCharacter* Enemy )
 {
-    Position->destiny = Position->current;      
+    Log(MSG_INFO,"In AOE Skill");
+    Position->destiny = Position->current;
+    
+    //LMA: handling case of AOE_SKILLS and AOE_TARGET (the target point is not the same).
+    fPoint goodtarget;
+    goodtarget=Position->current;
+    if (Battle->atktype==AOE_TARGET)
+       goodtarget=Position->aoedestiny;
+    
     if(Battle->castTime==0)
     {
         BEGINPACKET( pak, 0x7bb );
@@ -320,17 +357,26 @@ bool CCharacter::AoeSkill( CSkills* skill, CCharacter* Enemy )
         {
             if(!monster->IsSummon( )) continue;
         }
-        if(GServer->IsMonInCircle( Position->current,monster->Position->current,(float)skill->aoeradius+1))
-            UseAtkSkill( (CCharacter*) monster, skill );                                        
-    } 
+        if(GServer->IsMonInCircle( goodtarget,monster->Position->current,(float)skill->aoeradius+1))
+        {
+            Log(MSG_INFO,"AOE Attack (1) monster %i",monster->montype);
+            UseAtkSkill( (CCharacter*) monster, skill );
+        }
+        
+    }
+     
     if(map->allowpvp!=0 || (IsMonster( ) && !IsSummon( )))
     {
         for(UINT i=0;i<map->PlayerList.size();i++)
         {
             CPlayer* player = map->PlayerList.at(i);
             if(player->clientid==clientid) continue;
-            if(GServer->IsMonInCircle( Position->current,player->Position->current,(float)skill->aoeradius+1))
-                UseAtkSkill( (CCharacter*) player, skill );                    
+            if(GServer->IsMonInCircle( goodtarget,player->Position->current,(float)skill->aoeradius+1))
+            {
+                Log(MSG_INFO,"AOE Attack (2) player %s",player->CharInfo->charname);
+                UseAtkSkill( (CCharacter*) player, skill );
+            }
+            
         }
     }
     if(Enemy!=NULL)

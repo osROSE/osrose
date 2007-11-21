@@ -86,7 +86,7 @@ INSERT INTO `list_respawnzones` VALUES ('63', '53', '5040', '5200', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('64', '54', '5080', '4420', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('65', '55', '5520', '4480', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('66', '56', '5035', '4275', '10', '2');
-INSERT INTO `list_respawnzones` VALUES ('67', '57', '5430', '5355', '10', '2');
+INSERT INTO `list_respawnzones` VALUES ('67', '57', '5539', '5173', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('68', '61', '5435', '4595', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('69', '62', '5750', '5100', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('70', '63', '6075', '5185', '10', '2');

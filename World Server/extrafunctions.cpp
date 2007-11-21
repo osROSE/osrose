@@ -1248,3 +1248,61 @@ bool CWorldServer::SaveSlotStorage( CPlayer* thisclient,UINT slotnum)
 
     return true;
 }
+
+//LMA: Trying to get a monster from a location (for AOE_TARGET packet mainly).
+CMonster* CWorldServer::LookAOEMonster(CPlayer* thisclient)
+{
+    CMap* map = MapList.Index[thisclient->Position->Map];
+    for(UINT i=0;i<map->MonsterList.size();i++)
+    {
+        CMonster* monster = map->MonsterList.at(i);
+        if(monster->clientid==thisclient->clientid) continue;
+        if(thisclient->IsSummon( ) || thisclient->IsPlayer( ))
+        {
+            if(monster->IsSummon( ) && (map->allowpvp==0 || monster->owner==thisclient->clientid)) continue;
+        }
+        else
+        {
+            if(!monster->IsSummon( )) continue;
+        }
+        
+        //Looking for a monsters in the aera (1 meter from position sent by client)
+        if(GServer->IsMonInCircle( thisclient->Position->aoedestiny,monster->Position->current,(float) 1))
+        {
+            return monster;
+        }
+        
+    }
+    
+    
+    return NULL;
+}
+
+//LMA: Character version
+CMonster* CWorldServer::LookAOEMonster(CCharacter* character)
+{
+    CMap* map = MapList.Index[character->Position->Map];
+    for(UINT i=0;i<map->MonsterList.size();i++)
+    {
+        CMonster* monster = map->MonsterList.at(i);
+        if(monster->clientid==character->clientid) continue;
+        if(character->IsSummon( ) || character->IsPlayer( ))
+        {
+            if(monster->IsSummon( ) && (map->allowpvp==0 || monster->owner==character->clientid)) continue;
+        }
+        else
+        {
+            if(!monster->IsSummon( )) continue;
+        }
+        
+        //Looking for a monsters in the aera (1 meter from position sent by client)
+        if(GServer->IsMonInCircle( character->Position->aoedestiny,monster->Position->current,(float) 1))
+        {
+            return monster;
+        }
+        
+    }
+    
+    
+    return NULL;
+}

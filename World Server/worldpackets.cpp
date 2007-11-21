@@ -39,6 +39,13 @@ void CWorldServer::pakPlayer( CPlayer *thisclient )
     }
     CMap* map = MapList.Index[thisclient->Position->Map];
     map->AddPlayer( thisclient );
+
+    //LMA: Little fix if players comes with too much HP / MP In Game (exit when fairied?)    
+    if (thisclient->Stats->HP>thisclient->GetMaxHP())
+       thisclient->Stats->HP=thisclient->GetMaxHP();
+    if (thisclient->Stats->MP>thisclient->GetMaxMP())
+       thisclient->Stats->MP=thisclient->GetMaxMP();
+    
     BEGINPACKET( pak, 0x715 );
     ADDBYTE    ( pak, thisclient->CharInfo->Sex );               // Sex
     ADDWORD    ( pak, thisclient->Position->Map );		         // Map
@@ -2729,19 +2736,31 @@ bool CWorldServer::pakModifiedItemDone( CPlayer* thisclient, CPacket* P )
 // Aoe Skill
 bool CWorldServer::pakSkillAOE( CPlayer* thisclient, CPacket* P)
 {
+    Log(MSG_INFO,"[pakSkillAOE]");
+    
     if( thisclient->Shop->open || thisclient->Status->Stance==DRIVING ||
         thisclient->Status->Mute!=0xff || !thisclient->Status->CanCastSkill) return true;         
-    BYTE num = GETBYTE( (*P), 0 );	   
+    BYTE num = GETBYTE( (*P), 0 );
+    
+    //LMA: position of monster targeted.
+    thisclient->Position->aoedestiny.x=GETFLOAT((*P), 0x02 )/100;
+    thisclient->Position->aoedestiny.y=GETFLOAT((*P), 0x06 )/100;
+    thisclient->Position->aoedestiny.z=0;
+        
+    Log(MSG_INFO,"[pakSkillAOE] num=%i,x=%.2f, y=%.2f",num,thisclient->Position->aoedestiny.x,thisclient->Position->aoedestiny.y);
     if(num>=MAX_SKILL)
     {
         Log( MSG_HACK, "Invalid Skill id %i for %s ", num, thisclient->CharInfo->charname );
         return false;
     }    
-    unsigned int skillid = thisclient->cskills[num].id+thisclient->cskills[num].level-1;    
+    unsigned int skillid = thisclient->cskills[num].id+thisclient->cskills[num].level-1;
+    Log(MSG_INFO,"[pakSkillAOE] skillid=%i",skillid);    
     CSkills* thisskill = GetSkillByID( skillid );
     if(thisskill==NULL) return true;             
     if(thisskill->aoe==1)
     {
+        Log(MSG_INFO,"[pakSkillAOE] is AOE");
+        /*Previous version:
         if(isSkillTargetFriendly( thisskill ))
         {   
             cout << "Friendly skill: " << thisclient->Battle->skillid << endl;
@@ -2750,9 +2769,35 @@ bool CWorldServer::pakSkillAOE( CPlayer* thisclient, CPacket* P)
         {
             CMap* map = MapList.Index[thisclient->Position->Map];
             CCharacter* character = map->GetCharInMap( thisclient->Battle->target );
-            if(character==NULL) return true;
+            if(character==NULL)
+            {
+               Log(MSG_INFO,"[pakSkillAOE] character not found! (%i)",thisclient->Battle->target);
+               return true;
+            }
+            
+            Log(MSG_INFO,"[pakSkillAOE] start action (character found)");
             thisclient->StartAction( character , AOE_TARGET, skillid );
-        }      
+        }
+        */
+        //LMA: The packet doesn't give the target, only a location :)
+        //So we try to get a monster near the coordinates we have...        
+        CMonster* thismonster=LookAOEMonster(thisclient);
+        if (thismonster==NULL)
+        {
+           Log(MSG_INFO,"[pakSkillAOE] character not found at given coordinates %.2f,%.2f",thisclient->Position->aoedestiny.x,thisclient->Position->aoedestiny.y);
+           return true;      
+        }
+        
+        //CCharacter* character = map->GetCharInMap( thisclient->Battle->target );
+        CMap* map = MapList.Index[thisclient->Position->Map];
+        CCharacter* character = map->GetCharInMap( thismonster->clientid);
+        if(character==NULL)
+        {
+           Log(MSG_INFO,"[pakSkillAOE] character not found! (%i)",thismonster->clientid);
+           return true;
+        }
+        
+        thisclient->StartAction( character , AOE_TARGET, skillid );             
     }
     else
     {

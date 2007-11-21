@@ -158,6 +158,8 @@ class CWorldServer : public CServerSocket
         bool SaveSlotStorage( CPlayer* thisclient,UINT slotnum);  //LMA: Saving one slot into MySQL storage.
         bool GetZulyStorage( CPlayer* thisclient);     //LMA: Get Zuly from Storage (from MySQL)
         bool SaveZulyStorage( CPlayer* thisclient);    //LMA: Save Zuly to Storage (to MySQL)
+        CMonster* LookAOEMonster( CPlayer* thisclient);       //LMA: Trying to get a monster from a location (for AOE_TARGET paket mainly).
+        CMonster* LookAOEMonster( class CCharacter* character);       //LMA: Character version.
         void RefreshFairy( );
     
         //------------------ Fairies ---------------------
@@ -262,6 +264,7 @@ class CWorldServer : public CServerSocket
         bool pakGMFairyto(CPlayer* thisclient, char* name, int mode);
         bool pakGMClanRewardPoints(CPlayer* thisclient, char* name, int points);    //reward points
         bool pakGMManageFairy(CPlayer* thisclient, int mode); 
+        bool pakGMHurtHim(CPlayer* thisclient, char* name);   //LMA: Gm command.
         bool pakGMChangeFairyWait(CPlayer* thisclient, int newvalue);
         bool pakGMChangeFairyStay(CPlayer* thisclient, int newvalue); 
         bool pakGMChangeFairyTestMode(CPlayer* thisclient, int mode); 

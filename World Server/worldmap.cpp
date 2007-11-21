@@ -151,11 +151,21 @@ CMonster* CMap::AddMonster( UINT montype, fPoint position, UINT owner, CMDrops* 
        monster->maxhitcount=3;   //LMA: MoonChild
        monster->stay_still=true;
     }
-
     
+    //LMA: bonfire (and salamender...) don't move and don't attack ;)
+    if (monster->IsBonfire())
+       monster->stay_still=true;
+
+    monster->bonushp=0;
+    monster->bonusmp=0;
+    monster->maxvalue=0;
+    monster->minvalue=0;
+    monster->skillid=0;
+    monster->range=0;
+
+
     return monster; 
 }
-
 
 // Delete a monster
 bool CMap::DeleteMonster( CMonster* monster, bool clearobject, UINT i )

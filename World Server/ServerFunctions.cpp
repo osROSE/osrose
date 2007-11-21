@@ -94,7 +94,46 @@ bool CWorldServer::DoSkillScript( CCharacter* character, CSkills* thisskill )
                 return false;                
             fPoint position = RandInCircle( character->Position->current, 5 );
             CMap* map = MapList.Index[character->Position->Map];
-            map->AddMonster( thisskill->svalue1, position, character->clientid );
+            CMonster* thismonster=map->AddMonster( thisskill->svalue1, position, character->clientid );
+            if (thismonster!=NULL)
+            {
+               thismonster->skillid=thisskill->id;
+               if (!thismonster->IsBonfire())
+                  break;
+               
+               //LMA: Special for bonfire (and others) cases.
+               switch (thisskill->value1[0])
+               {
+                      case 3:
+                           {
+                             thismonster->bonushp=1;
+                             thismonster->bonusmp=1;
+                           }
+                           break;
+                      case 2:
+                           {
+                             thismonster->bonushp=1;
+                           }
+                           break;
+                      case 1:
+                           {
+                             thismonster->bonusmp=1;
+                           }
+                           break;
+                      default:
+                           {
+                             //NA
+                           }
+                           break;
+               }
+                
+                if (thismonster->bonushp==0&&thismonster->bonusmp==0)
+                   break;
+                thismonster->minvalue=thisskill->value1[1];
+                thismonster->maxvalue=thisskill->value1[2];
+                thismonster->range=thisskill->range;
+            }
+            
         }
         break;
     }

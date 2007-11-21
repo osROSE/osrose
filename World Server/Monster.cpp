@@ -73,14 +73,25 @@ bool CMonster::UpdateValues( )
 }
 
 // Spawn a monster
+//LMA: added handling of skill summons.
 void CMonster::SpawnMonster( CPlayer* player, CMonster* thismon )
 {
     BEGINPACKET( pak, 0x792 );
 	ADDWORD    ( pak, clientid );
 	ADDFLOAT   ( pak, Position->current.x*100 );
 	ADDFLOAT   ( pak, Position->current.y*100 );
-	ADDFLOAT   ( pak, Position->destiny.x*100 );
-	ADDFLOAT   ( pak, Position->destiny.y*100 );	
+	
+	if((thismon->bonushp>0||thismon->bonusmp>0)&&(thismon->skillid>0))
+	{
+    	ADDFLOAT   ( pak, 0xcdcdcdcd );
+    	ADDFLOAT   ( pak, 0xcdcdcdcd );	
+    }
+    else
+    {
+     	ADDFLOAT   ( pak, Position->destiny.x*100 );
+    	ADDFLOAT   ( pak, Position->destiny.y*100 );       
+    }
+    
 	if(IsDead( ))
 	{
 	   ADDWORD    ( pak, 0x0003 );
@@ -117,7 +128,16 @@ void CMonster::SpawnMonster( CPlayer* player, CMonster* thismon )
 	if(IsSummon( ))
     {
         ADDWORD( pak, owner );
-        ADDWORD( pak, 0x0000 ); //id del skill (si es summon de skill)
+        
+        if (thismon->skillid>0)
+        {
+           ADDWORD( pak, thismon->skillid ); //id del skill (si es summon de skill)
+        }
+        else
+        {
+           ADDWORD( pak, 0x0000 ); //id del skill (si es summon de skill)
+        }
+        
     }
 	player->client->SendPacket( &pak );
 }

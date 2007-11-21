@@ -1302,8 +1302,9 @@ unsigned int CPlayer::GetMaxMP( )
 unsigned int CPlayer::GetHPRegenAmount( )
 {
     UINT amount = (UINT)ceil ( Stats->MaxHP * 0.02 );
+    /*LMA: handled elsewhere.
     if( Status->Stance == 1 )
-        amount *= 4;   
+        amount *= 4;*/
     for(UINT i=0;i<MAX_SKILL;i++)
     {
         if( cskills[i].id == 0 || cskills[i].thisskill == 0 )
@@ -1348,6 +1349,7 @@ unsigned int CPlayer::GetHPRegenAmount( )
             }                 
         }
     }        
+
     return amount;
 }
 
@@ -1355,8 +1357,10 @@ unsigned int CPlayer::GetHPRegenAmount( )
 unsigned int CPlayer::GetMPRegenAmount( )
 {
     UINT amount = (UINT)ceil ( Stats->MaxMP * 0.02 );
+    /*LMA: Taken elsewhere
     if( Status->Stance == 1 )
-        amount *= 4;    
+        amount *= 4;
+    */
     for(UINT i=0;i<MAX_SKILL;i++)
     {
         if( cskills[i].id == 0 || cskills[i].thisskill == 0 )
