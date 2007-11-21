@@ -227,6 +227,7 @@ struct CROSEServerConfig
     int Command_ChangeFairyWait;
     int Command_ChangeFairyStay;
     int Command_ChangeFairyTestMode;
+    int Command_HurtHim;            //LMA: let's hurt someone :)
     int Command_Move;
     int Command_Goto;
     int Command_grid;               //LMA: maps grid test

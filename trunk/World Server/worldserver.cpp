@@ -684,6 +684,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Level = ConfigGetInt    ( "commands.ini", "level", 299 );
     Config.Command_LevelUp = ConfigGetInt    ( "commands.ini", "levelup", 299 );
     Config.Command_ManageFairy = ConfigGetInt    ( "commands.ini", "managefairy", 299 );
+    Config.Command_HurtHim = ConfigGetInt    ( "commands.ini", "hurthim", 299 );
     Config.Command_Mdmg = ConfigGetInt    ( "commands.ini", "mdmg", 299 );
     Config.Command_Mon = ConfigGetInt    ( "commands.ini", "mon", 299 );
     Config.Command_Mon2 = ConfigGetInt    ( "commands.ini", "mon2", 299 );

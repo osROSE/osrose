@@ -62,6 +62,8 @@ CDrop* CCharacter::GetDrop( )
 // start action [attack]
 void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, bool restart, CCharacter* receiver )
 {
+    Log(MSG_INFO,"Someone does an action %i, skill %i",action,skillid);
+    
     BEGINPACKET( pak, 0 );
     if (restart)
     {
@@ -127,7 +129,9 @@ void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, boo
             ADDFLOAT   ( pak, Target->Position->current.y*100 ); 
             Battle->atktype = action; 
             Battle->skillid = skillid;  
-            Battle->skilltarget = Target->clientid;                      
+            Battle->skilltarget = Target->clientid;
+            Battle->target = Target->clientid;     //LMA: just for compatibility use...
+            Log(MSG_INFO,"StartAction, AOE_TARGET, target ID %i, (%.2f,%.2f)",Target->clientid,Target->Position->current.x,Target->Position->current.y);
         }
         break;
         case STAY_STILL_ATTACK:

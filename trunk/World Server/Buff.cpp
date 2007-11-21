@@ -500,7 +500,10 @@ bool CWorldServer::CheckDBuffs( CSkills* thisskill, CCharacter* character, int E
                                               character->Status->Stun,
                                               0, false, true);
             unsigned tmp=RandNumber(1,100);
-            if(BuffValue.NewValue!=0 && (tmp < (Evalue+200)/7) )
+            
+            
+            //if(BuffValue.NewValue!=0 && (tmp < (Evalue+200)/7) )
+            if(BuffValue.NewValue!=0 && (RandNumber(1,100) < thisskill->success))
             {                           
                printf("stunning was a success!\n");                      
                UINT j = BuffValue.Position;

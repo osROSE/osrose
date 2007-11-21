@@ -38,6 +38,7 @@ struct POSITION
     fPoint source;          // source position
     fPoint current;         // current position    
     fPoint destiny ;         // destiny  position
+    fPoint aoedestiny;       //LMA: AOE destiny
     unsigned int Map;       // current map
     unsigned int respawn;   // respawn id [player = respawnid | monster = spawnid]
     unsigned int saved;     // saved id [player town | monster = 0]

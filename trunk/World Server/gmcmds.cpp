@@ -1090,6 +1090,14 @@ else if (loc == 10)
 	    Log( MSG_GMACTION, " %s : /givefairy %s, %i" , thisclient->CharInfo->charname, name, mode);
 	    return pakGMFairyto(thisclient, name, mode);
 	}
+    else if(strcmp(command, "hurthim")==0) 
+    {
+         if(Config.Command_HurtHim > thisclient->Session->accesslevel)
+	                    return true;
+        if ((tmp = strtok(NULL, " "))==NULL) return true; char* name=tmp;
+	    Log( MSG_GMACTION, " %s : /hurthim %s" , thisclient->CharInfo->charname, name);
+	    return pakGMHurtHim(thisclient, name);
+	}	
 	else if(strcmp(command, "fairymode")==0) 
     {
         if(Config.Command_ManageFairy > thisclient->Session->accesslevel)
@@ -2432,6 +2440,25 @@ bool CWorldServer::pakGMFairyto(CPlayer* thisclient, char* name, int mode)
           otherclient->SetStats();
           Log( MSG_INFO, "HP: %i  MP: %i  ATK: %i   DEF: %i   CRI: %i  MSPD: %i", otherclient->Stats->MaxHP, otherclient->Stats->MaxMP, otherclient->Stats->Attack_Power, otherclient->Stats->Defense, otherclient->Stats->Critical, otherclient->Stats->Move_Speed);  
     }      
+    otherclient->SetStats();
+	return true;
+}
+
+//LMA: let's hurt some people :)
+//takes away 90% of HP and MP of a player
+bool CWorldServer::pakGMHurtHim(CPlayer* thisclient, char* name)
+{
+	CPlayer* otherclient = GetClientByCharName (name);
+	if(otherclient==NULL){ 
+        BEGINPACKET(pak, 0x702);
+		ADDSTRING(pak, "User does not exist or is not online.");
+		ADDBYTE(pak, 0);
+		thisclient->client->SendPacket(&pak);
+        return true;
+    }
+    
+    otherclient->Stats->HP=(long int) 10*otherclient->Stats->MaxHP/100;
+    otherclient->Stats->MP=(long int) 10*otherclient->Stats->MaxMP/100;
     otherclient->SetStats();
 	return true;
 }

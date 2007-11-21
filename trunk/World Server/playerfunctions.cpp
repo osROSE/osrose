@@ -238,10 +238,17 @@ bool CPlayer::VisiblityList( )
         }
 	}    
     // Monsters
+    bool monster_seen=false;
+    int bon_sp_mp=0;
+    int bon_sp_hp=0;
+    int bon_nb_mp=0;
+    int bon_nb_hp=0;
+    
     for(UINT i=0;i<map->MonsterList.size();i++)
     {
         CMonster* thismon = map->MonsterList.at( i );
-		float distance = GServer->distance ( this->Position->current, thismon->Position->current );        		
+		float distance = GServer->distance ( this->Position->current, thismon->Position->current );
+		monster_seen=false;
 		if ( GServer->IsVisible( this, thismon ) ) 
         {			
 			if (distance < MAXVISUALRANGE ) 
@@ -249,6 +256,7 @@ bool CPlayer::VisiblityList( )
                 //LMATEST
                 //newVisibleMonsters.push_back( thismon );
                 newVisibleMonsters.push_back( thismon->clientid );
+                monster_seen=true;
             }
 			else
 			{
@@ -263,9 +271,32 @@ bool CPlayer::VisiblityList( )
 				//newVisibleMonsters.push_back( thismon );
 				newVisibleMonsters.push_back( thismon->clientid );
 				thismon->SpawnMonster(this, thismon );
+				monster_seen=true;
             }
 		}
-	}    
+		
+		//LMA: bonfire, salamender handle...
+		if((monster_seen)&&(thismon->IsBonfire())&&(distance<=thismon->range))
+		{
+            if(thismon->bonusmp>0)
+                bon_sp_mp+=GServer->RandNumber(thismon->minvalue,thismon->maxvalue);
+            if(thismon->bonushp>0)
+                bon_sp_hp+=GServer->RandNumber(thismon->minvalue,thismon->maxvalue);
+            bon_nb_mp+=thismon->bonusmp;
+            bon_nb_hp+=thismon->bonushp;                                                                                                      
+        }
+		
+	}
+	
+	//LMA: bonus from bonfires / salamender.
+	//One update so we divide if several bonuses
+	//regen will be updated faster, that's all.
+    nb_mp=bon_nb_mp;
+    nb_hp=bon_nb_hp;	
+	sp_hp=bon_sp_hp;
+    sp_mp=bon_sp_mp;
+	   
+	
 	// Drops
 	for(unsigned i=0; i<map->DropsList.size(); i++) 
     {
@@ -475,37 +506,124 @@ bool CPlayer::RefreshHPMP()
 
 // HP/MP Regeneration Function
 bool CPlayer::Regeneration()
-{
-    if (Stats->MaxHP==Stats->HP && Stats->MaxMP== Stats->MP)
-    {
-       lastRegenTime=0;
+{    
+    //LMA: New version, takes bonfire, salamender, sit, fairy in account.    
+    if (Stats->MaxHP==Stats->HP)
+       lastRegenTime_hp=0;
+
+    if (Stats->MaxMP==Stats->MP)
+       lastRegenTime_mp=0;
+
+    if ((Stats->MaxHP==Stats->HP)&&(Stats->MaxMP==Stats->MP))
        return true;
-    }
-
-    //LMA REGEN
-    bool is_first_regen=false;
-    if (lastRegenTime==0)
+    
+    //LMA: HP
+    float nb_sec_stance=0;  //LMA: on your feet soldier.
+    UINT bonus_sitted=0;
+    int bonus_hp=0;
+    int bonus_mp=0;
+    
+    if (Stats->HP<Stats->MaxHP)
     {
-       is_first_regen=true;
+        nb_sec_stance=(float) 8;  //LMA: on your feet soldier.
+        bonus_sitted=1;
+
+        if(nb_hp>0)
+           nb_sec_stance=(float) 3;
+           
+        if (Status->Stance==1)
+        {
+           bonus_hp++;
+           bonus_sitted=GServer->RandNumber(150,250);
+           nb_sec_stance=(float) 3;    //LMA: be sitted.
+        }
+        if(Fairy)
+        {
+           bonus_hp++;
+           nb_sec_stance=(float) 3;
+           bonus_sitted+=GServer->RandNumber(150,250);
+        }
+        
+        bonus_hp+=nb_hp;
+        if(bonus_hp!=0)
+           nb_sec_stance=nb_sec_stance/((float)bonus_hp);    //LMA: salamender-bonfire?
+        //Log(MSG_INFO,"HP info: sp_hp=%i, nb_hp=%i, bonus=%i, nb_bonus=%i, nb_sec=%.2f",sp_hp,nb_hp,bonus_sitted,bonus_hp,nb_sec_stance);
+        
+    	clock_t etime = clock() - lastRegenTime_hp;
+        if( etime >= nb_sec_stance * CLOCKS_PER_SEC && Stats->HP > 0 )
+        {
+            unsigned int hpamount = GetHPRegenAmount( );
+            
+            if (bonus_hp!=0)
+            {
+               Stats->HP += (long int) (hpamount*(sp_hp+bonus_sitted)/(100*bonus_hp));           //bonfire and so on...
+               Log(MSG_INFO,"REGEN HP %i(%i*(%i+%i)/(100*%i)",(long int) (hpamount*(sp_hp+bonus_sitted)/(100*bonus_hp)),hpamount,sp_hp,bonus_sitted,bonus_hp);
+            }
+            else
+                Stats->HP += hpamount;
+            
+            if( Stats->HP > Stats->MaxHP)
+                Stats->HP = Stats->MaxHP;
+    
+            if (Stats->MaxHP==Stats->HP)
+               lastRegenTime_hp=0;
+            else
+                lastRegenTime_hp = clock();
+        }
+        
     }
 
-	clock_t etime = clock() - lastRegenTime;
-    if( etime >= 8 * CLOCKS_PER_SEC && Stats->HP > 0 )
+    //LMA: MP
+    if(Stats->MP<Stats->MaxMP)
     {
-        unsigned int hpamount = GetHPRegenAmount( );
-        unsigned int mpamount = GetMPRegenAmount( );
-        Stats->HP += hpamount;
-        Stats->MP += mpamount;
-        if( Stats->HP > Stats->MaxHP)
-            Stats->HP = Stats->MaxHP;
-        if( Stats->MP > Stats->MaxMP )
-            Stats->MP = Stats->MaxMP;
+        nb_sec_stance=(float) 8;  //LMA: on your feet soldier.
+        bonus_sitted=1;
+        bonus_mp=0;
+        
+        if(nb_mp>0)
+           nb_sec_stance=(float) 3;
+                   
+        if (Status->Stance==1)
+        {
+           bonus_mp++;
+           bonus_sitted=GServer->RandNumber(150,250);
+           nb_sec_stance=(float) 3;    //LMA: be sitted.
+        }
+        if(Fairy)
+        {
+           bonus_mp++;
+           nb_sec_stance=(float) 3;
+           bonus_sitted+=GServer->RandNumber(150,250);
+        }
+        bonus_mp+=nb_mp;
+        if(bonus_mp!=0)
+           nb_sec_stance=nb_sec_stance/((float)bonus_mp);    //LMA: salamender-bonfire?
+        //Log(MSG_INFO,"MP info: sp_mp=%i, nb_mp=%i, bonus=%i, nb_bonus=%i, nb_sec=%.2f",sp_mp,nb_mp,bonus_sitted,bonus_mp,nb_sec_stance);
+    	clock_t etime = clock() - lastRegenTime_mp;
+        if( etime >= nb_sec_stance * CLOCKS_PER_SEC && Stats->HP > 0 )
+        {
+            unsigned int mpamount = GetMPRegenAmount( );
+            
+            if (bonus_mp!=0)
+            {
+               Stats->MP += (long int) (mpamount*(sp_mp+bonus_sitted)/(100*bonus_mp));           //bonfire and so on...
+               Log(MSG_INFO,"REGEN MP %i (%i*(%i+%i)/(100*%i)",(long int) (mpamount*(sp_mp+bonus_sitted)/(100*bonus_mp)),mpamount,sp_mp,bonus_sitted,bonus_mp);
+            }
+            else
+                Stats->MP += mpamount;
+    
+            if( Stats->MP > Stats->MaxMP )
+                Stats->MP = Stats->MaxMP;
+    
+            if (Stats->MaxMP== Stats->MP)
+               lastRegenTime_mp=0;
+            else
+                lastRegenTime_mp = clock();
+        }    
 
-        if (Stats->MaxHP==Stats->HP && Stats->MaxMP== Stats->MP)
-           lastRegenTime=0;
-        else
-            lastRegenTime = clock();
     }
+    
+    
     return true;
 }
 
@@ -777,6 +895,34 @@ void CPlayer::UpdateInventory( unsigned int slot1, unsigned int slot2 )
          SaveSlot41(slot2);
 }
 
+//LMA: We don't save this one in database.
+void CPlayer::UpdateInventoryNoSave( unsigned int slot1, unsigned int slot2 )
+{
+     Log(MSG_INFO,"In Update Inventory");
+    if(slot1==0xffff && slot2==0xffff) return;
+    BEGINPACKET( pak, 0x718 );
+    //if(slot2!=0xffff && slot2!=0xffff) {ADDBYTE( pak, 2 );}
+    if(slot1!=0xffff && slot2!=0xffff) {ADDBYTE( pak, 2 );}
+    else {ADDBYTE( pak, 1 );}
+    if(slot1!=0xffff)
+    {
+        ADDBYTE    ( pak, slot1);
+        ADDDWORD   ( pak, GServer->BuildItemHead( items[slot1] ) );
+        ADDDWORD   ( pak, GServer->BuildItemData( items[slot1] ) );
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );
+    }    
+    if(slot2!=0xffff)
+    {
+        ADDBYTE    ( pak, slot2 );
+        ADDDWORD   ( pak, GServer->BuildItemHead( items[slot2] ) );
+        ADDDWORD   ( pak, GServer->BuildItemData( items[slot2] ) );
+        ADDDWORD( pak, 0x00000000 );
+        ADDWORD ( pak, 0x0000 );
+    }
+    client->SendPacket( &pak );
+}
+
 void CPlayer::reduceItemsLifeSpan( bool attacked)
 {
         hits=0;
@@ -800,9 +946,10 @@ void CPlayer::reduceItemsLifeSpan( bool attacked)
 	               ADDWORD( pak, 0);
 	               ADDWORD( pak, 0);
 	               ADDWORD( pak, Stats->Move_Speed );
-                   GServer->SendToVisible( &pak,this );    
+                   GServer->SendToVisible( &pak,this );
                 }
-                   UpdateInventory(i);
+                   //UpdateInventory(i);
+                   UpdateInventoryNoSave(i);         //LMA: will be saved in database at auto save.
              }
             }
         }

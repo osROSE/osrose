@@ -35,6 +35,12 @@ class CPlayer: public CCharacter
     bool Saved;// already save this player?(used ondisconnect/returnchar)
     bool isInvisibleMode;
 
+
+    //LMA: HP / MP regeneration by bonfires and others...
+    int sp_hp;
+    int sp_mp;
+    int nb_hp;
+    int nb_mp;
     
     // Fairy
     bool Fairy;
@@ -77,6 +83,8 @@ class CPlayer: public CCharacter
        
     // Time
 	clock_t lastRegenTime;
+	clock_t lastRegenTime_hp;   //LMA: regen for HP	
+	clock_t lastRegenTime_mp;   //LMA: regen for MP
 	clock_t lastShowTime;       //LMA HP Jumping
 	clock_t firstlogin;         //LMA for fairy
 	clock_t lastSaveTime;	
@@ -118,7 +126,8 @@ class CPlayer: public CCharacter
         void ReduceABC( );
         CParty* GetParty( );
         unsigned int AddItem( CItem item );
-        void UpdateInventory( unsigned int slot1, unsigned int slot2=0xffff );
+        void UpdateInventory( unsigned int slot1, unsigned int slot2=0xffff );   //LMA: this one saves into database immediatly
+        void UpdateInventoryNoSave( unsigned int slot1, unsigned int slot2=0xffff );   //LMA: This one doesn't immediatly save into database.
         void SaveSlot( unsigned int slot); //LMA: Saving slot into MySQL database.
         void SaveSlot41( unsigned int slot); //LMA: Saving slot into MySQL database (Mysql 4.1+ function).
         void reduceItemsLifeSpan( bool attacked);
