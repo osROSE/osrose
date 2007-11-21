@@ -62,7 +62,7 @@ CDrop* CCharacter::GetDrop( )
 // start action [attack]
 void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, bool restart, CCharacter* receiver )
 {
-    Log(MSG_INFO,"Someone does an action %i, skill %i",action,skillid);
+    //Log(MSG_INFO,"Someone does an action %i, skill %i",action,skillid);
     
     BEGINPACKET( pak, 0 );
     if (restart)
@@ -365,6 +365,18 @@ void CCharacter::RefreshBuff( )
                         Status->MP_down = 0xff;
                     Stats->MaxMP = GetMaxMP( );
                 break;
+                case A_Extra_Damage:
+                     if(i<15)
+                     {
+                        Status->ExtraDamage_up = 0xff;
+                        Stats->ExtraDamage = 0;
+                        Stats->ExtraDamage_add=0;
+                     }
+                        
+                     else
+                         Status->ExtraDamage_down = 0xff;
+                         
+                break;                
                 case A_STUN:
                      Status->Stun = 0xff;
                      printf("removing stun\n");

@@ -98,5 +98,6 @@ class CMonster : public CCharacter
         bool OnFar( );
         bool Guardiantree(CMonster* monster,CMap* map);       //LMA: Arnold function for guardian tree
         bool MoonChild(CMonster* monster,CMap* map);          //LMA: For Moon Child
+        bool WormDragon(CMonster* monster,CMap* map);          //LMA: For Worm Dragon
 };
 #endif

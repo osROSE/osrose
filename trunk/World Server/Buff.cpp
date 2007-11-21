@@ -76,6 +76,28 @@ bool CWorldServer::CheckABuffs( CSkills* thisskill, CCharacter* character, int E
     bool bflag = false;
     switch( thisskill->buff[i] )
     {
+        case A_Extra_Damage:
+        {
+             //LMA: Devilking / Arnold.
+             CBValue BuffValue = GetBuffValue( thisskill, character, Evalue, i, 
+                                            character->Status->ExtraDamage_up, 
+                                            character->Status->ExtraDamage_down, 
+                                            character->Stats->ExtraDamage, true );
+             if(BuffValue.NewValue!=0)
+            {                       
+                UINT j = BuffValue.Position;   
+                character->Stats->ExtraDamage = thisskill->atkpower;
+                character->Stats->ExtraDamage_add=thisskill->value2[0];
+                character->Status->ExtraDamage_up = j;
+                character->MagicStatus[j].Buff = thisskill->buff[i];
+                character->MagicStatus[j].BuffTime = clock();
+                character->MagicStatus[j].Duration = thisskill->duration;  
+                character->MagicStatus[j].Value = BuffValue.Value;
+                Log(MSG_INFO,"ED: CheckABuffs %i, + %i",character->Stats->ExtraDamage,character->Stats->ExtraDamage_add);
+                bflag = true;
+            }
+        }
+        break;            
         case A_ATTACK:
         {
             CBValue BuffValue = GetBuffValue( thisskill, character, Evalue, i, 
@@ -294,6 +316,28 @@ bool CWorldServer::CheckDBuffs( CSkills* thisskill, CCharacter* character, int E
     bool bflag = false;
     switch( thisskill->buff[i] )
     {
+        case A_Extra_Damage:
+        {
+             //LMA: Devilking / Arnold
+             CBValue BuffValue = GetBuffValue( thisskill, character, Evalue, i, 
+                                            character->Status->ExtraDamage_up, 
+                                            character->Status->ExtraDamage_down, 
+                                            character->Stats->ExtraDamage, true );
+             if(BuffValue.NewValue!=0)
+            {                       
+                UINT j = BuffValue.Position;   
+                character->Stats->ExtraDamage = thisskill->atkpower;
+                character->Stats->ExtraDamage_add=thisskill->value2[0];
+                character->Status->ExtraDamage_up = j;
+                character->MagicStatus[j].Buff = thisskill->buff[i];
+                character->MagicStatus[j].BuffTime = clock();
+                character->MagicStatus[j].Duration = thisskill->duration;  
+                character->MagicStatus[j].Value = BuffValue.Value;
+                Log(MSG_INFO,"ED: CheckDBuffs %i, + %i",character->Stats->ExtraDamage,character->Stats->ExtraDamage_add);
+                bflag = true;
+            }
+        }
+        break;            
         case A_HP:
         {
             bflag = true;
@@ -703,7 +747,9 @@ unsigned int CWorldServer::BuildBuffs( CCharacter* character )
     if(character->Status->Critical_up != 0xff)//A_CRITICAL:
                 buff3 += CRITICAL_UP;
     if(character->Status->Dodge_up != 0xff)//A_DODGE:
-                buff1 += DODGE_UP;                                    
+                buff1 += DODGE_UP;    
+if(character->Status->ExtraDamage_up != 0xff)//A_Extra_Damage: Devilking / Arnold
+                buff4 += DAMAGE_UP;                                                
         //Down
     if(character->Status->Attack_down != 0xff) // A_ATTACK:
                 buff2 += ATTACK_DOWN;
