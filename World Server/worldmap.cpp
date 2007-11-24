@@ -157,6 +157,9 @@ CMonster* CMap::AddMonster( UINT montype, fPoint position, UINT owner, CMDrops* 
        monster->maxhitcount=1;   //LMA: Worm dragon
     }
     
+    //Sunrise, Sunset and Dusk Crystal in Junon Cartel
+    if (monster->thisnpc->id>=431&&monster->thisnpc->id<=433)
+       monster->stay_still=true;    
     
     //LMA: bonfire (and salamender...) don't move and don't attack ;)
     if (monster->IsBonfire())
@@ -168,7 +171,7 @@ CMonster* CMap::AddMonster( UINT montype, fPoint position, UINT owner, CMDrops* 
     monster->minvalue=0;
     monster->skillid=0;
     monster->range=0;
-
+       
 
     return monster; 
 }
