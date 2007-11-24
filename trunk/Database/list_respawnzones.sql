@@ -1,16 +1,7 @@
-/*
-MySQL Data Transfer
-Source Host: localhost
-Source Database: osrose
-Target Host: localhost
-Target Database: osrose
-Date: 11/8/2007 10:30:43 AM
-*/
-
-SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 -- Table structure for list_respawnzones
 -- ----------------------------
+DROP TABLE IF EXISTS `list_respawnzones`;
 CREATE TABLE `list_respawnzones` (
   `id` int(11) NOT NULL auto_increment,
   `map` int(11) NOT NULL,
@@ -87,10 +78,10 @@ INSERT INTO `list_respawnzones` VALUES ('64', '54', '5080', '4420', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('65', '55', '5520', '4480', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('66', '56', '5035', '4275', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('67', '57', '5539', '5173', '10', '2');
-INSERT INTO `list_respawnzones` VALUES ('68', '61', '5435', '4595', '10', '2');
-INSERT INTO `list_respawnzones` VALUES ('69', '62', '5750', '5100', '10', '2');
+INSERT INTO `list_respawnzones` VALUES ('68', '61', '5426', '4574', '10', '2');
+INSERT INTO `list_respawnzones` VALUES ('69', '62', '5839', '5176', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('70', '63', '6075', '5185', '10', '2');
-INSERT INTO `list_respawnzones` VALUES ('71', '64', '5035', '5325', '10', '2');
+INSERT INTO `list_respawnzones` VALUES ('71', '64', '5045', '5313', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('72', '65', '5485', '5285', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('73', '11', '5000', '5047', '10', '2');
 INSERT INTO `list_respawnzones` VALUES ('74', '12', '5000', '5047', '10', '2');
