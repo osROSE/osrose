@@ -230,6 +230,7 @@ class CWorldServer : public CServerSocket
     	bool pakDoID( CPlayer* thisclient, CPacket* P );	
     	bool pakGate( CPlayer* thisclient, CPacket* P );	
     	bool pakChangeRespawn( CPlayer* thisclient, CPacket* P );
+    	bool pakExpTC ( CPlayer* thisclient, CPacket* P );   //LMA: Bonus Exp Time Coupon
         bool pakExit( CPlayer* thisclient, CPacket* P );
     	bool pakPing( CPlayer* thisclient, CPacket* P );	          	
       	bool SendLevelUPtoChar(CPlayer* thisclient ); 

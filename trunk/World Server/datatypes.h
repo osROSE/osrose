@@ -467,6 +467,8 @@ struct CItem {
 	long int sig_head;
 	long int sig_data;
 	int sig_gem;
+	int sp_value;
+	int last_sp_value;
 };
 
 // -----------------------------------------------------------------------------------------

@@ -777,14 +777,18 @@ void CPlayer::SaveSlot41( unsigned int slot)
     //Log(MSG_INFO,"[Slot41] Trying to alter slot %i for player %i",slot,CharInfo->charid);
     CalculateSignature(slot);
     int res_mysql=0;
+    int sp_item_value=0;
+    
     
 	if (items[slot].itemtype > 0) 
     {
         //insert/update
-        res_mysql=GServer->DB->QExecuteUpdate("INSERT INTO items (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),slotnum=VALUES(slotnum),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+        if (items[slot].itemtype ==14) 
+           sp_item_value=items[slot].sp_value;
+        res_mysql=GServer->DB->QExecuteUpdate("INSERT INTO items (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem,sp_value) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),slotnum=VALUES(slotnum),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem),sp_value=VALUES(sp_value)",
     								CharInfo->charid, slot, items[slot].itemnum, items[slot].itemtype,items[slot].refine, items[slot].durability,
     								items[slot].lifespan, items[slot].count, items[slot].stats, (items[slot].socketed?1:0),
-    								(items[slot].appraised?1:0),items[slot].gem );                            	
+    								(items[slot].appraised?1:0),items[slot].gem,sp_item_value );                            	
         Log(MSG_INFO,"[Slot41] Save slot %i for player %i (res=%i)",slot,CharInfo->charid,res_mysql);
 		return;
 	}
@@ -795,13 +799,15 @@ void CPlayer::SaveSlot41( unsigned int slot)
     items[slot].sig_data=-1;
     items[slot].sig_head=-1;
     items[slot].sig_gem=-1;
+    items[slot].sp_value=-1;
+    items[slot].last_sp_value=-1;
 
 
    return;   
 }
 
 
-//LMA: saving slot in database.
+//LMA: saving slot in database (outdated)
 void CPlayer::SaveSlot( unsigned int slot)
 {
     //Update or add a slot (kinky way).
@@ -861,6 +867,119 @@ void CPlayer::SaveSlot( unsigned int slot)
 
    return;
 }
+
+
+//LMA: takes player fuel (or refuels). Handles CG and Cart.
+void CPlayer::TakeFuel(int add_fuel)
+{
+    float conso_fuel=0;
+    int save_fuel=0;
+    
+    //refuels.
+    if(add_fuel>0)
+    {
+       if(items[135].itemnum==0||items[136].itemnum==0)
+          return;
+       
+       Log(MSG_INFO,"Refueling by %i %%, lifespan was %i",add_fuel,items[136].lifespan);
+       items[136].lifespan+=add_fuel;
+       if(items[136].lifespan>100)
+         items[136].lifespan=100;
+       items[136].sp_value=items[136].lifespan*10;
+       Log(MSG_INFO,"New fuel lifespan %i",items[136].lifespan);
+       BEGINPACKET( pak,0x7ce );
+       ADDWORD    ( pak, 0x88 );
+       ADDWORD    ( pak, items[136].sp_value ); //%*10
+       client->SendPacket( &pak );
+       return;
+    }
+    
+    if(items[135].itemnum==0||items[136].itemnum==0||last_fuel==0)
+      return;
+    
+    save_fuel=items[136].sp_value;
+    if(save_fuel<=0)
+       save_fuel=items[136].lifespan*10;
+   
+    if(save_fuel==0)
+    {
+       items[136].sp_value=0;
+       BEGINPACKET( pak,0x7ce );
+       ADDWORD    ( pak, 0x88 ); //Slot
+       ADDWORD    ( pak, 0 ); //lifespan %*10 (fuel here)
+       client->SendPacket( &pak );                              
+       return;
+    }
+    
+    //Total fuel
+    float total_fuel=(float) GServer->PatList.Index[items[135].itemnum]->maxfuel+ (float) GServer->PatList.Index[items[136].itemnum]->maxfuel;   //maximum fuel.
+    if (total_fuel==0)
+    {
+      if (items[135].itemnum>=31&&items[135].itemnum<=35)
+      {
+        //CG
+        total_fuel=(float) 5000;                         
+      }
+      else
+      {
+        //Cart
+        total_fuel=(float) 3000;   
+      }
+      
+    }
+    
+    //consumption factor
+    conso_fuel=(float) GServer->PatList.Index[items[135].itemnum]->fuelcons + (float) GServer->PatList.Index[items[136].itemnum]->fuelcons;  
+    if(conso_fuel==0)
+    {
+        if (items[135].itemnum>=31&&items[135].itemnum<=35)
+        {
+           //CG
+           conso_fuel=(float) 23;
+        }
+        else
+        {
+            //Cart
+            conso_fuel=(float) 2;
+        }
+        
+    }
+    
+    //How much taken in the meantime?       
+    float current_fuel=((float) save_fuel)*total_fuel/(10*100);
+    conso_fuel*=250*(clock()-last_fuel)/(60*1000*100);
+    Log(MSG_INFO,"Total fuel %.2f/%.2f, conso fuel %.2f, multiplicator %i, frame %i:%i, engine %i:%i",current_fuel,total_fuel,conso_fuel,GServer->PatList.Index[items[136].itemnum]->fuelcons,GServer->PatList.Index[items[135].itemnum]->fuelcons,GServer->PatList.Index[items[135].itemnum]->maxfuel,GServer->PatList.Index[items[136].itemnum]->fuelcons,GServer->PatList.Index[items[136].itemnum]->maxfuel);
+    
+    //How much left?
+    if(current_fuel==0)
+    {
+       items[136].sp_value=0;
+       BEGINPACKET( pak,0x7ce );
+       ADDWORD    ( pak, 0x88 ); //Slot
+       ADDWORD    ( pak, 0 ); //lifespan %*10 (fuel here)
+       client->SendPacket( &pak );                              
+       return;
+    }
+    
+    current_fuel=100*(current_fuel-conso_fuel)/total_fuel;
+    
+    if (current_fuel<0)
+       current_fuel=0;
+    save_fuel=(int) (current_fuel*10);
+    items[136].lifespan=(int) current_fuel;
+    items[136].sp_value=save_fuel;
+    Log(MSG_INFO,"New lifespan %i, saved value %i",items[136].lifespan,save_fuel);
+    
+    //Sending Lifespan Packet for PAT
+    BEGINPACKET( pak,0x7ce );
+    ADDWORD    ( pak, 0x88 ); //Slot
+    ADDWORD    ( pak, items[136].sp_value ); //lifespan %*10 (fuel here)
+    client->SendPacket( &pak );
+
+    
+    return;
+}
+
 
 void CPlayer::UpdateInventory( unsigned int slot1, unsigned int slot2 )
 {
@@ -968,7 +1087,7 @@ bool CPlayer::CheckItems()
      {
          thisclient->items[7].count = 0;
          ClearItem( thisclient->items[7] );
-         GServer->SendPM(thisclient, "Sorry. The Morningstar is a banned item. It has been confiscated");                
+         GServer->SendPM(thisclient, "Sorry. The Morningstar is a banned item. It has been confiscated");
          thisclient->SetStats( );
      }
     return true;

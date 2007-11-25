@@ -110,8 +110,10 @@ bool CWorldServer::GiveExp( CMonster* thismon, UINT special_lvl, UINT special_ex
              //LMA BEGIN
              //20070621-211100
             //mod for CF
-            thisclient->CharInfo->Exp +=  GetColorExp( thisclient->Stats->Level, thismon->thisnpc->level + special_lvl, exp );
+            //Adding bonusxp (mileage)
+            thisclient->CharInfo->Exp +=  thisclient->bonusxp*GetColorExp( thisclient->Stats->Level, thismon->thisnpc->level + special_lvl, exp );
             //LMA END
+            
             BEGINPACKET( pak, 0x79b );
             ADDDWORD   ( pak, thisclient->CharInfo->Exp );
             ADDWORD    ( pak, thisclient->CharInfo->stamina );

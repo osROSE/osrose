@@ -42,6 +42,9 @@ class CPlayer: public CCharacter
     int nb_hp;
     int nb_mp;
     
+    //Fuel
+    clock_t last_fuel;
+    
     // Fairy
     bool Fairy;
     UINT FairyListIndex;
@@ -58,6 +61,12 @@ class CPlayer: public CCharacter
     CLAN* Clan;
     ATTRIBUTES* Attr;
     CRespawnPoints GMRespawnPoints;
+    
+    //Medal xp
+    int wait_validation;
+    time_t timerxp;
+    int bonusxp;
+    bool once;
     
     //Quest variables
     bool speaksLuna;
@@ -126,12 +135,15 @@ class CPlayer: public CCharacter
         void ReduceABC( );
         CParty* GetParty( );
         unsigned int AddItem( CItem item );
+        void TakeFuel(int add_fuel=0);   //LMA: Using fuel :)
         void UpdateInventory( unsigned int slot1, unsigned int slot2=0xffff );   //LMA: this one saves into database immediatly
         void UpdateInventoryNoSave( unsigned int slot1, unsigned int slot2=0xffff );   //LMA: This one doesn't immediatly save into database.
         void SaveSlot( unsigned int slot); //LMA: Saving slot into MySQL database.
         void SaveSlot41( unsigned int slot); //LMA: Saving slot into MySQL database (Mysql 4.1+ function).
         void reduceItemsLifeSpan( bool attacked);
         bool SaveQuest( QUESTS* myquest );       //LMA: Saving quests data (Mysql 4.1+ function).
+        bool PlasticSurgeon(CQuest* thisquest);      //LMA: Plastic Surgery coupons
+        bool CheckItem(int itemnb,int familyid,int nb);   //Check if a peculiar item is in inventory        
         // quest
         bool AddQuest( unsigned long int questid );
         bool DelInactiveQuest( unsigned long int questid );    //LMA
@@ -152,7 +164,8 @@ class CPlayer: public CCharacter
         unsigned int GetMagicDefense( );
         unsigned int GetCritical( );
         unsigned int GetAttackSpeed( );
-        unsigned int GetMoveSpeed( );   
+        unsigned int GetMoveSpeed( );
+        unsigned int GetCartSpeed( );
         unsigned int GetMaxHP( );   
         unsigned int GetMaxMP( );   
         float GetAttackDistance( ); 	

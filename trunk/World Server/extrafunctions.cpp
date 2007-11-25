@@ -658,6 +658,9 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
     useitem->itemnum = thisclient->items[slot].itemnum;
     useitem->itemtype = thisclient->items[slot].itemtype;
     type = UseList.Index[useitem->itemnum]->type;
+    
+    Log(MSG_INFO,"Using item %i:%i, type %i",useitem->itemtype,useitem->itemnum,type);
+    
     switch(type)
     {
         case 311://Medicine
@@ -827,8 +830,13 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
         case 314://Skill Book
         {
             useitem->usescript = 10;
-            useitem->usetype = UseList.Index[useitem->itemnum]->useeffect[0];            
-            useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];                                    
+            useitem->usetype = UseList.Index[useitem->itemnum]->useeffect[0];
+            useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];
+            
+            //LMA: Anti hack protection, those skills (plastic surgeon, reset skills) will be
+            //deleted in the quest itself, it'll avoid packets injections ;) .
+            if (useitem->itemnum>=451&&useitem->itemnum<=453)
+               useitem->usescript = 11;            
         }
         break;
         case 315://Repair Tool
@@ -839,15 +847,14 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
            delete useitem;        
            return NULL;
         break;
-        case 317://Engine Fuel - items 293-295
-//DreamRose Updates - needs updating before use
-/*        {
-            useitem->usescript = 1;
-            useitem->usetype = STB_ITEM[useitem->itemtype].rows[useitem->itemnum][19];            
-            useitem->usevalue = STB_ITEM[useitem->itemtype].rows[useitem->itemnum][20];
+        case 317://Engine Fuel - items 293-295, LMA / DRose
+        {
+            useitem->usescript = 12;
+            useitem->usetype = UseList.Index[useitem->itemnum]->useeffect[0];            
+            useitem->usevalue = UseList.Index[useitem->itemnum]->useeffect[1];
         }
         break;
-*/        
+        
             delete useitem;        
             return NULL;
         break;
@@ -867,23 +874,63 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
             }
         break;
         case 321://Time Coupon - items 201-203, 948, 952-957
-//DreamRose Updates - needs updating before use
-/*        {
-            if(thisclient->PlayerSession->MedalUsed == false)
+        {
+              //LMA: Mileage shop change
+              if (useitem->itemnum>=954 && useitem->itemnum<=957)
+              {
+                 Log(MSG_INFO,"Shop changed to %i",UseList.Index[useitem->itemnum]->quality);
+                 thisclient->Shop->ShopType=UseList.Index[useitem->itemnum]->quality;
+                 //thisclient->Shop->mil_shop_time=clock()+10*86400*1000; //10 days
+                 thisclient->Shop->mil_shop_time=time(NULL)+10*86400; //10 days
+                 BEGINPACKET( pak, 0x702 );
+                 ADDSTRING( pak, "[Mileage] Your Shop look has changed." );
+                 ADDBYTE( pak, 0 );
+                 thisclient->client->SendPacket(&pak);
+                 
+                 useitem->usescript = 1;
+                 useitem->usetype =0;
+                 useitem->usevalue =UseList.Index[useitem->itemnum]->quality;
+              }
+              
+              //LMA / Dream Rose: Medal Exp
+            if(((useitem->itemnum==948)||(useitem->itemnum>=201 && useitem->itemnum<=203))&&(thisclient->timerxp == 0))
             {
-                useitem->usescript = 1;
-                useitem->usetype = STB_ITEM[useitem->itemtype].rows[useitem->itemnum][9];            
-                useitem->usevalue = STB_ITEM[useitem->itemtype].rows[useitem->itemnum][8]/100;
-                thisclient->PlayerSession->MedalExp += useitem->itemnum % 200;
-                thisclient->PlayerSession->MedalUsed = true;
-                BEGINPACKET( pak, 0x702 );
-                ADDSTRING( pak, "The effect will hold until you log off. Have fun with this ItemMall Item. :)" );
-                ADDBYTE( pak, 0 );
-                thisclient->SendPacket( &pak );
+                useitem->usescript = 1;                
+                useitem->usetype =0;            
+                useitem->usevalue =UseList.Index[useitem->itemnum]->quality/100;
+                thisclient->bonusxp=1;
+                thisclient->wait_validation=UseList.Index[useitem->itemnum]->quality/100;                
+                                
+                //Good version?
+                if(useitem->itemnum==948||(useitem->itemnum>=202 && useitem->itemnum<=203))
+                 {
+                   //valid until logout (limit to one hour)
+                    thisclient->once=true;
+                    //thisclient->timerxp=clock()+60*60*1000;  //1 hour
+                    thisclient->timerxp=time(NULL)+60*60;  //1 hour
+                    Log(MSG_INFO,"Bonus XP to %i",thisclient->bonusxp);
+                    BEGINPACKET( pak, 0x702 );
+                    ADDSTRING( pak, "The effect will hold until you log off or you play for one hour." );
+                    ADDBYTE( pak, 0 );
+                    thisclient->client->SendPacket(&pak);                   
+                 }
+                else
+                {
+                   //1 day, will "resist" to logout ;)
+                   //thisclient->timerxp=clock()+86400*1000;
+                   thisclient->timerxp=time(NULL)+86400;
+                   thisclient->once=false;
+                    Log(MSG_INFO,"Bonus XP to %i",thisclient->bonusxp);
+                    BEGINPACKET( pak, 0x702 );
+                    ADDSTRING( pak, "The effect will hold 24 hours." );
+                    ADDBYTE( pak, 0 );
+                    thisclient->client->SendPacket(&pak);                   
+                }
+                                                  
             }
+              
         }
         break;
-*/
         case 323://Job Skill, Unique Kill, Mileage Skill and All Skill Reset Books
 
             delete useitem;        

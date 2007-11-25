@@ -711,6 +711,7 @@ void CWorldServer::LoadCommandLevels( void )
     Config.Command_Set = ConfigGetInt    ( "commands.ini", "set", 299 );
     Config.Command_Settime = ConfigGetInt    ( "commands.ini", "settime", 299 );
     Config.Command_ShopType = ConfigGetInt    ( "commands.ini", "shoptype", 299 );
+    Config.Command_BonusXp = ConfigGetInt    ( "commands.ini", "bonusxp", 299 );  //LMA: bonusxp
     Config.Command_Shutdown = ConfigGetInt    ( "commands.ini", "shutdown", 299 );
     Config.Command_SSpawn = ConfigGetInt    ( "commands.ini", "sspawn", 299 );
     Config.Command_Stat = ConfigGetInt    ( "commands.ini", "stat", 299 );
@@ -796,6 +797,7 @@ bool CWorldServer::OnReceivePacket( CClientSocket* thisclient, CPacket *P )
     	case 0x07e1: return pakClanManager      ( (CPlayer*)thisclient->player, P );
     	case 0x07eb: return pakPrintscreen      ( (CPlayer*)thisclient->player, P ); 
     	case 0x0808: return pakGameGuard        ( (CPlayer*)thisclient->player, P );
+    	case 0x0821: return pakExpTC        ( (CPlayer*)thisclient->player, P );  //LMA: Bonus Time Coupon
     	default:
     		Log( MSG_WARNING, "(SID:%i) Received unknown packet. Command:%04x Size:%04x", thisclient->sock, P->Command, P->Size );
 		break;

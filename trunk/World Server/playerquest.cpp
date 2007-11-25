@@ -61,6 +61,18 @@ bool CPlayer::AddQuest( unsigned long int questid )
              return GServer->DoQuestScript( this, thisquest );
         }
         
+        if (thisquest->script==9000)
+        {
+           //LMA: Used for Plastic surgery.
+           if(PlasticSurgeon(thisquest))
+           {
+              //Database update.
+              GServer->DB->QExecute("UPDATE characters SET sex=%i,hair=%i,face=%i WHERE id=%i",CharInfo->Sex,CharInfo->Hair,CharInfo->Face,CharInfo->charid);
+           }
+           LogQuest("questid %lu is Quest nb %i, Plastic Surgeon Quest",questid,thisquest->id);
+           return true;
+        }
+        
         //LMA begin
         LogQuest("questid %lu is Quest nb %i, NEW quest",questid,thisquest->id);
         //LMA end
@@ -1099,6 +1111,133 @@ bool CPlayer::AddQuest( unsigned long int questid )
     
     
     return true;
+}
+
+//LMA: Let's change some face ;)
+bool CPlayer::PlasticSurgeon(CQuest* thisquest)
+{
+     int questnb=thisquest->id;
+     if (thisquest->value1==0||thisquest->value2==0||thisquest->value3==0||thisquest->ExpReward==0)
+        return false;
+     
+     //Haircut (Girl Dumpling hair / pink dumpling), same for men.
+     if(questnb==9500||questnb==9504)
+     {
+        if(!CheckItem(thisquest->value1,thisquest->value2,thisquest->ExpReward))
+        {
+           Log(MSG_HACK,"%s tried to hack quest %i",CharInfo->charname,questnb);
+           return false;
+        }
+
+        CharInfo->Hair = (thisquest->value3*5);
+        BEGINPACKET(pak, 0x721);
+        ADDWORD(pak, 9);
+        ADDWORD(pak, CharInfo->Hair);
+        ADDWORD(pak, 0);
+        client->SendPacket(&pak);
+        RESETPACKET(pak, 0x0730);
+        ADDWORD(pak, 5);
+        ADDWORD(pak, 0xa24d);
+        ADDWORD(pak, 0x40b3);
+        client->SendPacket(&pak);
+        LogQuest("Haircut changed to %i",CharInfo->Hair);
+        GServer->SendPM(this, "Hair Changed!" );
+       return true;
+     }    
+     
+     //Face-Woman (cute and shame), same for men
+     if(questnb==9501||questnb==9503)
+     {
+        if(!CheckItem(thisquest->value1,thisquest->value2,thisquest->ExpReward))
+        {
+           Log(MSG_HACK,"%s tried to hack quest %i",CharInfo->charname,questnb);
+           return false;
+        }
+
+        CharInfo->Face = thisquest->value3;
+        BEGINPACKET(pak, 0x721);
+        ADDWORD(pak, 8);
+        ADDWORD(pak, CharInfo->Face);
+        ADDWORD(pak, 0);
+        client->SendPacket(&pak);
+        RESETPACKET(pak, 0x0730);
+        ADDWORD(pak, 5);
+        ADDWORD(pak, 0xa24d);
+        ADDWORD(pak, 0x40b3);
+        client->SendPacket(&pak); 
+        LogQuest("Face changed to %i",CharInfo->Face);
+        GServer->SendPM(this, "Face Changed!" );
+       return true;
+     }
+          
+     //Change sex
+     if(questnb==9502)
+     {
+        if(!CheckItem(thisquest->value1,thisquest->value2,thisquest->ExpReward))
+        {
+           Log(MSG_HACK,"%s tried to hack quest %i",CharInfo->charname,questnb);
+           return false;
+        }
+
+       if(CharInfo->Sex==0)
+          CharInfo->Sex=1;
+       else
+          CharInfo->Sex=0;
+       
+        BEGINPACKET( pak, 0x720 );
+        ADDWORD( pak, 2 );
+        ADDWORD( pak, CharInfo->Sex );
+        ADDWORD( pak, 0 );
+        client->SendPacket( &pak );
+        RESETPACKET( pak, 0x0730 );
+        ADDWORD( pak, 5 );
+        ADDWORD( pak, 0xa24d );
+        ADDWORD( pak, 0x40b3 );
+        client->SendPacket( &pak );
+       GServer->SendPM(this, "Sex Changed!" );
+       LogQuest("Sex changed to %i",CharInfo->Sex);
+       return true;
+     }
+          
+     LogQuest("Surgeon quest not handled %i",questnb);
+     
+     
+     return false;
+}
+
+//LMA: checking if there is a skillbook in inventory
+bool CPlayer::CheckItem(int itemnb,int familyid,int nb)
+{
+ 	for(UINT i=0;i<MAX_INVENTORY;i++) 
+    {
+        if (items[i].itemnum==itemnb&&items[i].itemtype==familyid)
+        {
+            //Taking away one of them.
+            /*Useless (done by client)
+            BEGINPACKET( pak,0x7a3 );
+            ADDWORD    ( pak, clientid );
+            ADDWORD    ( pak, items[i].itemnum );
+            ADDBYTE    ( pak, i );
+            client->SendPacket( &pak );
+            */
+            if (items[i].count<nb)
+            {
+              Log(MSG_HACK,"Not enough items: %i/%i (%i:%i)",items[i].count,nb,familyid,itemnb);
+              return false;
+            }
+            
+            items[i].count -= nb;        
+            if( items[i].count <= 0 )        
+                ClearItem( items[i] );      
+            
+            LogQuest("We found a correct item! %i:%i",familyid,itemnb);
+            return true;
+        }           
+                      
+    }
+     
+     LogQuest("We did NOT found a correct item! %i:%i",familyid,itemnb);     
+     return false;
 }
 
 //LMA: Saving a quest into database (Mysql 4.1+)

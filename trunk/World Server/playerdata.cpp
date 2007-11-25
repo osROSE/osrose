@@ -26,7 +26,7 @@
 bool CPlayer::loaddata( )
 {
 	MYSQL_ROW row;
-	MYSQL_RES *result = GServer->DB->QStore("SELECT level,face,hairStyle,sex,classid,zuly,str,dex,_int, con,cha,sen,curHp,curMp,id,statp,skillp,exp,stamina,quickbar,basic_skills, class_skills,class_skills_level,respawnid,clanid,clan_rank,townid,rewardpoints,unionid,unionfame,union01,union02,union03,union04,union05 FROM characters WHERE char_name='%s'", CharInfo->charname);
+	MYSQL_RES *result = GServer->DB->QStore("SELECT level,face,hairStyle,sex,classid,zuly,str,dex,_int, con,cha,sen,curHp,curMp,id,statp,skillp,exp,stamina,quickbar,basic_skills, class_skills,class_skills_level,respawnid,clanid,clan_rank,townid,rewardpoints,unionid,unionfame,union01,union02,union03,union04,union05,bonusxp,timerxp,shoptype,timershop FROM characters WHERE char_name='%s'", CharInfo->charname);
 	if(result==NULL) return false;
 	if(mysql_num_rows(result)!=1)
 	{
@@ -68,6 +68,39 @@ bool CPlayer::loaddata( )
     CharInfo->union03=atoi(row[32]);
     CharInfo->union04=atoi(row[33]);
     CharInfo->union05=atoi(row[34]);
+           
+    //LMA: mileage stuff
+    bonusxp=atoi(row[35]);
+    timerxp=atoi(row[36]);
+    wait_validation=0;
+    last_fuel=0;
+    
+    Shop->ShopType=atoi(row[37]);
+    Shop->mil_shop_time=atoi(row[38]);
+    
+    //TEST
+    time_t rawtime;
+    struct tm * timeinfo;
+    rawtime=Shop->mil_shop_time;
+    timeinfo = localtime ( &rawtime );   
+    Log(MSG_INFO,"Shop %i/%i/%i, %i:%i:%i",timeinfo->tm_year+1900,timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_hour+1,timeinfo->tm_min+1,timeinfo->tm_sec+1);
+    rawtime=timerxp;
+    timeinfo = localtime ( &rawtime );     
+    Log(MSG_INFO,"Bonus Xp %i/%i/%i, %i:%i:%i",timeinfo->tm_year+1900,timeinfo->tm_mon+1,timeinfo->tm_mday,timeinfo->tm_hour+1,timeinfo->tm_min+1,timeinfo->tm_sec+1);
+    //End of test
+    
+    time_t etime=time(NULL);
+    if(bonusxp>1&&(etime>=timerxp))
+    {
+      bonusxp=1;
+      timerxp=0;
+    }
+        
+    if (Shop->ShopType>0&&(etime>=Shop->mil_shop_time))
+    {
+     Shop->ShopType=0;
+     Shop->mil_shop_time=0;      
+    }
     
 	p_skills = 0;
 	for(BYTE i=0;i<48;i++) 
@@ -124,10 +157,12 @@ bool CPlayer::loaddata( )
         items[i].sig_data=-1;
         items[i].sig_head=-1;
         items[i].sig_gem-1;                        
+        items[i].sp_value=0;
+        items[i].last_sp_value=0;        
     }
     
 	GServer->DB->QFree( );	
-	result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM items WHERE owner=%i", CharInfo->charid);
+	result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem,sp_value FROM items WHERE owner=%i", CharInfo->charid);
     if(result==NULL) return false;
 	while(row = mysql_fetch_row(result)) 
     {
@@ -147,6 +182,7 @@ bool CPlayer::loaddata( )
 		items[itemnum].socketed = (atoi(row[8])==1)?true:false;
 		items[itemnum].appraised = (atoi(row[9])==1)?true:false;
 		items[itemnum].gem = atoi(row[10])>3999?0:atoi(row[10]);
+		items[itemnum].sp_value = atoi(row[11]);
 		CalculateSignature(itemnum);  //Calculate signature.
 	}
 	GServer->DB->QFree( );
@@ -841,7 +877,9 @@ void CPlayer::CalculateSignature( int slot )
      {
         items[slot].sig_head=-1;
         items[slot].sig_data=-1;
-        items[slot].sig_gem=-1;            
+        items[slot].sig_gem=-1;
+        items[slot].sp_value=-1;
+        items[slot].last_sp_value=-1;
         return;
      }
      
@@ -858,7 +896,8 @@ void CPlayer::CalculateSignature( int slot )
         		res_data+=(long int)pow(2,26);
         if(items[slot].appraised)
 		        res_data+=(long int)pow(2,27);
-		res_data+=(long int)pow(2,16)*(items[slot].lifespan*10);
+
+        res_data+=(long int)pow(2,16)*(items[slot].lifespan*10); 
 		res_data+=(long int)pow(2,9)*items[slot].durability;
 		res_data+=(long int)pow(2,28)*items[slot].refine;		
      }
@@ -866,6 +905,17 @@ void CPlayer::CalculateSignature( int slot )
      items[slot].sig_head=res_head;
      items[slot].sig_data=res_data;
      items[slot].sig_gem=items[slot].gem;
+
+     //Special PAT case
+     if(items[slot].itemtype == 14&&items[slot].sp_value<=0&&items[slot].lifespan>0)
+     {
+        items[slot].sp_value=10*items[slot].lifespan;
+        items[slot].last_sp_value=-1;
+     }
+     else
+     {
+         items[slot].last_sp_value=items[slot].sp_value;
+     }
 
      
      return;
@@ -907,18 +957,36 @@ int CPlayer::CheckSignature( int slot )
         		res_data+=(long int)pow(2,26);
         if(items[slot].appraised)
 		        res_data+=(long int)pow(2,27);
-		res_data+=(long int)pow(2,16)*(items[slot].lifespan*10);
+		        
+        res_data+=(long int)pow(2,16)*(items[slot].lifespan*10);
 		res_data+=(long int)pow(2,9)*items[slot].durability;
 		res_data+=(long int)pow(2,28)*items[slot].refine;		
 		//Log(MSG_INFO,"wep/pat: %i(%i*[%i:%i]), data: (%li:%li), head(%li:%li)",slot,items[slot].count,items[slot].itemtype,items[slot].itemnum,res_data,items[slot].sig_data,res_head,items[slot].sig_head);		
-         if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data)&&(items[slot].sig_gem==items[slot].gem))
-            return 2;		
+
+        //special PAT handling		
+		if(items[slot].itemtype == 14)
+		{
+             if(items[slot].sp_value<=0&&items[slot].lifespan>0)
+             {
+                items[slot].sp_value=10*items[slot].lifespan;
+                items[slot].last_sp_value=-1;
+             }
+
+            if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data)&&(items[slot].sig_gem==items[slot].gem)&&(items[slot].last_sp_value==items[slot].sp_value))
+               return 2;
+        }
+        else
+        {
+            if ((items[slot].sig_head==res_head)&&(items[slot].sig_data==res_data)&&(items[slot].sig_gem==items[slot].gem))
+               return 2;		            
+        }
      }
           
      items[slot].sig_head=res_head;
      items[slot].sig_data=res_data;
      items[slot].sig_gem=items[slot].gem;
-
+     items[slot].last_sp_value=items[slot].sp_value;
+     
      
      return res;
 }
@@ -972,18 +1040,29 @@ void CPlayer::savedata( )
     	   hp=Stats->MaxHP * 10 / 100;
 	   if(Stats->MP<0)
 	       Stats->MP=0;
-
-        GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i, townid=%i, rewardpoints=%i WHERE id=%i", 
+        
+        //LMA: bonus XP (coupon)
+        int temp_xp=bonusxp;
+        time_t temp_timer=timerxp;
+        
+        if(once)
+        {
+            temp_xp=0;
+            temp_timer=0;        
+        }
+        
+        GServer->DB->QExecute("UPDATE characters SET classid=%i,level=%i,zuly=%i,curHp=%i,curMp=%i,str=%i,con=%i,dex=%i,_int=%i,cha=%i,sen=%i,exp=%i,skillp=%i,statp=%i, stamina=%i,quickbar='%s',class_skills='%s',class_skills_level='%s',basic_skills='%s',respawnid=%i,clanid=%i,clan_rank=%i, townid=%i, rewardpoints=%i, bonusxp=%i, timerxp=%i, shoptype=%i, timershop=%i  WHERE id=%i", 
                     CharInfo->Job,Stats->Level, CharInfo->Zulies, hp, Stats->MP, 
                     Attr->Str,Attr->Con,Attr->Dex,Attr->Int,Attr->Cha,Attr->Sen,
                     CharInfo->Exp,CharInfo->SkillPoints,CharInfo->StatPoints,CharInfo->stamina, 
-                    quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,Position->saved,CharInfo->rewardpoints,CharInfo->charid);
+                    quick, sclass,slevel,basic,Position->respawn,Clan->clanid,Clan->clanrank,Position->saved,CharInfo->rewardpoints,temp_xp,temp_timer,Shop->ShopType,Shop->mil_shop_time,CharInfo->charid);
 
         //LMA: intelligent item save (?)
     	//if(!GServer->DB->QExecute("DELETE FROM items WHERE owner=%i", CharInfo->charid)) return;
     	int res_check=0;
     	int nb_saved=0;
     	int nb_delete=0;
+    	int sp_item_value=0;
     	for(UINT i=0;i<MAX_INVENTORY;i++) 
         {
             //Already deleted
@@ -1001,6 +1080,8 @@ void CPlayer::savedata( )
                 items[i].sig_data=-1;
                 items[i].sig_head=-1;
                 items[i].sig_gem=-1;
+                items[i].sp_value=-1;
+                items[i].last_sp_value=-1;
                 nb_delete++;
                 continue;
             }
@@ -1013,10 +1094,13 @@ void CPlayer::savedata( )
     								(items[i].appraised?1:0),items[i].gem );
             */
             nb_saved++;
-            GServer->DB->QExecute("INSERT INTO items (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),slotnum=VALUES(slotnum),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+            sp_item_value=0;
+            if(items[i].itemtype==14)
+              sp_item_value=items[i].sp_value;
+            GServer->DB->QExecute("INSERT INTO items (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem,sp_value) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),slotnum=VALUES(slotnum),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem),sp_value=VALUES(sp_value)",
     								CharInfo->charid, i, items[i].itemnum, items[i].itemtype,items[i].refine, items[i].durability,
     								items[i].lifespan, items[i].count, items[i].stats, (items[i].socketed?1:0),
-    								(items[i].appraised?1:0),items[i].gem );
+    								(items[i].appraised?1:0),items[i].gem,sp_item_value );
     	}
     	
     	Log(MSG_INFO,"We saved %i slots, deleted %i",nb_saved,nb_delete);
