@@ -102,11 +102,26 @@ void CWorldServer::pakPlayer( CPlayer *thisclient )
 	for(int i=0; i<19; i++)
         ADDBYTE( pak, 0 );    //null        
     ADDWORD( pak, thisclient->CharInfo->stamina );					// Stamina
-	for(int i=0; i<326; i++) ADDBYTE( pak, 0 );	
+	
+    
+    //TEST
+    //for(int i=0; i<326; i++) ADDBYTE( pak, 0 );	
+    for(int i=0; i<320; i++) ADDBYTE( pak, 0 );
+    ADDWORD( pak, 3500 );
+    ADDWORD( pak, 0 );
+    ADDWORD( pak, 0 );
+    
 	for(int i=0; i<MAX_SKILL; i++) // Class Skills   
         ADDWORD( pak, thisclient->cskills[i].id+thisclient->cskills[i].level-1 );
-	for(int i=0; i<260; i++)  ADDWORD( pak, 0 );
-	for(int i=0; i<42; i++)       // Basic Skills                               
+	
+    
+    //TEST !!
+    //for(int i=0; i<260; i++)  ADDWORD( pak, 0 );
+    ADDWORD( pak, 5000 ); //Driving skill
+    for(int i=0; i<259; i++)  ADDWORD( pak, 0 );
+    
+    
+	for(int i=0; i<42; i++)       // Basic Skills
 		ADDWORD( pak, thisclient->bskills[i] );	
 	for(int i=0; i<48; i++)       // QuickBar
         ADDWORD( pak, thisclient->quickbar[i] );
@@ -661,6 +676,8 @@ bool CWorldServer::pakChangeStance( CPlayer* thisclient, CPacket* P )
     if(thisclient->Shop->open)
         return true;    
 	BYTE stancenum = GETBYTE((*P),0x00);
+	BYTE previous_stance=thisclient->Status->Stance;
+
 	if (stancenum == 0)
 	{
         if(thisclient->Status->Stance == RUNNING) //Walking
@@ -715,7 +732,22 @@ bool CWorldServer::pakChangeStance( CPlayer* thisclient, CPacket* P )
 	ADDWORD( pak, thisclient->clientid );
 	ADDBYTE( pak, thisclient->Status->Stance );
 	ADDWORD( pak, thisclient->Stats->Move_Speed );
-	SendToVisible( &pak, thisclient );       
+	SendToVisible( &pak, thisclient );
+ 
+    //Fuel.
+	if (thisclient->Status->Stance==DRIVING)
+	{
+       thisclient->last_fuel=clock();
+       //forcing refresh for good value :)
+       thisclient->TakeFuel();
+    }
+    
+    if (previous_stance==DRIVING)
+    {
+       thisclient->TakeFuel();
+       thisclient->last_fuel=0;
+    }
+       
             
 	return true;
 }
@@ -1093,15 +1125,23 @@ bool CWorldServer::pakChangeCart( CPlayer* thisclient, CPacket* P )
 	thisclient->items[srcslot] = thisclient->items[destslot];
 	thisclient->items[destslot] = tmpitm;
 
+    //LMA: Getting good mspeed value for packet.
+    thisclient->UpdateInventory( srcslot, destslot );
+    unsigned int lma_speed=thisclient->GetCartSpeed();
+
 	BEGINPACKET( pak, 0x7ca );     
 	ADDWORD    ( pak, thisclient->clientid );
 	ADDWORD    ( pak, cartslot);							
-	ADDWORD    ( pak, thisclient->items[srcslot].itemnum);
-	ADDWORD    ( pak, BuildItemRefine( thisclient->items[srcslot] ) );
-	ADDWORD    ( pak, thisclient->Stats->Move_Speed );
+	//ADDWORD    ( pak, thisclient->items[srcslot].itemnum);
+	//ADDWORD    ( pak, BuildItemRefine( thisclient->items[srcslot] ) );
+	//ADDWORD    ( pak, thisclient->Stats->Move_Speed );
+
+	ADDWORD    ( pak, tmpitm.itemnum);
+	ADDWORD    ( pak, BuildItemRefine( tmpitm ) );	
+	ADDWORD    ( pak, lma_speed );
 	SendToVisible( &pak, thisclient );
 
-    thisclient->UpdateInventory( srcslot, destslot );	
+    //thisclient->UpdateInventory( srcslot, destslot );	
 	thisclient->Stats->Move_Speed = thisclient->GetMoveSpeed( );
 	return true;
 }
@@ -1283,6 +1323,52 @@ bool CWorldServer::pakGameGuard ( CPlayer* thisclient, CPacket* P )
 	return true;
 }
 
+// LMA: Bonus Exp Time coupon (Using Drose fix)
+bool CWorldServer::pakExpTC ( CPlayer* thisclient, CPacket* P )
+{
+    unsigned int action = GETBYTE((*P),0);
+    //TEST
+    time_t rawtime;
+    struct tm * timeinfo;
+    
+    if (thisclient->timerxp==0||thisclient->wait_validation==0)
+    {
+       Log(MSG_HACK,"Bonus XP packet received from %s (shouldn't be).",thisclient->CharInfo->charname);
+       return true;
+    }
+    
+    //validating Xp bonus :)
+    thisclient->bonusxp=thisclient->wait_validation;
+    rawtime=thisclient->timerxp;
+    //time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    
+    switch(action)
+    {
+        case 0x04: //Medal
+        {
+             BEGINPACKET( pak, 0x822 );
+             ADDBYTE( pak, 0x04 );
+             ADDBYTE( pak, 0x00 );
+             ADDWORD( pak, 0x0000 );
+             ADDWORD(pak,timeinfo->tm_year+1900);   //Year
+             ADDBYTE( pak, timeinfo->tm_mon+1);  //Month
+             ADDBYTE( pak, timeinfo->tm_mday);  //Day
+             ADDBYTE( pak, timeinfo->tm_hour+1);  //hour
+             //ADDBYTE( pak, timeinfo->tm_min+1); //minutes?
+             ADDBYTE( pak, 0x00);  //minutes?
+             
+			 thisclient->client->SendPacket( &pak );
+             return true;
+        }
+        break;
+        default:
+                Log(MSG_WARNING,"TimeCoupon - unknown action: %i", action );
+    }     
+     
+
+	return true;
+}
  
 // Changing Respawn for a client
 bool CWorldServer::pakChangeRespawn( CPlayer* thisclient, CPacket* P )
@@ -2130,6 +2216,8 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						thisitem.sig_data=0;
 						thisitem.sig_head=0;
 						thisitem.sig_gem=0;
+						thisitem.sp_value=0;
+						thisitem.last_sp_value=0;
 						unsigned newslot = otherclient->GetNewItemSlot( thisitem );
 						if(newslot==0xffff) continue;
 						thisclient->items[thisclient->Trade->trade_itemid[i]].count -= thisclient->Trade->trade_count[i];
@@ -2161,7 +2249,9 @@ bool CWorldServer::pakTradeAction ( CPlayer* thisclient, CPacket* P )
 						CItem thisitem = otherclient->items[otherclient->Trade->trade_itemid[i]];
 						thisitem.sig_data=0;
 						thisitem.sig_head=0;
-						thisitem.sig_gem=0;						
+						thisitem.sig_gem=0;
+                        thisitem.sp_value=0;
+                        thisitem.last_sp_value=0;				
 						unsigned newslot = thisclient->GetNewItemSlot( thisitem );
 						if(newslot==0xffff) continue;                       						
 						otherclient->items[otherclient->Trade->trade_itemid[i]].count -= otherclient->Trade->trade_count[i];
@@ -2359,7 +2449,7 @@ bool CWorldServer::pakUseItem ( CPlayer* thisclient, CPacket* P )
             BEGINPACKET( pak,0x7a3 );
             ADDWORD    ( pak, thisclient->clientid );
             ADDWORD    ( pak, thisuse->itemnum );   
-            SendToVisible( &pak, thisclient );    
+            SendToVisible( &pak, thisclient );
             flag = true;            
         }
         break;
@@ -2504,7 +2594,19 @@ bool CWorldServer::pakUseItem ( CPlayer* thisclient, CPacket* P )
         {
             flag = LearnSkill( thisclient, thisuse->usevalue );
         }
-        break;        
+        break;
+        case 11:
+        {
+             //LMA: some special skill cases where it's handled in quest itself :)
+             flag=false;
+        }
+        case 12:
+        {
+             //LMA: Refuel :)
+            thisclient->TakeFuel(thisuse->usevalue);
+            flag=true;
+        }
+        break;
     }
     if(flag == true)
     {    

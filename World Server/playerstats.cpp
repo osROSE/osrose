@@ -998,6 +998,29 @@ unsigned int CPlayer::GetAttackSpeed( )
     return aspeed;    
 }
 
+//LMA: Special Move Speed calcul for cart change (only multiplicator)
+unsigned int CPlayer::GetCartSpeed( )
+{
+       unsigned int mspeed=0;
+        UINT porc = 1;
+        UINT nb_parts=0;
+        float lma_speed;
+        
+        
+        //returns a value only id cart is complete.
+        if (items[135].itemnum==0||items[136].itemnum==0||items[137].itemnum==0)
+           return 0;
+           
+        if(items[138].itemnum==0&&items[139].itemnum==0)
+           return 0;
+                
+        for (int k=135;k<138;k++)
+          mspeed+=GServer->PatList.Index[items[k].itemnum]->speed;
+        
+       
+    return mspeed;  
+}
+
 // Return Movement Speed
 unsigned int CPlayer::GetMoveSpeed( )
 {

@@ -1315,7 +1315,50 @@ else if (strcmp(command, "give2")==0)
             unsigned int shoptype =atoi(tmp);           
         thisclient->Shop->ShopType = shoptype;
         Log( MSG_GMACTION, " %s : /shoptype %i" , thisclient->CharInfo->charname, shoptype);        
-    }     
+    }
+	else if (strcmp(command, "bonusxp")==0)
+	{    
+         if(Config.Command_BonusXp > thisclient->Session->accesslevel)
+	                    return true;    
+        if ((tmp = strtok(NULL, " "))==NULL) return true; 
+        char* name = tmp;
+        if ((tmp = strtok(NULL, " "))==NULL) return true; 
+        unsigned int bonus =atoi(tmp);
+        if ((tmp = strtok(NULL, " "))==NULL) return true; 
+        unsigned int time_min =atoi(tmp);
+        if ((tmp = strtok(NULL, " "))==NULL) return true; 
+        unsigned int to_save =atoi(tmp);
+
+        CPlayer* otherclient = GetClientByCharName(name);
+        if (otherclient == NULL)
+            return true;
+        
+        char buffer2[200];
+        if (bonus==0)
+        {
+           otherclient->bonusxp=1;
+           otherclient->timerxp=0;
+           otherclient->wait_validation=0;
+           otherclient->Saved=false;            
+            sprintf ( buffer2, "Your Bonus Xp has been deactivated.");
+            SendPM(otherclient, buffer2);           
+        }
+        else
+        {
+           otherclient->bonusxp=bonus;
+           otherclient->wait_validation=0;
+           //otherclient->timerxp=clock()+time_min*60*1000;
+           otherclient->timerxp=time(NULL)+time_min*60;
+           otherclient->Saved=false;
+           if (to_save!=0)
+              otherclient->Saved=true;
+            sprintf ( buffer2, "You have a bonus xp (*%i) for %i minutes.",bonus,time_min);
+            SendPM(otherclient, buffer2);              
+        }
+                      
+        Log( MSG_GMACTION, " %s : /bonusxp %s %i %i %i" ,thisclient->CharInfo->charname, otherclient->CharInfo->charname,bonus,time_min,to_save );
+        return true;
+    }      
     else if (strcmp(command, "stat")==0) /// Code By Minoc
     {
          if(Config.Command_Stat > thisclient->Session->accesslevel)

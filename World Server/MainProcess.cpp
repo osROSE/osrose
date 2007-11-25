@@ -66,6 +66,38 @@ PVOID MapProcess( PVOID TS )
                 player->Regeneration( );
                 player->CheckPlayerLevelUP( );
                 player->CheckZulies( );
+                
+                //Fuel handling.
+                if (player->Status->Stance==DRIVING&&(player->last_fuel>0)&&(clock()-player->last_fuel>60000))
+                {
+                  //We kill some fuel every now and then :)
+                  player->TakeFuel();
+                  player->last_fuel=clock();
+                }
+                
+                //LMA: mileage coupon checks.
+                time_t etime=time(NULL);
+                if(player->bonusxp>1&&(etime>=player->timerxp))
+                {
+                  BEGINPACKET( pak, 0x702 );
+                  ADDSTRING( pak, "[Mileage] Bonus Xp vanished.");
+                  ADDBYTE( pak, 0 );                  
+                  player->client->SendPacket(&pak);
+                  player->bonusxp=1;
+                  player->timerxp=0;
+                  player->wait_validation=0;
+                }
+                
+                if(player->Shop->ShopType>0&&(etime>=player->Shop->mil_shop_time))
+                {
+                  BEGINPACKET( pak, 0x702 );
+                  ADDSTRING( pak, "[Mileage] Mileage shop expired !");
+                  ADDBYTE( pak, 0 );
+                  player->client->SendPacket(&pak);
+                  player->Shop->ShopType=0;
+                  player->Shop->mil_shop_time=0;
+                }
+                
             }
             // Monster update //------------------------
             pthread_mutex_lock( &map->MonsterMutex );

@@ -234,6 +234,7 @@ struct SHOP
     UINT Buying;
     UINT Selling;
     UINT ShopType;
+    time_t mil_shop_time;   //LMA: Timer for shop time (mileage).
 };
 
 struct SKILLS

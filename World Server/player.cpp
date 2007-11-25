@@ -86,7 +86,15 @@ CPlayer::CPlayer( CClientSocket* CLIENT )
     }
     Shop->Buying = 0;
     Shop->Selling = 0;
-    Shop->ShopType = 0; 
+    Shop->ShopType = 0;
+    Shop->mil_shop_time=0;
+    
+    //bonusxp
+    timerxp=0;
+    bonusxp=1;
+    wait_validation=0;
+    once=false;
+    
     // SESSION
     Session = new SESSION;
     assert(Session);

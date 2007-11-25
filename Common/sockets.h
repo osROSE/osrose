@@ -242,6 +242,7 @@ struct CROSEServerConfig
     int Command_DQuest;
     int Command_IQuest;
     int Command_ShopType;
+    int Command_BonusXp; //LMA: gives a bonusxp to a player
     int Command_Stat;
     int Command_KillInRange;
     int Command_GoToMap;
