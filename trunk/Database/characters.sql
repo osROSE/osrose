@@ -37,9 +37,9 @@ CREATE TABLE `characters` (
   `clan_rank` int(11) NOT NULL default '0',
   `stamina` int(11) NOT NULL default '5000',
   `quickbar` varchar(255) NOT NULL default '0',
-  `basic_skills` varchar(255) NOT NULL default '11,12,13,14,15,16,17,18,19,20,21,22,25,5000,5001,101,102,103,104,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0',
-  `class_skills` varchar(300) NOT NULL default '0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0',
-  `class_skills_level` varchar(300) NOT NULL default '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1',
+  `basic_skills` varchar(255) NOT NULL default '11,12,13,14,15,16,17,18,19,20,21,22,25,5000,5001,101,102,103,104',
+  `class_skills` varchar(255) NOT NULL default '0',
+  `class_skills_level` varchar(255) NOT NULL default '1',
   `respawnid` int(11) NOT NULL default '56',
   `townid` int(11) NOT NULL default '6',
   `rewardpoints` int(11) NOT NULL default '0',
@@ -50,8 +50,12 @@ CREATE TABLE `characters` (
   `union03` int(11) NOT NULL default '0',
   `union04` int(11) NOT NULL default '0',
   `union05` int(11) NOT NULL default '0',
+  `bonusxp` int(11) NOT NULL default '0',
+  `timerxp` int(11) NOT NULL default '0',
+  `shoptype` int(11) NOT NULL default '0',
+  `timershop` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=433 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records 
