@@ -143,6 +143,7 @@ CPlayer::CPlayer( CClientSocket* CLIENT )
     hits = 0;
     //FairyTime = 0;
     nstorageitems = 0;
+    nsitemmallitems = 0;
     p_skills = 0;
     for(int i=0;i<MAX_SKILL;i++)
     {

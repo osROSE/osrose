@@ -209,6 +209,10 @@ bool CPlayer::loaddata( )
 		storageitems[itemnum].gem = atoi(row[10]);
 	}
 	GServer->DB->QFree( );
+	
+	//LMA: Loading ItemMall
+    RebuildItemMall();
+	
     if(Clan->clanid!=0)
     {	
     	result = GServer->DB->QStore("SELECT logo,back,name,grade FROM list_clan where id=%i", Clan->clanid);

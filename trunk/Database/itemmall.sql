@@ -1,7 +1,7 @@
 -- ----------------------------
--- Table structure for storage
+-- Table structure for itemmall
 -- ----------------------------
-CREATE TABLE `storage` (
+CREATE TABLE `itemmall` (
   `owner` int(11) NOT NULL default '0',
   `itemnum` int(11) NOT NULL default '0',
   `itemtype` int(11) NOT NULL default '0',

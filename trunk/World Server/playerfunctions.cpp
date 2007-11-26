@@ -770,7 +770,7 @@ unsigned int CPlayer::AddItem( CItem item )
     return newslot;
 }
 
-//LMA: Saving slot with a MySQL 4.1+ function
+//LMA: Saving slot with a MySQL 4.1+ function for Inventory
 void CPlayer::SaveSlot41( unsigned int slot)
 {
    //Update or add a slot (kinky way).
@@ -805,7 +805,6 @@ void CPlayer::SaveSlot41( unsigned int slot)
 
    return;   
 }
-
 
 //LMA: saving slot in database (outdated)
 void CPlayer::SaveSlot( unsigned int slot)
@@ -1135,4 +1134,83 @@ bool CPlayer::AddClanPoints(unsigned int count)
 CClientSocket* CPlayer::getClient()
 {
    return client;
+}
+
+//LMA: reload itemmall... In fact there must be no void in itemmall :(
+//so we load, check and rebuild if necessary...
+void CPlayer::RebuildItemMall()
+{
+    for(int i=0;i<MAX_ITEMMALL;i++)
+    {
+  		itemmallitems[i].itemnum = 0;
+		itemmallitems[i].itemtype = 0;
+		itemmallitems[i].refine = 0;
+		itemmallitems[i].durability = 0;
+		itemmallitems[i].lifespan = 0;
+		itemmallitems[i].count = 0;
+		itemmallitems[i].stats = 0;
+		itemmallitems[i].socketed = 0;
+		itemmallitems[i].appraised = 0;
+		itemmallitems[i].gem = 0;   
+    }
+     
+	MYSQL_ROW row;
+	MYSQL_RES *result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM itemmall WHERE owner=%i", Session->userid);
+	if(result==NULL)
+    {
+       nsitemmallitems=0;
+       return;
+    }
+    
+	nsitemmallitems = mysql_num_rows(result);
+	int i=0;
+	bool do_again=false;
+	while(row = mysql_fetch_row(result)) 
+    {
+        if(!GServer->IsValidItem( atoi(row[1]), atoi(row[0]) ) || atoi(row[6])==0)
+        {
+            Log(MSG_WARNING, "char %s have a invalid or empty item in ItemMall: %i%i [%i], this item will be deleted", CharInfo->charname, atoi(row[1]), atoi(row[0]), atoi(row[6]) );
+            continue;
+        }        
+        
+		UINT itemnum = atoi(row[5]);	
+		if(itemnum!=i)
+		   do_again=true;
+		itemmallitems[i].itemnum = atoi(row[0]);
+		itemmallitems[i].itemtype = atoi(row[1]);
+		itemmallitems[i].refine = atoi(row[2]);
+		itemmallitems[i].durability = atoi(row[3]);
+		itemmallitems[i].lifespan = atoi(row[4]);
+		itemmallitems[i].count = atoi(row[6]);
+		itemmallitems[i].stats = atoi(row[7]);
+		itemmallitems[i].socketed = (atoi(row[8])==1)?true:false;
+		itemmallitems[i].appraised = (atoi(row[9])==1)?true:false;
+		itemmallitems[i].gem = atoi(row[10]);
+		Log(MSG_INFO,"We have item %i * %i:%i",itemmallitems[i].count,itemmallitems[i].itemtype,itemmallitems[i].itemnum);
+		i++;
+	}     
+ 
+    Log(MSG_INFO,"We have %i items in item mall",nsitemmallitems);
+    GServer->DB->QFree( );
+    if (!do_again)
+       return;
+       
+    //We have to do the table again...
+    GServer->DB->QExecute("DELETE FROM itemmall WHERE owner=%i", Session->userid);
+    for(int i=0;i<MAX_ITEMMALL;i++)
+    {
+      if(itemmallitems[i].itemnum==0)
+        continue;
+      if(!GServer->DB->QExecute("INSERT INTO itemmall (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),slotnum=VALUES(slotnum),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+    						Session->userid, i, itemmallitems[i].itemnum, itemmallitems[i].itemtype,itemmallitems[i].refine, itemmallitems[i].durability, 
+    						itemmallitems[i].lifespan, itemmallitems[i].count, itemmallitems[i].stats, (itemmallitems[i].socketed?1:0), 
+                            (itemmallitems[i].appraised?1:0), itemmallitems[i].gem ))
+      {
+          Log(MSG_INFO,"Error in Mysql...");                      
+      }
+      
+    }
+    
+     
+     return;     
 }

@@ -76,8 +76,11 @@ class CPlayer: public CCharacter
     UINT QuestVariables[25];
     
     // Inventory/storage
-    CItem storageitems[MAX_STORAGE];    
-    unsigned int nstorageitems;		
+    CItem storageitems[MAX_STORAGE];
+    CItem itemmallitems[MAX_ITEMMALL];
+    unsigned int nstorageitems;
+    unsigned int nsitemmallitems;
+    
     CItem items[MAX_INVENTORY];    
     
     // skills/quickbar
@@ -180,6 +183,7 @@ class CPlayer: public CCharacter
         unsigned int GetInt( );
         unsigned getWeaponType();
         bool AddClanPoints(unsigned int count);
+        void RebuildItemMall(); //LMA: Rebuild player's itemmall.
         CClientSocket* getClient();
 };
 
