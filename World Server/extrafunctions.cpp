@@ -1280,7 +1280,8 @@ bool CWorldServer::SaveSlotStorage( CPlayer* thisclient,UINT slotnum)
 {
     UINT i=0;
     i=slotnum;
-         
+    
+    /*previous version
     if(!GServer->DB->QExecute("DELETE FROM storage WHERE owner=%i AND slotnum=%i", thisclient->Session->userid,i))
        return false;
         
@@ -1291,6 +1292,43 @@ bool CWorldServer::SaveSlotStorage( CPlayer* thisclient,UINT slotnum)
     						thisclient->storageitems[i].lifespan, i, thisclient->storageitems[i].count, thisclient->storageitems[i].stats, (thisclient->storageitems[i].socketed?1:0), 
                             (thisclient->storageitems[i].appraised?1:0), thisclient->storageitems[i].gem );//Gem Fix by Irulagain
     }
+    */
+    
+    //New version (MySQL 4.1+)
+    if (thisclient->storageitems[i].count > 0) 
+    {
+        GServer->DB->QExecute("INSERT INTO storage (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),slotnum=VALUES(slotnum),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+    						thisclient->Session->userid, i, thisclient->storageitems[i].itemnum, thisclient->storageitems[i].itemtype,thisclient->storageitems[i].refine, thisclient->storageitems[i].durability, 
+    						thisclient->storageitems[i].lifespan, thisclient->storageitems[i].count, thisclient->storageitems[i].stats, (thisclient->storageitems[i].socketed?1:0), 
+                            (thisclient->storageitems[i].appraised?1:0), thisclient->storageitems[i].gem );
+    }
+    else
+    {
+        GServer->DB->QExecute("DELETE FROM storage WHERE owner=%i AND slotnum=%i", thisclient->Session->userid,i);
+    }    
+        
+
+    return true;
+}
+
+//LMA: Saving a slot in ItemMall.
+bool CWorldServer::SaveSlotMall( CPlayer* thisclient,UINT slotnum)
+{
+    UINT i=0;
+    i=slotnum;
+    
+    
+    if (thisclient->itemmallitems[i].count > 0) 
+    {
+        GServer->DB->QExecute("INSERT INTO itemmall (owner,slotnum,itemnum,itemtype,refine,durability,lifespan,count,stats,socketed,appraised,gem) VALUES(%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i) ON DUPLICATE KEY UPDATE owner=VALUES(owner),slotnum=VALUES(slotnum),itemnum=VALUES(itemnum),itemtype=VALUES(itemtype),refine=VALUES(refine),durability=VALUES(durability),lifespan=VALUES(lifespan),count=VALUES(count),stats=VALUES(stats),socketed=VALUES(socketed),appraised=VALUES(appraised),gem=VALUES(gem)",
+    						thisclient->Session->userid, i, thisclient->itemmallitems[i].itemnum, thisclient->itemmallitems[i].itemtype,thisclient->itemmallitems[i].refine, thisclient->itemmallitems[i].durability, 
+    						thisclient->itemmallitems[i].lifespan, thisclient->itemmallitems[i].count, thisclient->itemmallitems[i].stats, (thisclient->itemmallitems[i].socketed?1:0), 
+                            (thisclient->itemmallitems[i].appraised?1:0), thisclient->itemmallitems[i].gem );
+    }
+    else
+    {
+        GServer->DB->QExecute("DELETE FROM itemmall WHERE owner=%i AND slotnum=%i", thisclient->Session->userid,i);
+    }    
         
 
     return true;
@@ -1352,4 +1390,237 @@ CMonster* CWorldServer::LookAOEMonster(CCharacter* character)
     
     
     return NULL;
+}
+
+
+//LMA: returns the Item Mall list (with packet)
+void CWorldServer::ReturnItemMallList(CPlayer* thisclient)
+{
+     thisclient->CPlayer::RebuildItemMall();
+     
+     if (thisclient->nsitemmallitems==0)
+        return;
+     
+    //First signature.
+    BEGINPACKET( pak, 0x7d9 );
+    ADDWORD    ( pak, 0x0008);
+    ADDWORD    ( pak, 0x0000 );
+    ADDBYTE    ( pak, 0x44 );
+    ADDBYTE    ( pak, 0x04  );
+    ADDBYTE    ( pak, 0x20  );
+    ADDBYTE    ( pak, 0x8b  );
+    ADDBYTE    ( pak, 0x11  );
+    ADDBYTE    ( pak, 0x49  );
+    ADDBYTE    ( pak, 0xc0  );
+    ADDBYTE    ( pak, 0x3c  );
+    ADDBYTE    ( pak, 0xf9  );
+    ADDBYTE    ( pak, 0x48  );
+    ADDBYTE    ( pak, 0x00  );
+    ADDBYTE    ( pak, 0x00  );
+    ADDBYTE    ( pak, 0x01  );
+    thisclient->client->SendPacket( &pak );     
+     
+     
+     //list
+     RESETPACKET(pak,0x7d9);
+     ADDBYTE    ( pak, 0x09 );
+     ADDBYTE    ( pak, thisclient->nsitemmallitems);
+     
+     //signature     
+     ADDWORD    ( pak, 0x0000 );
+     ADDBYTE    ( pak, 0x2f );
+     ADDBYTE    ( pak, 0x02 );
+     ADDBYTE    ( pak, 0xc4 );
+     ADDBYTE    ( pak, 0x28 );
+     ADDBYTE    ( pak, 0x10 );
+     ADDBYTE    ( pak, 0x49 );
+     ADDBYTE    ( pak, 0x91 );
+     ADDBYTE    ( pak, 0xbd );
+     ADDBYTE    ( pak, 0x06 );
+     ADDBYTE    ( pak, 0x49 );
+     ADDBYTE    ( pak, 0x4f );
+     ADDBYTE    ( pak, 0x2c );
+     ADDBYTE    ( pak, 0x00);
+     
+     //there's no void between two objects ;)
+     for(int i=0;i<thisclient->nsitemmallitems;i++)
+     {
+         ADDDWORD   ( pak, BuildItemHead( thisclient->itemmallitems[i] ) );
+         ADDDWORD   ( pak, BuildItemData( thisclient->itemmallitems[i] ) );
+         ADDWORD    ( pak, 0x0000 );
+         ADDWORD    ( pak, 0x0000 );
+         ADDWORD    ( pak, 0x0000 );
+         ADDBYTE    ( pak, 0x00);
+         
+         Log(MSG_INFO,"We send item in slot %i/%i: %i * %i:%i",i,thisclient->nsitemmallitems,thisclient->itemmallitems[i].count,thisclient->itemmallitems[i].itemtype,thisclient->itemmallitems[i].itemnum);
+     }
+     
+     thisclient->client->SendPacket( &pak );
+     
+    //Signature end
+    RESETPACKET( pak, 0x7d9 );
+    ADDWORD    ( pak, 0x000a);
+    ADDWORD    ( pak, 0x0000 );
+    ADDBYTE    ( pak, 0xca);
+    ADDBYTE    ( pak, 0x01  );
+    ADDBYTE    ( pak, 0x3c  );
+    ADDBYTE    ( pak, 0x84  );
+    ADDBYTE    ( pak, 0x08  );
+    ADDBYTE    ( pak, 0x49  );
+    ADDBYTE    ( pak, 0xbd  );
+    ADDBYTE    ( pak, 0x8e  );
+    ADDBYTE    ( pak, 0xda  );
+    ADDBYTE    ( pak, 0x48  );
+    ADDBYTE    ( pak, 0xcb  );
+    ADDBYTE    ( pak, 0x03  );
+    ADDBYTE    ( pak, 0x00  );
+    thisclient->client->SendPacket( &pak );      
+     
+     return;     
+}
+
+//LMA: takes an item from item mall to player's inventory
+void CWorldServer::TakeItemMallList(CPlayer* thisclient,int qty,int slot)
+{
+ 	MYSQL_ROW row;
+	MYSQL_RES *result = GServer->DB->QStore("SELECT itemnum,itemtype,refine,durability,lifespan,slotnum,count,stats,socketed,appraised,gem FROM itemmall WHERE owner=%i AND slotnum=%i", thisclient->Session->userid,slot);
+	if(result==NULL)
+    {
+       Log(MSG_HACK,"%s tried to get %i items from slot %i from itemmall and there is nothing there !",thisclient->CharInfo->charname, qty, slot);
+       return;
+    }
+ 
+    if(mysql_num_rows(result)!=1)
+    {
+      Log(MSG_HACK,"%s tried to get %i items from slot %i from itemmall and there is nothing there !",thisclient->CharInfo->charname, qty, slot);
+      return;
+    }
+    
+    row = mysql_fetch_row(result);
+    //little refresh :)
+	thisclient->itemmallitems[slot].itemnum = atoi(row[0]);
+	thisclient->itemmallitems[slot].itemtype = atoi(row[1]);
+	thisclient->itemmallitems[slot].refine = atoi(row[2]);
+	thisclient->itemmallitems[slot].durability = atoi(row[3]);
+	thisclient->itemmallitems[slot].lifespan = atoi(row[4]);
+	thisclient->itemmallitems[slot].count = atoi(row[6]);
+	thisclient->itemmallitems[slot].stats = atoi(row[7]);
+	thisclient->itemmallitems[slot].socketed = (atoi(row[8])==1)?true:false;
+	thisclient->itemmallitems[slot].appraised = (atoi(row[9])==1)?true:false;
+	thisclient->itemmallitems[slot].gem = atoi(row[10]);
+   
+    Log(MSG_INFO,"%s takes %i * %i:%i from item mall",thisclient->CharInfo->charname,qty,thisclient->itemmallitems[slot].itemtype,thisclient->itemmallitems[slot].itemnum);
+    
+    GServer->DB->QFree( );
+    if(qty>thisclient->itemmallitems[slot].count)
+    {
+       Log(MSG_HACK,"%s tried to get %i items from slot %i from itemmall, had only %i !",thisclient->CharInfo->charname, qty, slot,thisclient->itemmallitems[slot].count);
+       return;
+    }
+    
+    //Is there a free slot into inventory for this item?
+    CItem newitem = thisclient->itemmallitems[slot];
+    if(newitem.itemtype>9 && newitem.itemtype<14)
+    {
+        int count = qty;
+        if( count>thisclient->itemmallitems[slot].count )
+            count = thisclient->itemmallitems[slot].count;
+        newitem.count = count;
+        thisclient->itemmallitems[slot].count -= count;
+        
+        if(thisclient->itemmallitems[slot].count<=0)
+            ClearItem(thisclient->itemmallitems[slot]);
+    }    
+    else
+    {
+        ClearItem(thisclient->itemmallitems[slot]);                
+    }                             
+    
+    int newslot= thisclient->GetNewItemSlot ( newitem );
+    //no place in player's inventory, so back to itemall. 
+    if(newslot==0xffff)
+    {
+        thisclient->itemmallitems[slot] = newitem;
+        return ;
+    }
+    
+    int amount = 0;
+    if(thisclient->items[newslot].count>0)                
+    {
+      int amount = thisclient->items[newslot].count;                     
+	  newitem.count+=amount;
+    }
+    if( newitem.count > 999 )
+    {
+        amount = 999 - newitem.count;
+        newitem.count = 999;                         
+    }        
+    thisclient->items[newslot] = newitem;   
+    if( amount > 0 )
+    {
+        newitem.count = amount;
+        unsigned int newslot2 = thisclient->GetNewItemSlot( newitem );
+        if( newslot2 == 0xffff )
+        {
+            thisclient->itemmallitems[slot] = thisclient->items[newslot];
+            thisclient->items[newslot].count = amount;
+            return ;
+        }
+        thisclient->items[newslot2] = newitem;
+        thisclient->UpdateInventory( newslot2 );    
+    }                          
+   
+    if (thisclient->items[newslot].itemnum>0)
+       Log(MSG_INFO,"Slot in inventory: %i, exist already: %i * %i:%i",newslot,thisclient->items[newslot].count,thisclient->items[newslot].itemtype,thisclient->items[newslot].itemnum);
+    else
+        Log(MSG_INFO,"Slot in inventory: %i, does not exist already.",newslot);
+   
+    //Packet time :)
+    BEGINPACKET( pak, 0x7d9 );
+    ADDBYTE    ( pak, 0x04 ); 
+    ADDBYTE    ( pak, slot );                       
+    ADDBYTE    ( pak, newslot );
+   	ADDDWORD   ( pak, BuildItemHead( thisclient->items[newslot] ) );
+	ADDDWORD   ( pak, BuildItemData( thisclient->items[newslot] ) );
+	//signature
+    ADDBYTE    (pak,0xbb); 
+    ADDBYTE    (pak,0xfb); 
+    ADDBYTE    (pak,0xb0); 
+    ADDBYTE    (pak,0x01);
+    ADDWORD    (pak,0x0000);
+    //End of item signature.
+    ADDBYTE    ( pak, slot );
+    ADDDWORD   ( pak, BuildItemHead( thisclient->itemmallitems[slot] ) );
+    ADDDWORD   ( pak, BuildItemData( thisclient->itemmallitems[slot] ) );
+	//signature
+    ADDBYTE    (pak,0x00); 
+    ADDBYTE    (pak,0x00); 
+    ADDBYTE    (pak,0x00); 
+    ADDBYTE    (pak,0x00);
+    ADDWORD    (pak,0x0000);
+    //End of item signature.
+    //last signature
+    ADDWORD    (pak,0xcccc );
+    ADDBYTE    (pak,0x4f );
+    ADDBYTE    (pak,0x0c );
+    ADDBYTE    (pak,0x36 );
+    ADDBYTE    (pak,0xf4 );
+    ADDBYTE    (pak,0x00 );
+    ADDWORD    (pak,0x0000 );
+    ADDWORD    (pak,0x0000 );
+    ADDWORD    (pak,0x0000 );
+    ADDWORD    (pak,0x0000);
+    //end of last signature...
+ 
+    thisclient->client->SendPacket( &pak ); 
+    //should be ok now :)
+    if(thisclient->itemmallitems[slot].itemnum==0)
+       thisclient->nsitemmallitems--;
+       
+    //Saving :)
+    SaveSlotMall(thisclient,slot);
+    thisclient->SaveSlot41(newslot);
+    
+  
+    return;
 }

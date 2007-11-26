@@ -3140,10 +3140,11 @@ bool CWorldServer::pakChangeStorage( CPlayer* thisclient, CPacket* P)
               
     		ADDQWORD   ( pak, thisclient->CharInfo->Zulies );
             ADDBYTE    ( pak, 0x00 );   
-
                          		
-            thisclient->client->SendPacket( &pak );            
-            thisclient->nstorageitems--;
+            thisclient->client->SendPacket( &pak );
+            
+            if(thisclient->storageitems[storageslot].itemnum==0)            
+                thisclient->nstorageitems--;
             
             //LMA: need to save the storage item...
             SaveSlotStorage(thisclient,storageslot);
@@ -3915,7 +3916,7 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
             if(!CheckInventorySlot( thisclient, item))
                 return false;  
             if(!CheckInventorySlot( thisclient, material))
-                return false;                               
+                return false;               
             if( thisclient->items[material].count<=0 )
             {
                 BEGINPACKET( pak, 0x7bc );
@@ -3923,25 +3924,61 @@ bool CWorldServer::pakModifiedItem( CPlayer* thisclient, CPacket* P )
                 ADDBYTE    ( pak, 0x00 );
                 thisclient->client->SendPacket( &pak );                
                 return true;
-            } 
-            if( thisclient->items[item].socketed ) return true;//Show message                        
+            }                        
+            //LMA: already drilled 
+            if(thisclient->items[item].socketed)
+            {
+                BEGINPACKET( pak, 0x7bc );
+                ADDBYTE    ( pak, 0x23 );
+                ADDBYTE    ( pak, 0x00 );
+                thisclient->client->SendPacket( &pak );                
+               return true;
+            }
+            
             thisclient->items[material].count -= 1;
-            thisclient->items[item].socketed = true;
+            
             if( thisclient->items[material].count<=0 )
                 ClearItem(thisclient->items[material]);
-            BEGINPACKET( pak, 0x7cb );
-            ADDBYTE    ( pak, 2 );
-            ADDBYTE    ( pak, material);
-            ADDDWORD   ( pak, BuildItemHead( thisclient->items[material] ) );
-            ADDDWORD   ( pak, BuildItemData( thisclient->items[material] ) );            
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
-            ADDBYTE    ( pak, item );
-            ADDDWORD   ( pak, BuildItemHead( thisclient->items[item] ) );
-            ADDDWORD   ( pak, BuildItemData( thisclient->items[item] ) );
-        ADDDWORD( pak, 0x00000000 );
-        ADDWORD ( pak, 0x0000 );   
-            thisclient->client->SendPacket(&pak);                           
+                                
+            //LMA: Adding some probability there :)
+            int luck_time=RandNumber(0,100);
+            Log(MSG_INFO,"Drill succes? %i/%i",luck_time,UseList.Index[thisclient->items[material].itemnum]->useeffect[1]);
+            if(luck_time>UseList.Index[thisclient->items[material].itemnum]->useeffect[1])
+            {
+                //fail
+                thisclient->items[item].socketed = false;
+                BEGINPACKET( pak, 0x7bc );
+                ADDBYTE    ( pak, 0x21 );
+                ADDBYTE    ( pak, 0x01 );
+                ADDBYTE    ( pak, material);
+                ADDDWORD   ( pak, BuildItemHead( thisclient->items[material] ) );
+                ADDDWORD   ( pak, BuildItemData( thisclient->items[material] ) );            
+                ADDDWORD( pak, 0x00000000 );
+                ADDWORD ( pak, 0x0000 );
+                thisclient->client->SendPacket(&pak);
+            }
+            else
+            {
+                thisclient->items[item].socketed = true;
+                BEGINPACKET( pak, 0x7bc );
+                ADDBYTE    ( pak, 0x20 );
+                ADDBYTE    ( pak, 0x02 );
+                ADDBYTE    ( pak, material);
+                ADDDWORD   ( pak, BuildItemHead( thisclient->items[material] ) );
+                ADDDWORD   ( pak, BuildItemData( thisclient->items[material] ) );            
+                ADDDWORD( pak, 0x00000000 );
+                ADDWORD ( pak, 0x0000 );   
+                ADDBYTE    ( pak, item );
+                ADDDWORD   ( pak, BuildItemHead( thisclient->items[item] ) );
+                ADDDWORD   ( pak, BuildItemData( thisclient->items[item] ) );
+                ADDDWORD( pak, 0x00000000 );
+                ADDWORD ( pak, 0x0000 );
+                thisclient->client->SendPacket(&pak);
+            }                      
+            
+            //Saving in database.
+            //thisclient->SaveSlot41(material);
+            //thisclient->SaveSlot41(item);
         }
         break;        
         default:
@@ -4194,7 +4231,45 @@ bool CWorldServer::pakCSCharSelect ( CPlayer* thisclient, CPacket* P )
 	return true;
 }
 
+//LMA: ItemMall handling
 bool CWorldServer::pakItemMall( CPlayer* thisclient, CPacket* P )
 {
+     
+     switch (GETBYTE((*P), 0x0))
+     {
+            case 0x01:
+            {
+                 //list of player's itemmall
+                 if (thisclient->nsitemmallitems==0)
+                    return true;
+                 ReturnItemMallList(thisclient);                      
+            }
+            break;
+            case 0x02:
+            {
+                 //transfer to another player?
+                 return true;
+            }
+            break;
+            case 0x03:
+            {
+                 //takes one item to itemmall to player's inventory
+                 WORD mal_qty=GETWORD( (*P), 0x01);
+                 BYTE mall_slot=GETBYTE((*P), 0x03);
+                 Log(MSG_INFO,"%s Trying to get %i from slot %i in itemmall",thisclient->CharInfo->charname,mal_qty,mall_slot);
+                 //Handle this...
+                 TakeItemMallList(thisclient,mal_qty,mall_slot);                 
+                 return true;
+            }
+            break;
+            default:
+            {
+                    Log(MSG_INFO,"Unknown command %i for ItemMall",GETBYTE((*P), 0x0));
+                    return true;
+            }
+            break;
+     }
+            
+   
     return true;
 }

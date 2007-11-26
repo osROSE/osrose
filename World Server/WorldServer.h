@@ -156,10 +156,13 @@ class CWorldServer : public CServerSocket
         bool GetAllStorage( CPlayer* thisclient);     //LMA: Getting Storage (all).
         bool GetSlotStorage( CPlayer* thisclient,UINT slotnum);   //LMA: refreshing one slot from MySQL storage.
         bool SaveSlotStorage( CPlayer* thisclient,UINT slotnum);  //LMA: Saving one slot into MySQL storage.
+        bool CWorldServer::SaveSlotMall( CPlayer* thisclient,UINT slotnum);  //LMA: Saving one slot into MySQL Item Mall.
         bool GetZulyStorage( CPlayer* thisclient);     //LMA: Get Zuly from Storage (from MySQL)
         bool SaveZulyStorage( CPlayer* thisclient);    //LMA: Save Zuly to Storage (to MySQL)
         CMonster* LookAOEMonster( CPlayer* thisclient);       //LMA: Trying to get a monster from a location (for AOE_TARGET paket mainly).
         CMonster* LookAOEMonster( class CCharacter* character);       //LMA: Character version.
+        void ReturnItemMallList(CPlayer* thisclient);   //LMA: Return ItemMall List
+        void TakeItemMallList(CPlayer* thisclient,int qty,int slot); //LMA: takes an item from Item Mall to player's inventory
         void RefreshFairy( );
     
         //------------------ Fairies ---------------------
