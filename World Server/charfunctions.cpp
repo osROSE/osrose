@@ -88,7 +88,7 @@ void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, boo
             Position->lastMoveTime = clock( );                     
         }
         break;
-        case SKILL_ATTACK: 
+        case SKILL_ATTACK:              
         case SKILL_BUFF:
         {
         	RESETPACKET( pak, 0x7b3 );
@@ -109,6 +109,38 @@ void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, boo
             Position->lastMoveTime = clock( );                             
         }
         break;  
+        case SUMMON_BUFF:
+        {
+            //LMA: Special case for Support summons
+        	RESETPACKET( pak, 0x7b3 );
+        	ADDWORD    ( pak, clientid );
+        	ADDWORD    ( pak, Target->clientid );
+        	ADDWORD    ( pak, skillid );
+        	
+        	//TEST
+            //ADDWORD    ( pak, 50000 );
+            ADDBYTE (pak,0x2b);
+            ADDBYTE (pak,0x01);
+                        
+        	/*
+            ADDFLOAT   ( pak, Target->Position->current.x*100 );
+            ADDFLOAT   ( pak, Target->Position->current.y*100 );
+            */
+            ADDFLOAT   ( pak, Position->current.x*100 );
+            ADDFLOAT   ( pak, Position->current.y*100 );            
+            ADDBYTE    ( pak, 0x06);  //TEST
+            Battle->target = 0;            
+            //Battle->skilltarget = Target->clientid;
+            Battle->bufftarget = Target->clientid;            
+            Battle->atktype = action; 
+            Position->destiny  = Target->Position->current;
+            Battle->skillid = skillid;
+            Position->lastMoveTime = clock( );
+            GServer->SendToVisible( &pak, Target );
+            return;
+            
+        }
+        break;          
         case SKILL_AOE:
         case BUFF_SELF:
         case BUFF_AOE:
@@ -154,6 +186,11 @@ void CCharacter::StartAction( CCharacter* Target, BYTE action, UINT skillid, boo
 
 bool CCharacter::IsOnBattle( )
 {  
+    /*
+    if (Battle->atktype==SUMMON_BUFF)
+       Log(MSG_INFO,"IsOnBattle, atktype: %i/%i, bufftarget %i, skill %i ",Battle->atktype,SUMMON_BUFF,Battle->bufftarget,Battle->skillid);
+    */
+    
     if(Battle->atktype==0) return false;
     switch(Battle->atktype)
     {
@@ -172,7 +209,12 @@ bool CCharacter::IsOnBattle( )
         {
             if(Battle->bufftarget!=0 && Battle->skillid!=0) return true;
         }
-        break;        
+        break;
+        case SUMMON_BUFF:
+        {
+             if(Battle->bufftarget!=0&&Battle->skillid!=0) return true;
+        }
+        break;
         case SKILL_AOE: 
         case SKILL_SELF: 
         case BUFF_SELF: 
@@ -262,6 +304,12 @@ void CCharacter::AddDamage( CCharacter* enemy, long int hitpower)
 CCharacter* CCharacter::GetCharTarget( )
 {
     return GServer->MapList.Index[Position->Map]->GetCharInMap( Battle->target );
+}
+
+// return character Buff target
+CCharacter* CCharacter::GetCharBuffTarget( )
+{
+    return GServer->MapList.Index[Position->Map]->GetCharInMap( Battle->bufftarget );
 }
 
 // VIRTUAL [reduce ammon/bullets/cannons]

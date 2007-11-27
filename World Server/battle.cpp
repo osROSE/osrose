@@ -23,7 +23,10 @@
 
 void CCharacter::DoAttack( )
 {
-     //Log(MSG_INFO,"Someone attacks type=%i,skillid=%i",Battle->atktype,Battle->skillid);
+     /*
+     if(IsSummon())
+       Log(MSG_INFO,"Someone attacks type=%i,skillid=%i",Battle->atktype,Battle->skillid);
+     */
      
     CMap* map = GServer->MapList.Index[Position->Map];
     switch(Battle->atktype)
@@ -58,9 +61,30 @@ void CCharacter::DoAttack( )
                 SkillAttack( Enemy, skill );        
         }
         break;
+        case SUMMON_BUFF://Summon buffs (support)
+        {
+            //LMA: For summon that buff player :)
+            if (Battle->bufftarget==0)
+               break;
+            CCharacter* master = GetCharBuffTarget( );
+            if(master==NULL) 
+            {
+                ClearBattle( Battle );
+                return;
+            }
+            CSkills* skill = GServer->GetSkillByID( Battle->skillid );
+            if(skill==NULL)
+            {
+                ClearBattle( Battle );
+                return;
+            }
+            if(IsTargetReached( master, skill ) && CanAttack( ))
+                SummonBuffSkill( master, skill );
+        }
+        break;        
         case SKILL_BUFF://buffs
         {
-            CCharacter* Enemy = GetCharTarget( );
+            CCharacter* Enemy= GetCharTarget( );
             if(Enemy==NULL) 
             {
                 ClearBattle( Battle );
@@ -72,7 +96,7 @@ void CCharacter::DoAttack( )
                 ClearBattle( Battle );
                 return;
             }
-            if(IsTargetReached( Enemy, skill ) && CanAttack( )) 
+            if(IsTargetReached( Enemy, skill ) && CanAttack( ))
                 BuffSkill( Enemy, skill );
         }
         case SKILL_AOE:
@@ -319,6 +343,37 @@ bool CCharacter::BuffSkill( CCharacter* Target, CSkills* skill )
     UseBuffSkill( Target, skill );    
     Stats->MP -= (skill->mp - (skill->mp * Stats->MPReduction / 100));      
     if(Stats->MP<0) Stats->MP=0;
+    ClearBattle( Battle );
+    GServer->DoSkillScript( this, skill );           
+    Battle->lastAtkTime = clock( );    
+    return true;    
+}
+
+//LMA: A summon does a buff skill
+//2do: check if master is debuffed.
+bool CCharacter::SummonBuffSkill( CCharacter* Target, CSkills* skill )
+{
+    Position->destiny = Position->current;        
+    if(Battle->castTime==0)
+    {
+        BEGINPACKET( pak, 0x7bb );
+        ADDWORD    ( pak, clientid );
+        GServer->SendToVisible( &pak, (CCharacter*)this );          
+        Battle->castTime = clock();
+        Log(MSG_INFO,"0x7bb");
+        return true;
+    }
+    else
+    {
+        clock_t etime = clock() - Battle->castTime;
+        if(etime<SKILL_DELAY)
+            return true;            
+    }
+    
+    //LMA: For now, it seems the summon buff only one time :(
+    Log(MSG_INFO,"Real buff skill");
+    Battle->castTime = 0;   
+    UseBuffSkill( Target, skill );    
     ClearBattle( Battle );
     GServer->DoSkillScript( this, skill );           
     Battle->lastAtkTime = clock( );    

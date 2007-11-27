@@ -161,6 +161,7 @@
 #define BUFF_AOE 7
 #define AOE_TARGET 8
 #define STAY_STILL_ATTACK 15
+#define SUMMON_BUFF 16
 
 // other constants
 #define MAX_SKILL 60
@@ -657,7 +658,8 @@ struct CUseInfo
     int itemtype;
     int usescript;
     int usetype;
-    int usevalue;   
+    int usevalue;
+    int use_buff;
 };
 
 struct CItemType             

@@ -67,7 +67,7 @@ bool CPlayer::AddQuest( unsigned long int questid )
            if(PlasticSurgeon(thisquest))
            {
               //Database update.
-              GServer->DB->QExecute("UPDATE characters SET sex=%i,hair=%i,face=%i WHERE id=%i",CharInfo->Sex,CharInfo->Hair,CharInfo->Face,CharInfo->charid);
+              GServer->DB->QExecute("UPDATE characters SET sex=%i,hairStyle=%i,face=%i WHERE id=%i",CharInfo->Sex,CharInfo->Hair,CharInfo->Face,CharInfo->charid);
            }
            LogQuest("questid %lu is Quest nb %i, Plastic Surgeon Quest",questid,thisquest->id);
            return true;

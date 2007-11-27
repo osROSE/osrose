@@ -42,7 +42,7 @@ bool CWorldServer::AddDeBuffs( CSkills* thisskill, CCharacter* character, int Ev
     {
         if(thisskill->buff[i]!=0)
         {
-            bflag = CheckDBuffs( thisskill, character, Evalue, i );
+            bflag = CheckDBuffs( thisskill, character, Evalue, i );                      
         }
     }
     return bflag;
@@ -93,11 +93,10 @@ bool CWorldServer::CheckABuffs( CSkills* thisskill, CCharacter* character, int E
                 character->MagicStatus[j].BuffTime = clock();
                 character->MagicStatus[j].Duration = thisskill->duration;  
                 character->MagicStatus[j].Value = BuffValue.Value;
-                Log(MSG_INFO,"ED: CheckABuffs %i, + %i",character->Stats->ExtraDamage,character->Stats->ExtraDamage_add);
                 bflag = true;
             }
         }
-        break;            
+        break;
         case A_ATTACK:
         {
             CBValue BuffValue = GetBuffValue( thisskill, character, Evalue, i, 
@@ -188,8 +187,11 @@ bool CWorldServer::CheckABuffs( CSkills* thisskill, CCharacter* character, int E
                 character->MagicStatus[j].Buff = thisskill->buff[i];
                 character->MagicStatus[j].BuffTime = clock();
                 character->MagicStatus[j].Duration = thisskill->duration;  
-                character->MagicStatus[j].Value = BuffValue.Value;                  
+                character->MagicStatus[j].Value = BuffValue.Value;
                 bflag = true;
+                
+                Log(MSG_INFO,"In + A_DODGE, dodge %i, up %i, buff %i, BuffTime %li, Duration %i, value %i",BuffValue.NewValue,j,thisskill->buff[i],character->MagicStatus[j].BuffTime,character->MagicStatus[j].Duration,BuffValue.Value);
+                
             } 
         }
         break;    

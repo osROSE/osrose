@@ -45,6 +45,7 @@ class CCharacter
         void NormalAttack( CCharacter* Enemy );
         bool SkillAttack( CCharacter* Enemy, CSkills* skill );
         bool BuffSkill( CCharacter* Target, CSkills* skill );
+        bool SummonBuffSkill( CCharacter* Target, CSkills* skill );  //LMA: Special for supportive summons :)
         bool AoeSkill( CSkills* skill, CCharacter* Enemy=NULL );
         bool AoeBuff( CSkills* skill );
         void UseBuffSkill( CCharacter* Target, CSkills* skill );
@@ -62,6 +63,7 @@ class CCharacter
         bool IsMoving( ); 
         bool stopMoving( );       
         CCharacter* GetCharTarget( );
+        CCharacter* GetCharBuffTarget( );           //LMA: Used for some summons.
         bool IsAttacking( );
                         
         // virtual functions

@@ -287,21 +287,21 @@ bool CCharServer::pakCreateChar( CCharClient* thisclient, CPacket* P )
 	   return false;
 	unsigned int mid = (unsigned)mysql_insert_id( DB->Mysql );    
     MYSQL_ROW row;        
-	if(!DB->QExecute("INSERT INTO items VALUES(%i,29,3,0,40,100,3,1,0,0,0,0)", mid))
+	if(!DB->QExecute("INSERT INTO items VALUES(%i,29,3,0,40,100,3,1,0,0,0,0,0)", mid))
 		return false;
-	if(!DB->QExecute("INSERT INTO items VALUES(%i,29,5,0,40,100,6,1,0,0,0,0)", mid))
+	if(!DB->QExecute("INSERT INTO items VALUES(%i,29,5,0,40,100,6,1,0,0,0,0,0)", mid))
 		return false;
-	if(!DB->QExecute("INSERT INTO items VALUES(%i,1,8,0,40,100,7,1,0,0,0,0)", mid))
+	if(!DB->QExecute("INSERT INTO items VALUES(%i,1,8,0,40,100,7,1,0,0,0,0,0)", mid))
 		return false;
 		
 	if(sex==0)
 	{
-	    if(!DB->QExecute("INSERT INTO items VALUES(%i,221,2,0,40,100,12,1,0,0,0,0)", mid))
+	    if(!DB->QExecute("INSERT INTO items VALUES(%i,221,2,0,40,100,12,1,0,0,0,0,0)", mid))
 	    	return false;
      }
 	else
 	{
-	    if(!DB->QExecute("INSERT INTO items VALUES(%i,222,2,0,40,100,12,1,0,0,0,0)", mid))
+	    if(!DB->QExecute("INSERT INTO items VALUES(%i,222,2,0,40,100,12,1,0,0,0,0,0)", mid))
 	    	return false;	
     }
      

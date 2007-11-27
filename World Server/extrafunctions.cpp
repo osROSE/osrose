@@ -653,7 +653,8 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
     useitem->itemtype = 0;    
     useitem->usescript = 0;  
     useitem->usetype = 0;  
-    useitem->usevalue = 0;      
+    useitem->usevalue = 0;
+    useitem->use_buff=0;
     unsigned int type = 0;
     useitem->itemnum = thisclient->items[slot].itemnum;
     useitem->itemtype = thisclient->items[slot].itemtype;
@@ -806,11 +807,16 @@ CUseInfo* CWorldServer::GetUseItemInfo(CPlayer* thisclient, unsigned int slot )
                 else if(useitem->itemnum==940){useitem->usevalue = 994;} // Easter Bunny
                 else if(useitem->itemnum==941){useitem->usevalue = 995;} // Easter Egg
                 else if(useitem->itemnum==942){useitem->usevalue = 1472;} // Soccer Ball Pet
-                else if(useitem->itemnum==594) {useitem->usevalue = 941;} // Lucky Ghost
+                else if(useitem->itemnum==594)
+                {
+                     // Lucky Ghost
+                     useitem->usevalue = 941;
+                     useitem->use_buff = UseList.Index[useitem->itemnum]->useeffect[0];
+                }
                 else if(useitem->itemnum==496) {useitem->usevalue = 992;} // Christmas Tree
 //                else if(useitem->itemnum==943) {useitem->usevalue;} // Event Scroll
 //                else if(useitem->itemnum==944){useitem->usevalue = 172;} // Arua's Blessing
-                else{ useitem->usevalue = useitem->itemnum + 500; }                
+                else{ useitem->usevalue = useitem->itemnum + 500; }
             }
             else // Snowball
             if( useitem->itemnum==326 )
