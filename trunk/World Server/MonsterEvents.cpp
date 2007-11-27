@@ -106,6 +106,7 @@ bool CMonster::OnSpawn( bool Attack )
             return true;
         StartAction( (CCharacter*)player, NORMAL_ATTACK, 0 ); 
     }
+    
     return true;    
 }
 
@@ -151,6 +152,13 @@ bool CMonster::OnEnemyDie( CCharacter* Enemy )
 
 bool CMonster::OnFar( )
 {
+    //if Owner too far away, we kill the bonfire.
+    if(IsBonfire())
+    {
+       UnspawnMonster( );
+       return true;
+    }
+    
     Position->destiny = Position->source; //ON TARGET LOST
     ClearBattle( Battle );
     MoveTo( Position->source );

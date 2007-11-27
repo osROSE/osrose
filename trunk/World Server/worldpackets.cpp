@@ -2532,21 +2532,33 @@ bool CWorldServer::pakUseItem ( CPlayer* thisclient, CPacket* P )
             BEGINPACKET( pak, 0x7b2 );
             ADDWORD    ( pak, thisclient->clientid );
             ADDWORD    ( pak, thisuse->usetype );  
-            ADDBYTE    ( pak, 6 );                      
+            //ADDBYTE    ( pak, 6 );                      
             SendToVisible( &pak, thisclient );
+            
+            /*
             //Finish Animation
             RESETPACKET( pak, 0x7bb );
             ADDWORD    ( pak, thisclient->clientid );
             SendToVisible( &pak, thisclient );    
+            */
+            
             //????
             RESETPACKET( pak, 0x7b9);
             ADDWORD    ( pak, thisclient->clientid);
             ADDWORD    ( pak, thisuse->usetype );
-	        SendToVisible( &pak, thisclient );   	        
+	        SendToVisible( &pak, thisclient );   	 
+            
 	        // Add our Mob to the mobs list
            	fPoint position = RandInCircle( thisclient->Position->current, 5 );
            	CMap* map = MapList.Index[thisclient->Position->Map];
-           	map->AddMonster( thisuse->usevalue, position, thisclient->clientid );              
+           	CMonster * this_summon=map->AddMonster( thisuse->usevalue, position, thisclient->clientid );                      	
+           	
+            if (this_summon!=NULL)
+            {
+           	   this_summon->skillid=thisuse->usetype;
+           	   this_summon->buffid=thisuse->use_buff;
+            }
+              
             flag = true;                        
         }
         break;        

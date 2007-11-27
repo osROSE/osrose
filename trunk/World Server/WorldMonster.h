@@ -42,6 +42,7 @@ class CMonster : public CCharacter
     	unsigned int maxhitcount;    //LMA: max hit count for some monsters (MC and so on...) Arnold.
     	bool stay_still;             //LMA: if yes, the monster will never move from the place it had been placed.
     	UINT skillid;                //LMA: skill info (generally for summons like bonfires...) 
+    	UINT buffid;                 //LMA: some monsters do buff.
         UINT minvalue;
         UINT maxvalue;
         UINT bonushp;

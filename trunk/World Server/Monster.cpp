@@ -22,34 +22,51 @@
 
 // update attack values and destiny  position
 bool CMonster::UpdateValues( )
-{   
-    //LMA: Some special case where special monsters stay still (mc)
-    if(stay_still)
+{       
+    //LMA: Some special case where special monsters stay still (mc, bonfires and so on...)
+    if(stay_still&&(!IsBonfire()))
        return true;
-       
+        
     if(IsSummon( ) && CanMove( ))
     {
         CPlayer* thisclient = GetOwner( );
         if(thisclient!=NULL)
-        {
-            if(!IsOnBattle( ) && thisclient->IsAttacking( ))
+        {               
+            if(!IsBonfire())
             {
-                Battle->target = thisclient->Battle->target;
-                Battle->atktarget = Battle->target;
-                Battle->atktype = NORMAL_ATTACK;
-                Battle->contatk = true;
-                CCharacter* Enemy = GetCharTarget( );
-                if(Enemy!=NULL)
-                    StartAction( Enemy, NORMAL_ATTACK );
+                if(!IsOnBattle( ) && thisclient->IsAttacking( ))
+                {
+                    Battle->target = thisclient->Battle->target;
+                    Battle->atktarget = Battle->target;
+                    Battle->atktype = NORMAL_ATTACK;
+                    Battle->contatk = true;
+                    CCharacter* Enemy = GetCharTarget( );
+                    if(Enemy!=NULL)
+                        StartAction( Enemy, NORMAL_ATTACK );
+                }
+                else
+                if(!IsOnBattle( ))
+                {
+                    Position->source = thisclient->Position->current;
+                    float distance = GServer->distance( Position->destiny , thisclient->Position->current );
+                    if((distance>15 && !IsOnBattle()) || distance>50)
+                        Move( );                
+                }
+            
             }
             else
-            if(!IsOnBattle( ))
             {
-                Position->source = thisclient->Position->current;
-                float distance = GServer->distance( Position->destiny , thisclient->Position->current );
-                if((distance>15 && !IsOnBattle()) || distance>50)
-                    Move( );                
+                //LMA: Let's kill bonfires if owner too far away :).
+                float distance = GServer->distance( Position->current , thisclient->Position->current );
+                if(distance>25)
+                {
+                   UnspawnMonster( );
+                   return false;                
+                }
+                
+                return true;
             }
+            
         }
         else
         {
@@ -99,8 +116,18 @@ void CMonster::SpawnMonster( CPlayer* player, CMonster* thismon )
     }
 	else if(IsOnBattle( ))
 	{
-	   ADDWORD    ( pak, 0x0002 );
-	   ADDWORD    ( pak, Battle->target );        
+       //LMA: for supportive summons (lucky ghost...)
+       if(Battle->bufftarget==Battle->target)
+       {
+    	   ADDWORD    ( pak, 0x0002 );
+    	   ADDWORD    ( pak, 0x0000 );
+       }
+       else
+       {
+    	   ADDWORD    ( pak, 0x0002 );
+    	   ADDWORD    ( pak, Battle->target );
+       }
+       
     }	
 	else if(IsMoving( ))
 	{
@@ -140,6 +167,19 @@ void CMonster::SpawnMonster( CPlayer* player, CMonster* thismon )
         
     }
 	player->client->SendPacket( &pak );
+	
+    //LMA: supportive summons (lucky ghost)
+    if(IsSummon()&&buffid>0&&(player==GetOwner()))
+    {
+        Log(MSG_INFO,"The summon is spwaned");
+        /*CPlayer* player = GetOwner( );
+        if (ownplayer==NULL)
+           return true;*/
+        StartAction( player,SUMMON_BUFF,buffid);
+        Log(MSG_INFO,"completly");
+        buffid=0;  //only one buff
+    }
+	
 }
 
 // UnSpawn a Monster
