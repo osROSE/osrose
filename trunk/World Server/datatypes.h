@@ -98,6 +98,7 @@
 #define A_STUN 40
 #define A_MUTE 41
 #define A_POISON 42
+#define A_FLAME 58
 
 
 //*spawn values
@@ -105,7 +106,8 @@
 #define UNK1 0x01
 #define MAX_HP_MP 0x02//revizar
 #define POISED 0x04
-#define UNK2 0x08
+#define FLAMED 0x08
+//#define UNK2 0x08
 #define MP_UP 0x10//revizar
 #define HP_UP 0x20//revizar
 #define DASH_UP 0x40

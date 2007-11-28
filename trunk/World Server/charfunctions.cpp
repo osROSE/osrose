@@ -436,7 +436,12 @@ void CCharacter::RefreshBuff( )
                 break;
                 case A_MUTE:
                      Status->Mute = 0xff;
-                break;                                                                        
+                break;
+                case A_FLAME:
+                     Status->Flame = 0xff;
+                printf("removing flame\n");
+                break;
+                                                                        
             }
             MagicStatus[i].Buff = 0;
             MagicStatus[i].BuffTime = 0;            
@@ -450,6 +455,64 @@ void CCharacter::RefreshBuff( )
              MagicStatus[i].BuffTime+= 1*CLOCKS_PER_SEC;
              MagicStatus[i].Duration-=1;
              printf("did %i poison dmg to the player, still %i seconds and %i HP remain \n", MagicStatus[i].Value, MagicStatus[i].Duration, Stats->HP);
+             
+             //A bunch of messy code to send dmg packet
+             BEGINPACKET( pak, 0x7b6 );
+             ADDWORD    ( pak, clientid );
+             ADDWORD    ( pak, 0 );
+             ADDDWORD   ( pak, 0x000007f8 );
+             ADDBYTE    ( pak, 0x00 );
+             ADDDWORD   ( pak, MagicStatus[i].Value );
+    
+             //If Enemy is killed
+             if( IsDead())
+             {
+                 printf("char died\n");
+                 CDrop* thisdrop = NULL;
+                 ADDDWORD   ( pak, 16 );
+                 if( !IsSummon( ) && !IsPlayer( ))
+                 {
+                     thisdrop = GetDrop( );
+                     if( thisdrop!=NULL)
+                     {
+                         ADDFLOAT   ( pak, thisdrop->pos.x*100 );
+                         ADDFLOAT   ( pak, thisdrop->pos.y*100 );
+                         if( thisdrop->type==1)
+                         {
+                             ADDDWORD( pak, 0xccccccdf );
+                             ADDDWORD( pak, thisdrop->amount );
+                            ADDDWORD( pak, 0xcccccccc );
+                            ADDWORD ( pak, 0xcccc );
+                         }
+                         else
+                         {
+                             ADDDWORD   ( pak, GServer->BuildItemHead( thisdrop->item ) );
+                             ADDDWORD   ( pak, GServer->BuildItemData( thisdrop->item ) );
+                            ADDDWORD( pak, 0x00000000 );
+                            ADDWORD ( pak, 0x0000 );
+                         }
+                         ADDWORD    ( pak, thisdrop->clientid );
+                         ADDWORD    ( pak, thisdrop->owner );
+                         CMap* map = GServer->MapList.Index[thisdrop->posMap];
+                         map->AddDrop( thisdrop );
+                     }
+                 }
+                 GServer->SendToVisible( &pak, this, thisdrop );
+             }
+    
+             //If enemy is still alive
+             else
+             {
+                 ADDDWORD   ( pak, 4 );
+                 GServer->SendToVisible( &pak, this );
+             }
+         }
+                else if (MagicStatus[i].Buff == A_FLAME && etime > 1*CLOCKS_PER_SEC) //Do flame dmg every 1.5 seconds
+        {
+             Stats->HP -= MagicStatus[i].Value;
+             MagicStatus[i].BuffTime+= 1*CLOCKS_PER_SEC;
+             MagicStatus[i].Duration-=1;
+             printf("did %i flame dmg to the player, still %i seconds and %i HP remain \n", MagicStatus[i].Value, MagicStatus[i].Duration, Stats->HP);
              
              //A bunch of messy code to send dmg packet
              BEGINPACKET( pak, 0x7b6 );

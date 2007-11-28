@@ -117,6 +117,7 @@ struct STATUS
     BYTE Stun;
     BYTE Poison;
     BYTE Mute;
+    BYTE Flame;
     //BYTE ExtraDamage;   //Was not quoted before
     bool CanAttack;
     bool CanRun;

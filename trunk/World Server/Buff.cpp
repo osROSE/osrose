@@ -605,6 +605,26 @@ bool CWorldServer::CheckDBuffs( CSkills* thisskill, CCharacter* character, int E
             else printf("muting failed: BuffValue.NewValue= %i, rand= %i, (Evalue+200)/700= %i \n", BuffValue.NewValue, tmp, (Evalue+200)/700);
         }
         break;
+        case A_FLAME:
+        {
+             printf("User used flame skill\n");
+            CBValue BuffValue = GetBuffValue( thisskill, character, Evalue, i,
+                                              0xff,
+                                              character->Status->Flame,
+                                              0, false, true);
+            if(BuffValue.NewValue!=0 && (RandNumber(1,100) < thisskill->success) /*(Evalue+200)/700) */)
+            {              
+               printf("flameing successful\n");                      
+               UINT j = BuffValue.Position;
+               character->Status->Flame = j;
+               character->MagicStatus[j].Buff = thisskill->buff[i];
+               character->MagicStatus[j].BuffTime = clock();
+               character->MagicStatus[j].Duration = thisskill->duration;  
+               character->MagicStatus[j].Value = BuffValue.Value;                  
+               bflag = true;
+            }
+        }
+        break;
     }
     return bflag;   
 }   
@@ -777,5 +797,7 @@ if(character->Status->ExtraDamage_up != 0xff)//A_Extra_Damage: Devilking / Arnol
                 buff1+= POISED;
     if(character->Status->Mute != 0xff)
                 buff3+= MUTED;
+    if(character->Status->Flame != 0xff)
+                buff1+= FLAMED;
     return (buff1 * 0x01) + (buff2 * 0x100 ) + (buff3 * 0x10000) + (buff4 * 0x1000000);
 }

@@ -96,6 +96,7 @@ CCharacter::CCharacter( )
     Status->CanCastSkill = true;
     Status->Poison = 0xff;
     Status->Mute = 0xff;
+    Status->Flame = 0xff;
         // Stance
     Status->Stance = RUNNING;              
     for(int i=0;i<30;i++)
