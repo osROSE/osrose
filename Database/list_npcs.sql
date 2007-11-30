@@ -4,7 +4,7 @@ Source Host: 192.168.1.100
 Source Database: osrose
 Target Host: 192.168.1.100
 Target Database: osrose
-Date: 11/10/2007 2:56:15 PM
+Date: 11/29/2007 4:05:23 PM
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -20,7 +20,7 @@ CREATE TABLE `list_npcs` (
   `x` float NOT NULL,
   `y` float NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=156 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=158 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records 
@@ -177,5 +177,6 @@ INSERT INTO `list_npcs` VALUES ('130', '[Bird] Hawker', '1253', '62', '230', '59
 INSERT INTO `list_npcs` VALUES ('131', '[Sikuku Warrior] Seka', '1256', '62', '180', '5817', '5173');
 INSERT INTO `list_npcs` VALUES ('132', '[Critically Wounded] Nukie', '1266', '62', '220', '5858', '5208');
 INSERT INTO `list_npcs` VALUES ('133', '[Cleric] Jude', '1251', '62', '315', '5851', '5209');
-INSERT INTO `list_npcs` VALUES ('134', '[Sikuku Resident] Shilma', '1260', '62', '315', '5854', '5224');
+INSERT INTO `list_npcs` VALUES ('134', '[Sikuku Resident] Shilma', '1261', '62', '315', '5854', '5224');
 INSERT INTO `list_npcs` VALUES ('135', '[Sikuku Warrior] Wounded Soldier', '1262', '62', '230', '5865', '5211');
+INSERT INTO `list_npcs` VALUES ('156', '[Sikuku Warrior] Wounded Soldier', '1263', '62', '315', '5862', '5218');
