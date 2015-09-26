@@ -1,0 +1,1 @@
+An open source implementation of the ROSE (Rush On Seven Episode) Server. Anything posted here is the latest, bleeding-edge release, it is not stable, and should not be used by anyone other than devs.
